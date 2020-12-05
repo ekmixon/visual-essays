@@ -53,6 +53,7 @@ def config():
 @app.route('/essay/<path:path>', methods=['GET'])
 @app.route('/essay/', methods=['GET'])
 def essay(path=None):
+    path = f'/{path}' if path else '/'
     parsed_base_url = urlparse(request.base_url)
     site = parsed_base_url.hostname
     logger.info(f'essay: site={site} path={path}')

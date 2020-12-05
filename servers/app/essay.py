@@ -10,7 +10,7 @@ import re
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 SPARQL_DIR = os.path.join(SCRIPT_DIR, 'sparql')
-BASE_DIR = os.path.dirname(SCRIPT_DIR)
+BASE_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 
 import json
 import getopt
@@ -44,8 +44,7 @@ DEFAULT_SITE = 'https://kg.jstor.org'
 cache = {}
 
 def get_local_markdown(path, root):
-    path = path[:-1] if path and len(path) > 0 and path[-1] == '/' else path if path is not None else ''
-    abs_path = f'{root}/{path if path else ""}'
+    abs_path = f'{root}{path}'
     logger.info(f'get_local_markdown: path={path} root={root} abs={abs_path} exists={os.path.exists(abs_path)}')
     markdown = md_path = None
     to_check = []
@@ -54,7 +53,7 @@ def get_local_markdown(path, root):
             markdown = open(abs_path, 'r').read()
             md_path = path
         else:
-            to_check = [f'{abs_path}/{file}' for file in ('README.md', 'index.md')]
+            to_check = [f'{abs_path}{file}' for file in ('README.md', 'index.md')]
     else:
         to_check = [f'{abs_path}.md'] + [f'{abs_path}{file}' for file in ('README.md', 'index.md')]
     if not markdown:
@@ -70,7 +69,7 @@ def get_local_markdown(path, root):
 def get_gh_file(path, gh_token, acct, repo, branch='main', **kwargs):
     logger.info(f'get_gh_file: acct={acct} repo={repo} branch={branch} path={path}')
     content = sha = None
-    url = f'https://api.github.com/repos/{acct}/{repo}/contents/{path}?ref={branch}'
+    url = f'https://api.github.com/repos/{acct}/{repo}/contents{path}?ref={branch}'
     resp = requests.get(url, headers={
         'Authorization': f'Token {gh_token}',
         'Accept': 'application/vnd.github.v3+json',
@@ -84,16 +83,18 @@ def get_gh_file(path, gh_token, acct, repo, branch='main', **kwargs):
     return content, sha
 
 def get_gh_markdown(path, token, **kwargs):
-    path = path[:-1] if path and len(path) > 0 and path[-1] == '/' else path if path is not None else ''
     logger.info(f'get_gh_markdown: path={path}')
     markdown = md_path = None
-    if path:
-        if path.endswith('.md'):
-            paths = [path]
-        else:
-            paths = [f'{path}.md'] + [f'{path}/{file}' for file in ('README.md', 'index.md')]
+    if path.endswith('.md'):
+        paths = [path]
     else:
-        paths = ['README.md', 'index.md']
+        if path == '/':
+            paths = ['README.md', 'index.md']
+        else:
+            if path[-1] == '/':
+                paths = [f'{path}{file}' for file in ('README.md', 'index.md')]
+            else:
+                paths = [f'{path}.md'] + [f'{path}/{file}' for file in ('README.md', 'index.md')]
     for _path in paths:
         markdown, sha = get_gh_file(_path, token, **kwargs)
         if markdown:
@@ -607,13 +608,23 @@ def parse(html, md_path, site_config):
     return str(soup)
 
 def _check_local(site):
-    return site.startswith('localhost') or site.endswith('gitpod.io')
+    is_local = site.startswith('localhost') or site.endswith('gitpod.io')
+    logger.info(f'is_local={is_local}')
+    return is_local
 
-def get_essay(path, root, site, site_config, token):
-    logger.info(f'essay: site={site} path={path} site_config={site_config}')
+def get_essay(path, root, site, site_config, token=None):
+    if not path:  path = '/'
+    logger.info(f'essay: site={site} root={root} path={path} site_config={site_config}')
+    if token is None:
+        token = os.environ.get('gh_token')
     if _check_local(site):
         markdown, md_path = get_local_markdown(path=path, root=root)
     if markdown is None:
+        path_elems = path.split('/')
+        acct, repo = path_elems[1:3]
+        path = f'/{"/".join(path_elems[3:] if len(path_elems) > 2 else [])}'
+        logger.info(f'acct={acct} repo={repo} path={path}')
+        site_config.update({'acct': acct, 'repo': repo})
         markdown, md_path = get_gh_markdown(path, token, **site_config)
     logger.info(md_path)
     html = markdown_to_html5(markdown, md_path)
@@ -632,7 +643,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
     site = 'localhost'
     token = None
-    site_config = {'acct': 'jstor-labs', 'repo': 'visual-essays'}
+    site_config = {'acct': 'jstor-labs', 'repo': 've-docs'}
     try:
         opts, args = getopt.getopt(
             sys.argv[1:], 'hl:a:r:s:t:', ['help', 'loglevel', 'acct', 'repo', 'site', 'tokeh'])
@@ -663,5 +674,5 @@ if __name__ == '__main__':
         else:
             assert False, "unhandled option"
 
-    path = args[0] if len(args) == 1 else ''
+    path = args[0] if len(args) == 1 else '/'
     print(get_essay(path, BASE_DIR, site, site_config, token))

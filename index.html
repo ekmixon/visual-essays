@@ -199,6 +199,14 @@ new Promise(function(resolve, reject) {
               this.$nextTick(() => {
                 const essayElem = document.getElementById('essay')
                 if (essayElem) window._essay = essayElem.dataset.name
+                const essayFname = essayElem.dataset.name.split('/').pop()
+                console.log(`essayFname=${essayFname}`)
+                if (essayFname === 'README' || essayFname === 'index') {
+                    console.log(window.location.pathname)
+                    if (window.location.pathname.length === 0 || window.location.pathname[window.location.pathname.length-1] !== '/') {
+                        window.history.replaceState(null, null, `${window.location.pathname}/`)
+                    }
+                }
               })
             })
           },
