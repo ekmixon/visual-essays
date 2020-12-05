@@ -40,6 +40,8 @@ cors_headers = {
     'Allow': 'PUT, PATCH, GET, POST, DELETE, OPTIONS, HEAD'
 }
 
+default_repo = 've-content'
+
 default_gh_token = os.environ.get('gh_token')
 if default_gh_token is None and os.path.exists(f'{SCRIPT_DIR}/gh-token'):
     with open(f'{SCRIPT_DIR}/gh-token', 'r') as fp:
@@ -91,9 +93,9 @@ def _get_acct_repo_branch(path):
         if len(path_elems) > 1:
             acct, repo = path_elems[:2]
             if not _is_repo(acct, repo, default_gh_token):
-                acct, repo = ('jstor-labs', 've-docs')
+                acct, repo = ('jstor-labs', default_repo)
         else:
-            acct, repo = ('jstor-labs', 've-docs')
+            acct, repo = ('jstor-labs', default_repo)
     elif site in KNOWN_SITES:
         acct = KNOWN_SITES[site]['acct']
         repo = KNOWN_SITES[site]['repo']
@@ -108,7 +110,7 @@ def _site_config(path):
     site, acct, repo, branch = _get_acct_repo_branch(path)
     config_key = f'{acct}/{repo}/{branch}'
     if config_key not in _site_configs:
-        if _check_local(site) and config_key.startswith('jstor-labs/ve-docs/'):
+        if _check_local(site) and config_key.startswith(f'jstor-labs/{default_repo}/'):
             _config = json.load(open(os.path.join(BASEDIR, 'config.json'), 'r'))
         else:
             content, sha = _get_gh_file('/config.json', acct, repo, branch)

@@ -133,15 +133,21 @@ new Promise(function(resolve, reject) {
           current: undefined,
           externalWindow: undefined,
           jwt: context.jwt,
-          href: undefined
+          href: undefined,
+          host: undefined,
+          branch: 'main'
         }),
         computed: {
           isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
           readOnly() { return this.context.qargs.readonly}
         },
         mounted() {
+          const loc = window.location
+          this.host = window.location.host
+          this.branch = this.context.qargs.ref || this.branch
+          console.log(`branch=${this.branch}`)
           window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
-          this.loadEssay(this.context.path)
+          this.loadEssay(loc.pathname)
         },
         methods: {
           logout() {
@@ -168,11 +174,11 @@ new Promise(function(resolve, reject) {
             let url
             if ( path === '/help') {
               url = `https://${this.context.codeBranch === 'develop' ? 'dev.' : ''}visual-essays.app/essay/jstor-labs/ve-content/${this.context.branch}/help`
-              // url = `${this.context.service}/essay/jstor-labs/ve-content/${this.context.branch}/help`
             } else {
-              // url = `${this.context.service}/essay/${this.context.acct}/${this.context.repo}/${this.context.branch}${path}${raw ? '&raw' : ''}`
               url = `/essay${path}`
-
+            }
+            if (this.branch !== 'main') {
+              url += `?ref=${this.branch}`
             }
             console.log(`fetch=${url}`)
             if (!this.essayCache[url]) {
@@ -185,7 +191,10 @@ new Promise(function(resolve, reject) {
             .then(html => {
               browserPath = path === '/help'
                 ? '/help'
-                : `${this.context.browserRoot}${path.replace(/\.md$/, '')}`
+                : path.replace(/\.md$/, '')
+              if (this.branch !== 'main') {
+                browserPath += `?ref=${this.branch}`
+              }
               if (replace) {
                 history.replaceState({file: path || ''}, '', browserPath)
               } else {
@@ -204,16 +213,21 @@ new Promise(function(resolve, reject) {
                 if (essayFname === 'README' || essayFname === 'index') {
                     console.log(window.location.pathname)
                     if (window.location.pathname.length === 0 || window.location.pathname[window.location.pathname.length-1] !== '/') {
-                        window.history.replaceState(null, null, `${window.location.pathname}/`)
+                      let browserPath = `${window.location.pathname}/`
+                      if (this.branch !== 'main') {
+                        browserPath += `?ref=${this.branch}`
+                      }
+                      window.history.replaceState(null, null, browserPath)
                     }
                 }
               })
             })
           },
           viewMarkdown() {
-            const url = this.context.path === '/help' && hostname !== 'localhost'
-              ? `https://${this.context.branch.codeBranch === 'develop' ? 'dev.' : ''}visual-essays.app/essay/jstor-labs/ve-content/help?raw&root=/docs&branch=${this.context.branch}`
-              : `${this.context.service}/markdown-viewer/${this.context.acct}/${this.context.repo}/${this.context.branch}${this.current}`
+            console.log(window.location.pathname)
+            console.log(window._essay)
+            let url = `${this.context.service}/markdown-viewer${window.location.pathname}/${window._essay}.md`
+            console.log(url)
             if (this.externalWindow) { this.externalWindow.close() }
             this.markdownViewer = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
           },
@@ -238,18 +252,14 @@ new Promise(function(resolve, reject) {
             // convert links
             const essayElem = document.getElementById('essay')
             if (essayElem) {
-              console.log(this.context.site)
               essayElem.querySelectorAll('a').forEach(link => {
                 console.log(link.href)
-                if (!link.href || link.href.indexOf(this.context.site) > 0 || link.href.indexOf('/help#') > 0 ) {
+                if (!link.href || link.href.indexOf(this.host) > 0 || link.href.indexOf('/help#') > 0 ) {
                   let target = link.dataset.target
                   if (!target) { 
                     const parsedUrl = parseUrl(link.href)
                     if (parsedUrl.hash === '' ) {
                       const pathElems = parsedUrl.pathname.split('/').filter(pathElem => pathElem !== '')
-                      target = context.isKnownSite || context.ghPagesSite
-                        ? `/${pathElems.slice(4).join('/')}`
-                        : `/${pathElems.slice(this.context.browserRoot.split('/').length).join('/')}`
                       target = parsedUrl.pathname
                     } else {
                       target = parsedUrl.hash.split('?')[0]

@@ -39,7 +39,7 @@ from pyld import jsonld
 
 import concurrent.futures
 
-DEFAULT_SITE = 'https://kg.jstor.org'
+DEFAULT_REPO = 've-content'
 
 cache = {}
 
@@ -89,7 +89,7 @@ def get_gh_markdown(path, token, **kwargs):
         paths = [path]
     else:
         if path == '/':
-            paths = ['README.md', 'index.md']
+            paths = ['/README.md', '/index.md']
         else:
             if path[-1] == '/':
                 paths = [f'{path}{file}' for file in ('README.md', 'index.md')]
@@ -570,7 +570,7 @@ def _get_manifest(item, essay_path, acct, repo):
     return item
 
 _manifests_cache = {}
-def _get_manifests(markup, essay_path, acct='jstor-labs', repo='ve-docs', **kwargs):
+def _get_manifests(markup, essay_path, acct='jstor-labs', repo=DEFAULT_REPO, **kwargs):
     global _manifests_cache
     logger.info(f'_get_manifests: essay_path={essay_path} acct={acct} repo={repo}')
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -657,7 +657,7 @@ def usage():
     print(f'   -h --help          Print help message')
     print(f'   -l --loglevel      Logging level (default=warning)')
     print(f'   -a --acct          Github account (default="jstor-labs")')
-    print(f'   -r --repo          Github repo (default="ve-docs")')
+    print(f'   -r --repo          Github repo (default="{DEFAULT_REPO}")')
     print(f'   -s --site          Site (default="localhost")')
     print(f'   -t --token         Github token')
 
@@ -665,7 +665,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
     site = 'localhost'
     token = None
-    site_config = {'acct': 'jstor-labs', 'repo': 've-docs'}
+    site_config = {'acct': 'jstor-labs', 'repo': DEFAULT_REPO}
     try:
         opts, args = getopt.getopt(
             sys.argv[1:], 'hl:a:r:s:t:', ['help', 'loglevel', 'acct', 'repo', 'site', 'tokeh'])
