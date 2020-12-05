@@ -615,16 +615,20 @@ def _check_local(site):
 def get_essay(path, root, site, site_config, token=None):
     if not path:  path = '/'
     logger.info(f'essay: site={site} root={root} path={path} site_config={site_config}')
+    markdown = md_path = None
     if token is None:
         token = os.environ.get('gh_token')
     if _check_local(site):
         markdown, md_path = get_local_markdown(path=path, root=root)
     if markdown is None:
-        path_elems = path.split('/')
-        acct, repo = path_elems[1:3]
+        path_elems = path[1:].split('/')
+        if len(path_elems) > 1:
+            acct, repo = path_elems[:2]
+        else:
+            acct = site_config.get('acct')
+            repo = site_config.get('repo')
         path = f'/{"/".join(path_elems[3:] if len(path_elems) > 2 else [])}'
         logger.info(f'acct={acct} repo={repo} path={path}')
-        site_config.update({'acct': acct, 'repo': repo})
         markdown, md_path = get_gh_markdown(path, token, **site_config)
     logger.info(md_path)
     html = markdown_to_html5(markdown, md_path)

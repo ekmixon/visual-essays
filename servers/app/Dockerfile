@@ -15,6 +15,7 @@ WORKDIR /usr/src/app
 
 ADD main.py .
 ADD essay.py .
+ADD index.html .
 # ADD mappings mappings
 ADD index.html .
 ADD gh-token .
