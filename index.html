@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <script src="https://cdn.jsdelivr.net/npm/http-vue-loader@1.4.2/src/httpVueLoader.min.js"></script>
+  <style>
+    [v-cloak] { display: none; }
+    #app {
+      display: grid;
+      align-items: stretch;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas: 
+        "header"
+        "content"
+        "footer";
+      height: 100vh;
+      width: 100vw;
+      position: absolute;
+    }
+    .header {
+      grid-area: header;
+    }
+    .content {
+      grid-area: content;
+      overflow-y: auto;
+      height: 100%;
+    }
+    .footer {
+      grid-area: footer;
+    }
+    .visible {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.5s linear;
+    }
+    .hidden {
+      visibility: hidden;
+      opacity: 0;
+      /* transition: opacity 0.5s linear; */
+      /* transition: visibility 0s 1s, opacity 1s linear; */
+    }
+  </style>   
+
+    <!-- Used for deep linking of Single Page Apps when hosted with GitHub Pages -->
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // https://github.com/rafrex/spa-github-pages
+      // Copyright (c) 2016 Rafael Pedicini, licensed under the MIT License
+      (function(l) {
+        if (l.search) {
+          let q = {}
+          l.search.slice(1).split('&').forEach(function(v) {
+            let a = v.split('=')
+            q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&')
+          })
+          if (q.p !== undefined) {
+            window.history.replaceState(null, null, l.pathname.slice(0, -1) + (q.p || '') + (q.q ? ('?' + q.q) : '') + l.hash)
+          }
+        }
+      }(window.location))
+    </script>
+    <!-- End Single Page Apps for GitHub Pages -->
+
+</head>
+<body>
+  <div id="app">
+    
+    <div class="header">
+      <component v-if="essayConfig" :is="essayConfig.layout === 'index' ? 'indexHeader' : 'essayHeader'"
+        :height="400"
+        :essay-config="essayConfig"
+        :site-config="context"
+        :is-authenticated="isAuthenticated"
+        :read-only="readOnly"
+        :href="href"
+        :appVersion="appVersion"
+        :libVersion="libVersion"
+        @menu-item-clicked="menuItemClicked"
+        @logout="logout"
+        @view-markdown="viewMarkdown"
+        @edit-markdown="editMarkdown"
+        @goto-github="gotoGithub"
+        @open-docs-site="openDocsSite"
+      ></component>
+    </div>
+
+    <div id="content" v-html="html" class="content hidden"></div>
+
+    <div class="footer">
+      <component is="siteFooter" :site-config="context"></component>
+    </div>
+  
+  </div>
+
+  <script>window.context = null</script>
+  <script src="https://dev-visual-essays.netlify.app/visual-essays.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://kit.fontawesome.com/19541ddce8.js" crossorigin="anonymous"></script>
+
+<script>
+
+new Promise(function(resolve, reject) {
+  function waitForContext() {
+    if (window.context) {
+      resolve(window.context)
+    } else {
+      setTimeout(waitForContext, 250)
+    }
+  }
+  waitForContext()
+})
+.then(context => {
+      console.log('context', context)
+      window.app = new Vue({
+        el: '#app',
+        components: {
+          'indexHeader': httpVueLoader(context.components.indexHeader && context.components.indexHeader.src),
+          'essayHeader': httpVueLoader(context.components.essayHeader && context.components.essayHeader.src),
+          'siteFooter': httpVueLoader(context.components.siteFooter && context.components.siteFooter.src)        },
+        data: () => ({
+          context,
+          html: undefined,
+          isLoaded: false,
+          essayConfig: null,
+          essayCache: {},
+          appVersion: '0.8.0',
+          libVersion: undefined,
+          current: undefined,
+          externalWindow: undefined,
+          jwt: context.jwt,
+          href: undefined
+        }),
+        computed: {
+          isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
+          readOnly() { return this.context.qargs.readonly}
+        },
+        mounted() {
+          window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
+          this.loadEssay(this.context.path)
+        },
+        methods: {
+          logout() {
+            this.jwt = undefined
+            window.localStorage.removeItem('ghcreds')
+          },
+          menuItemClicked(path) {
+            if (path !== this.current) this.loadEssay(path)
+          },
+          async fetchRetry (url, retries=3, backoff=300, lastError=null) {
+            const retryCodes = [408, 500, 502, 503, 504, 522, 524]
+            const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+            if (retries === 0 ) throw new Error(lastError)
+            try {
+              const resp = await fetch(url)
+              if (retryCodes.includes(resp.status)) throw new Error(resp)
+              return resp
+            } catch (e) {
+              await delay(backoff)
+              return this.fetchRetry(url, retries-1, backoff * 2, lastError)
+            }
+          },
+          cachingFetch(path, raw) {
+            let url
+            if ( path === '/help') {
+              url = `https://${this.context.codeBranch === 'develop' ? 'dev.' : ''}visual-essays.app/essay/jstor-labs/ve-content/${this.context.branch}/help`
+              // url = `${this.context.service}/essay/jstor-labs/ve-content/${this.context.branch}/help`
+            } else {
+              // url = `${this.context.service}/essay/${this.context.acct}/${this.context.repo}/${this.context.branch}${path}${raw ? '&raw' : ''}`
+              url = `/essay${path}`
+
+            }
+            console.log(`fetch=${url}`)
+            if (!this.essayCache[url]) {
+              this.essayCache[url] = this.fetchRetry(url).then(resp => resp.ok ? resp.text() : null)
+            }
+            return this.essayCache[url]
+          },
+          loadEssay(path, replace, retries) {
+            this.cachingFetch(path)
+            .then(html => {
+              browserPath = path === '/help'
+                ? '/help'
+                : `${this.context.browserRoot}${path.replace(/\.md$/, '')}`
+              if (replace) {
+                history.replaceState({file: path || ''}, '', browserPath)
+              } else {
+                history.pushState({file: path || ''}, '', browserPath)
+              }
+              this.href = window.location.href
+              this.html = html
+              this.current = path
+              document.getElementById('content').classList.remove('visible')
+              document.getElementById('content').classList.add('hidden')
+              this.$nextTick(() => {
+                const essayElem = document.getElementById('essay')
+                if (essayElem) window._essay = essayElem.dataset.name
+              })
+            })
+          },
+          viewMarkdown() {
+            const url = this.context.path === '/help' && hostname !== 'localhost'
+              ? `https://${this.context.branch.codeBranch === 'develop' ? 'dev.' : ''}visual-essays.app/essay/jstor-labs/ve-content/help?raw&root=/docs&branch=${this.context.branch}`
+              : `${this.context.service}/markdown-viewer/${this.context.acct}/${this.context.repo}/${this.context.branch}${this.current}`
+            if (this.externalWindow) { this.externalWindow.close() }
+            this.markdownViewer = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
+          },
+          editMarkdown(editor) {
+            const url = editor == 'custom'
+              ? `https://editor.visual-essays.app/${this.context.acct}/${this.context.repo}${this.context.mdRoot}/${window._essay}.md`
+              : `https://github.com/${this.context.acct}/${this.context.repo}/edit/${this.context.branch}${this.context.mdRoot}/${window._essay}.md`
+            if (this.externalWindow) { this.externalWindow.close() }
+            this.externalWindow = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1300,height=1600,scrollbars=yes,status=yes`)
+          },
+          gotoGithub(editor) {
+            const url = `https://github.com/${this.context.acct}/${this.context.repo}/tree/${this.context.branch}`
+            if (this.externalWindow) { this.externalWindow.close() }
+            this.externalWindow = window.open(url, '_blank')
+          },
+          openDocsSite(editor) {
+            const url = `https://docs.visual-essays.app?readonly`
+            if (this.externalWindow) { this.externalWindow.close() }
+            this.externalWindow = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
+          },
+          convertLinks() {
+            // convert links
+            const essayElem = document.getElementById('essay')
+            if (essayElem) {
+              console.log(this.context.site)
+              essayElem.querySelectorAll('a').forEach(link => {
+                console.log(link.href)
+                if (!link.href || link.href.indexOf(this.context.site) > 0 || link.href.indexOf('/help#') > 0 ) {
+                  let target = link.dataset.target
+                  if (!target) { 
+                    const parsedUrl = parseUrl(link.href)
+                    if (parsedUrl.hash === '' ) {
+                      const pathElems = parsedUrl.pathname.split('/').filter(pathElem => pathElem !== '')
+                      target = context.isKnownSite || context.ghPagesSite
+                        ? `/${pathElems.slice(4).join('/')}`
+                        : `/${pathElems.slice(this.context.browserRoot.split('/').length).join('/')}`
+                      target = parsedUrl.pathname
+                    } else {
+                      target = parsedUrl.hash.split('?')[0]
+                    }
+                  }
+                  link.addEventListener('click', (e) => {
+                    if (target[0] === '#') {
+                      document.querySelector(target).scrollIntoView({block:'center'})
+                    } else {
+                      this.loadEssay(target)
+                    }
+                  })
+                  link.removeAttribute('href')
+                  link.setAttribute('data-target', target)
+                } else {
+                  link.innerHTML += '<sup><i class="fal fa-external-link-alt" style="margin-left:4px;font-size:0.8em;color:blue;"></i></sup>'
+                  link.setAttribute('target', '_blank')
+                }
+              })
+            }
+          },
+          waitForEssayReady() {
+            const essayElem = document.getElementById('essay')
+            if (essayElem) {
+              this.convertLinks()
+              document.getElementById('content').classList.add('visible')
+              document.getElementById('content').classList.remove('hidden')
+            } else {
+              setTimeout(this.waitForEssayReady, 10)
+            }
+          }
+        },
+        watch: {
+          isLoaded() {    
+            if (this.isLoaded) {
+              this.isLoaded = false
+              this.$nextTick(() => this.waitForEssayReady())
+            }
+          }
+        }
+      })
+    })
+    function parseUrl (href) {
+      const match = href.match(/^(https?)\:\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/)
+      return match && {protocol: match[1], host: match[2], hostname: match[3], origin: `${match[1]}://${match[2]}`, port: match[4], pathname: match[5], search: match[6], hash: match[7]}
+    }
+  </script>
+</body>
+</html>
