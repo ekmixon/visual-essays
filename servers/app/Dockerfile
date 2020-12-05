@@ -16,6 +16,7 @@ WORKDIR /usr/src/app
 ADD main.py .
 ADD essay.py .
 ADD index.html .
+ADD sparql sparql
 # ADD mappings mappings
 ADD index.html .
 ADD gh-token .

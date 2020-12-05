@@ -63,6 +63,20 @@ def _get_gh_file(path, acct, repo, branch='main', gh_token=None):
         sha = resp['sha']
     return content, sha
 
+def _repo_info(acct, repo, gh_token):
+    url = f'https://api.github.com/repos/{acct}/{repo}'
+    resp = requests.get(url, headers={
+        'Authorization': f'Token {gh_token}',
+        'Accept': 'application/vnd.github.v3+json',
+        'User-agent': 'JSTOR Labs visual essays client'
+    })
+    logger.info(f'{url} {resp.status_code}')
+    if resp.status_code == 200:
+        return resp.json()
+
+def _is_repo(acct, repo, gh_token):
+    return _repo_info(acct, repo, gh_token) is not None
+
 def _check_local(site):
     is_local = site.startswith('localhost') or site.endswith('gitpod.io')
     logger.info(f'is_local={is_local}')
@@ -76,6 +90,8 @@ def _get_acct_repo_branch(path):
         path_elems = path[1:].split('/')
         if len(path_elems) > 1:
             acct, repo = path_elems[:2]
+            if not _is_repo(acct, repo, default_gh_token):
+                acct, repo = ('jstor-labs', 've-docs')
         else:
             acct, repo = ('jstor-labs', 've-docs')
     elif site in KNOWN_SITES:
@@ -96,8 +112,9 @@ def _site_config(path):
             _config = json.load(open(os.path.join(BASEDIR, 'config.json'), 'r'))
         else:
             content, sha = _get_gh_file('/config.json', acct, repo, branch)
-            _config = json.loads(content)
-        if _config:
+            _config = json.loads(content) if content is not None else {}
+        if _config is not None:
+            _config.update({'acct': acct, 'repo': repo, 'branch': branch})
             _site_configs[config_key] = _config
     return _site_configs.get(config_key, {})
 

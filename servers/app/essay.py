@@ -102,6 +102,20 @@ def get_gh_markdown(path, token, **kwargs):
             break
     return markdown, md_path
 
+def _repo_info(acct, repo, gh_token):
+    url = f'https://api.github.com/repos/{acct}/{repo}'
+    resp = requests.get(url, headers={
+        'Authorization': f'Token {gh_token}',
+        'Accept': 'application/vnd.github.v3+json',
+        'User-agent': 'JSTOR Labs visual essays client'
+    })
+    logger.info(f'{url} {resp.status_code}')
+    if resp.status_code == 200:
+        return resp.json()
+
+def _is_repo(acct, repo, gh_token):
+    return _repo_info(acct, repo, gh_token) is not None
+
 def _img_to_figure(soup):
     for elem in soup.find_all('img'):
         logger.info(f'img {elem}')
@@ -624,10 +638,14 @@ def get_essay(path, root, site, site_config, token=None):
         path_elems = path[1:].split('/')
         if len(path_elems) > 1:
             acct, repo = path_elems[:2]
+            if _is_repo(acct, repo, token):
+                path = f'/{"/".join(path_elems[2:] if len(path_elems) > 2 else [])}'
+            else:
+                acct = site_config.get('acct')
+                repo = site_config.get('repo')
         else:
             acct = site_config.get('acct')
             repo = site_config.get('repo')
-        path = f'/{"/".join(path_elems[3:] if len(path_elems) > 2 else [])}'
         logger.info(f'acct={acct} repo={repo} path={path}')
         markdown, md_path = get_gh_markdown(path, token, **site_config)
     logger.info(md_path)

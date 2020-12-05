@@ -12,7 +12,7 @@ git checkout $BRANCH
 rm -rf gcr-build
 
 mkdir gcr-build
-cp -va main.py essay.py Dockerfile gcr-build
+cp -va main.py essay.py Dockerfile sparql gcr-build
 cp ../../index.html gcr-build
 echo ${gh_token} > gcr-build/gh-token
 
