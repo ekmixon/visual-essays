@@ -1,0 +1,22 @@
+[
+    { "name": "viewer", "src": "/components/Viewer.vue"},
+    { "name": "entityInfoboxModal", "src": "/components/EntityInfoboxModal.vue"},
+    { "name": "essay", "src": "/components/Essay.vue", "type": "content", "layouts": ["default", "vertical", "horizontal"]},
+    { "name": "essayIndex", "src": "/components/EssayIndex.vue", "type": "content", "layouts": ["index"]},
+    { "name": "essayHeader", "src": "/components/Header.vue", "type": "header", "layouts": ["default", "vertical", "horizontal"]},
+    { "name": "indexHeader", "src": "/components/Header.vue", "type": "header", "layouts": ["index"]},
+    { "name": "siteFooter", "src": "/components/Footer.vue"},
+    { "name": "mapViewer", "src": "/components/LeafletTimeDimension.vue", "selectors": ["tag:map"], "icon": "fa-map-marker-alt", "label": "Map"},
+    { "name": "imageViewer", "src": "/components/OpenSeadragonViewer.vue", "selectors": ["tag:image"], "icon": "fa-file-image", "label": "Images"},
+    { "name": "videoPlayer", "src": "/components/VideoPlayer.vue", "selectors": ["tag:video"], "icon": "fa-video", "label": "Videos"},
+    { "name": "storiiiesViewer", "src": "/components/StoriiiesViewer.vue", "selectors": ["tag:storiiies"], "icon": "fa-book", "label": "Storiiies Viewer"},
+    { "name": "plantSpecimenViewer", "src": "/components/PlantSpecimenViewer.vue", "selectors": ["tag:plant-specimen"], "icon": "fa-seedling", "label": "Plant Specimens"},
+    { "name": "d3Network", "src": "/components/D3Network.vue", "selectors": ["tag:d3-network"], "icon": "fa-chart-network", "label": "Networks"},
+    { "name": "d3PlusNetwork", "src": "/components/D3PlusNetwork.vue", "selectors": ["tag:d3plus-network"], "icon": "fa-chart-network", "label": "Networks"},
+    { "name": "d3PlusRingNetwork", "src": "/components/D3PlusRingNetwork.vue", "selectors": ["tag:d3plus-ring-network"], "icon": "fa-chart-network", "label": "Networks"},
+    { "name": "visNetwork", "src": "/components/VisNetwork.vue", "selectors": ["tag:vis-network"], "icon": "fa-chart-network", "label": "Networks"},
+    { "name": "entityInfobox", "src": "/components/EntityInfobox.vue"},
+    { "name": "iiifSideBySide", "src": "/components/IIIFSideBySide.vue", "selectors": ["tag:iiif-compare"], "icon": "fa-file-image", "label": "Image compare"},
+    { "name": "knightlabTimeline", "src": "/components/KnightlabTimeline.vue", "selectors": ["tag:knightlab-timeline"], "icon": "fa-history", "label": "Knightlab Timeline"},
+    { "name": "tabulator", "src": "/components/Tabulator.vue", "selectors": ["tag:tabulator"], "icon": "fa-table", "label": "Tabulator"}
+]

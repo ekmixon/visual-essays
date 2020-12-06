@@ -10,7 +10,7 @@ import re
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 SPARQL_DIR = os.path.join(SCRIPT_DIR, 'sparql')
-BASE_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+BASEDIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 
 import json
 import getopt
@@ -39,7 +39,9 @@ from pyld import jsonld
 
 import concurrent.futures
 
-DEFAULT_REPO = 've-content'
+from gh import get_gh_markdown
+
+DEFAULT_REPO = 've-docs'
 
 cache = {}
 
@@ -66,56 +68,6 @@ def get_local_markdown(path, root):
                 break
     return markdown, md_path
 
-def get_gh_file(path, gh_token, acct, repo, branch='main', **kwargs):
-    logger.info(f'get_gh_file: acct={acct} repo={repo} branch={branch} path={path}')
-    content = sha = None
-    url = f'https://api.github.com/repos/{acct}/{repo}/contents{path}?ref={branch}'
-    resp = requests.get(url, headers={
-        'Authorization': f'Token {gh_token}',
-        'Accept': 'application/vnd.github.v3+json',
-        'User-agent': 'JSTOR Labs visual essays client'
-    })
-    logger.info(f'{url} {resp.status_code}')
-    if resp.status_code == 200:
-        resp = resp.json()
-        content = base64.b64decode(resp['content']).decode('utf-8')
-        sha = resp['sha']
-    return content, sha
-
-def get_gh_markdown(path, token, **kwargs):
-    logger.info(f'get_gh_markdown: path={path}')
-    markdown = md_path = None
-    if path.endswith('.md'):
-        paths = [path]
-    else:
-        if path == '/':
-            paths = ['/README.md', '/index.md']
-        else:
-            if path[-1] == '/':
-                paths = [f'{path}{file}' for file in ('README.md', 'index.md')]
-            else:
-                paths = [f'{path}.md'] + [f'{path}/{file}' for file in ('README.md', 'index.md')]
-    for _path in paths:
-        markdown, sha = get_gh_file(_path, token, **kwargs)
-        if markdown:
-            md_path = _path.replace('.md', '')
-            break
-    return markdown, md_path
-
-def _repo_info(acct, repo, gh_token):
-    url = f'https://api.github.com/repos/{acct}/{repo}'
-    resp = requests.get(url, headers={
-        'Authorization': f'Token {gh_token}',
-        'Accept': 'application/vnd.github.v3+json',
-        'User-agent': 'JSTOR Labs visual essays client'
-    })
-    logger.info(f'{url} {resp.status_code}')
-    if resp.status_code == 200:
-        return resp.json()
-
-def _is_repo(acct, repo, gh_token):
-    return _repo_info(acct, repo, gh_token) is not None
-
 def _img_to_figure(soup):
     for elem in soup.find_all('img'):
         logger.info(f'img {elem}')
@@ -135,7 +87,27 @@ def _img_to_figure(soup):
         elem.replace_with(figure)
     return soup
 
-def markdown_to_html5(markdown, path):
+def convert_relative_links(soup, site, acct, repo, branch, path, root=None):
+    path_elems = path[1:].split('/')
+    if False and site == 'localhost' and root is not None:
+        abs_baseurl = f'http://{site}/static'
+    else:
+        abs_baseurl = f'https://raw.githubusercontent.com/{acct}/{repo}/{branch}'
+    rel_baseurl = f'{abs_baseurl}/{"/".join(path_elems[:-1])}' if len(path_elems) > 1 else abs_baseurl
+    logger.info(f'convert_relative_links: site={site} acct={acct} repo={repo} branch={branch} root={root} path={path} abs_baseurl={abs_baseurl} rel_baseurl={rel_baseurl}')
+
+    for tag in ('img', 'var', 'span', 'param'):
+        for elem in soup.find_all(tag):
+            for attr in ('banner', 'data-banner', 'src', 'url', 'file', 'manifest', 'data', 'geojson', 'logo'):
+                if attr in elem.attrs and elem.attrs[attr] and not elem.attrs[attr].startswith('http'):
+                    before = elem.attrs[attr]
+                    if elem.attrs[attr][0] == '/':
+                        elem.attrs[attr] = f'{abs_baseurl}{elem.attrs[attr]}'
+                    else:
+                        elem.attrs[attr] = f'{rel_baseurl}/{elem.attrs[attr]}'
+                    logger.info(f'{before} {elem.attrs[attr]}')
+
+def markdown_to_html5(markdown, site, acct, repo, branch, path, root):
     '''Transforms markdown generated HTML to semantic HTML'''
     html = markdown_parser.markdown(
         markdown,
@@ -147,6 +119,7 @@ def markdown_to_html5(markdown, path):
             }
         })
     soup = BeautifulSoup(f'<div id="md-content">{html}</div>', 'html5lib')
+    convert_relative_links(soup, site, acct, repo, branch, path, root)
 
     base_html = f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title></title></head><body></body></html>'
     html5 = BeautifulSoup(base_html, 'html5lib')
@@ -570,7 +543,7 @@ def _get_manifest(item, essay_path, acct, repo):
     return item
 
 _manifests_cache = {}
-def _get_manifests(markup, essay_path, acct='jstor-labs', repo=DEFAULT_REPO, **kwargs):
+def _get_manifests(markup, essay_path, acct, repo):
     global _manifests_cache
     logger.info(f'_get_manifests: essay_path={essay_path} acct={acct} repo={repo}')
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -607,7 +580,7 @@ def is_qid(s, ns_required=False):
     eid = split[-1]
     return len(eid) > 1 and eid[0] == 'Q' and eid[1:].isdecimal()
 
-def parse(html, md_path, site_config):
+def parse(html, md_path, acct, repo):
     soup = BeautifulSoup(html, 'html5lib')
     for comment in soup(text=lambda text: isinstance(text, Comment)):
         comment.extract()
@@ -617,7 +590,7 @@ def parse(html, md_path, site_config):
     _add_entity_classes(soup, markup)
     _remove_empty_paragraphs(soup)
     _add_heading_ids(soup)
-    _get_manifests(markup, md_path, **site_config)
+    _get_manifests(markup, md_path, acct, repo)
     _add_data(soup, markup)
     return str(soup)
 
@@ -626,38 +599,26 @@ def _check_local(site):
     logger.info(f'is_local={is_local}')
     return is_local
 
-def get_essay(path, root, site, site_config, token=None):
+def get_essay(site, acct, repo, branch, path, root, token, **kwargs):
     if not path:  path = '/'
-    logger.info(f'essay: site={site} root={root} path={path} site_config={site_config}')
+    logger.info(f'essay: site={site} acct={acct} repo={repo} branch={branch} root={root} path={path}')
     markdown = md_path = None
-    if token is None:
-        token = os.environ.get('gh_token')
     if _check_local(site):
         markdown, md_path = get_local_markdown(path=path, root=root)
     if markdown is None:
-        path_elems = path[1:].split('/')
-        if len(path_elems) > 1:
-            acct, repo = path_elems[:2]
-            if _is_repo(acct, repo, token):
-                path = f'/{"/".join(path_elems[2:] if len(path_elems) > 2 else [])}'
-            else:
-                acct = site_config.get('acct')
-                repo = site_config.get('repo')
-        else:
-            acct = site_config.get('acct')
-            repo = site_config.get('repo')
-        logger.info(f'acct={acct} repo={repo} path={path}')
-        markdown, md_path = get_gh_markdown(path, token, **site_config)
+        markdown, md_path = get_gh_markdown(acct, repo, branch, path, token)
     logger.info(md_path)
-    html = markdown_to_html5(markdown, md_path)
-    return parse(html, md_path, site_config)
+    html = markdown_to_html5(markdown, site, acct, repo, branch, md_path, root)
+
+    return parse(html, md_path, acct, repo)
 
 def usage():
-    print(f'{sys.argv[0]} [hl:a:r:s:t:] path')
+    print(f'{sys.argv[0]} [hl:a:r:b:s:t:] path')
     print(f'   -h --help          Print help message')
     print(f'   -l --loglevel      Logging level (default=warning)')
     print(f'   -a --acct          Github account (default="jstor-labs")')
     print(f'   -r --repo          Github repo (default="{DEFAULT_REPO}")')
+    print(f'   -b --branch        Github branch (default="main")')
     print(f'   -s --site          Site (default="localhost")')
     print(f'   -t --token         Github token')
 
@@ -665,10 +626,10 @@ if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
     site = 'localhost'
     token = None
-    site_config = {'acct': 'jstor-labs', 'repo': DEFAULT_REPO}
+    site_config = {'acct': 'jstor-labs', 'repo': DEFAULT_REPO, 'branch': 'main'}
     try:
         opts, args = getopt.getopt(
-            sys.argv[1:], 'hl:a:r:s:t:', ['help', 'loglevel', 'acct', 'repo', 'site', 'tokeh'])
+            sys.argv[1:], 'hl:a:r:b:s:t:', ['help', 'loglevel', 'acct', 'repo', 'branch', 'site', 'tokeh'])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(str(err))  # will print something like "option -a not recognized"
@@ -686,6 +647,8 @@ if __name__ == '__main__':
             site_config['acct'] = a
         elif o in ('-r', '--repo'):
             site_config['repo'] = a
+        elif o in ('-b', '--branch'):
+            site_config['branch'] = a
         elif o in ('-s', '--site'):
             site = a
         elif o in ('-t', '--token'):
@@ -697,4 +660,4 @@ if __name__ == '__main__':
             assert False, "unhandled option"
 
     path = args[0] if len(args) == 1 else '/'
-    print(get_essay(path, BASE_DIR, site, site_config, token))
+    print(get_essay(path, BASEDIR, site, site_config, token))

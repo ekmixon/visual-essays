@@ -13,15 +13,16 @@ RUN set -e; \
 
 WORKDIR /usr/src/app
 
-ADD main.py .
-ADD essay.py .
+ADD js js
+ADD components components
+ADD server server
 ADD index.html .
-ADD sparql sparql
+
 # ADD mappings mappings
-ADD index.html .
-ADD gh-token .
 
 ENV PORT 8080
+
+WORKDIR /usr/src/app/server
 
 ENTRYPOINT ["tini", "--"]
 CMD uwsgi --http :${PORT} --manage-script-name --mount /app=main:app --enable-threads --processes 4

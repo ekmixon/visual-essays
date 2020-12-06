@@ -11,10 +11,13 @@ gcloud config set run/region us-central1
 git checkout $BRANCH
 rm -rf gcr-build
 
-mkdir gcr-build
-cp -va main.py essay.py Dockerfile sparql gcr-build
-cp ../../index.html gcr-build
-echo ${gh_token} > gcr-build/gh-token
+mkdir -p gcr-build/server
+cp -va server/Dockerfile gcr-build
+cp -va server/main.py server/essay.py server/sparql gcr-build/server
+echo ${gh_token} > gcr-build/server/gh-token
+cp index.html gcr-build
+cp -va js gcr-build/js
+cp -va components gcr-build/components
 
 cd gcr-build
 gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
