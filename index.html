@@ -176,7 +176,7 @@ new Promise(function(resolve, reject) {
               url = `https://${this.context.codeBranch === 'develop' ? 'dev.' : ''}visual-essays.app/essay/jstor-labs/ve-content/${this.context.branch}/help`
             } else {
               if (context.ghPagesSite) {
-                const pathElems = windows.location.pathname.split('/').filter(pathElem => pathElem !== '')
+                const pathElems = window.location.pathname.split('/').filter(pathElem => pathElem !== '')
                 path = `/${pathElems.slice(1).join('/')}`
                 url = `https://exp.visual-essays.app/essay${path}`
               } else {
