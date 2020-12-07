@@ -175,7 +175,7 @@ new Promise(function(resolve, reject) {
           path(inPath) {
             return context.ghPagesSite
               ? `/${inPath.split('/').filter(pathElem => pathElem !== '').slice(1).join('/')}`
-              : `/${this.contentAcct}/${this.contentRepo}/${inPath}`
+              : `/${this.contentAcct}/${this.contentRepo}${inPath}`
           },
           cachingFetch(path, raw) {
             let url
