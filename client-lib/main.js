@@ -162,7 +162,7 @@ const getSiteConfig = async () => {
     const configUrl = `${context.service}/config${window.location.pathname}${context.branch && context.branch !== 'main' ? '?ref='+context.branch : ''}`
     console.log(configUrl)
     let [ghpConfig, fromServer] = await Promise.all([
-      fetch('/config.json'),
+      fetch('config.json'),
       fetch(configUrl)
     ])
     console.log(`ghpConfig=${ghpConfig.ok} fromServer=${fromServer.ok}`)
