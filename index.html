@@ -270,7 +270,7 @@ new Promise(function(resolve, reject) {
                     const parsedUrl = parseUrl(link.href)
                     if (parsedUrl.hash === '' ) {
                       const pathElems = parsedUrl.pathname.split('/').filter(pathElem => pathElem !== '')
-                      target = this.path(parsedUrl.pathname)
+                      target = parsedUrl.pathname
                     } else {
                       target = parsedUrl.hash.split('?')[0]
                     }
