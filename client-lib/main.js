@@ -17,6 +17,7 @@ const version = VERSION
 let gaTrackingID = 'UA-125778965-6'
 
 console.log(`visual-essays: version=${version} branch=${codeBranch}`)
+
 const hash = window.location.hash || location.hash
 
 const referrerUrl = document.referrer
@@ -56,7 +57,7 @@ if (qargs.token) {
   jwt = window.localStorage.getItem('ghcreds')
 }
 
-const veSites = ['localhost', 'visual-essays.app', 'dev.visual-essays.app']
+const veSites = ['localhost', 'visual-essays.app', 'dev.visual-essays.app', 'exp.visual-essays.app']
 let otherKnownSites = {
   'docs.visual-essays.app': {acct: 'jstor-labs', repo: 've-docs'},
   'plant-humanities.app': {acct: 'jstor-labs', repo: 'plant-humanities'},
@@ -158,7 +159,7 @@ const checkJWTExpiration = async(jwt) => {
 const getSiteConfig = async () => {
   let siteConfig = { components: [] }
   try {
-    const configUrl = `${context.service}/config/${context.acct}/${context.repo}${context.branch && context.branch !== 'main' ? '?ref='+context.branch : ''}`
+    const configUrl = `${context.service}/config${window.location.pathname}${context.branch && context.branch !== 'main' ? '?ref='+context.branch : ''}`
     console.log(configUrl)
     let [ghpConfig, fromServer] = await Promise.all([
       fetch('/config.json'),
@@ -170,15 +171,12 @@ const getSiteConfig = async () => {
       // configUpdate = await ghpConfig.json()
       siteConfig = { ...siteConfig, ...await ghpConfig.json() }
       context.ghPagesSite = true
-      context.acct = siteConfig.acct
-      context.repo = siteConfig.repo
-      console.log(siteConfig.repo)
     } 
     if (fromServer.ok) {
       siteConfig = { ...siteConfig, ...await fromServer.json() }
     }
-
-    // siteConfig = { ...siteConfig, ...configUpdate }
+    context.acct = siteConfig.acct
+    context.repo = siteConfig.repo
     context.branch = context.branch === null ? siteConfig.publishedVersion || 'main' : context.branch
 
     console.log('siteConfig', siteConfig)
@@ -243,7 +241,6 @@ const doRemoteRequests = async () => {
   let _components = responses[0]
   let _siteConfig = responses[1]
   let _repoInfo = responses[2]
-  console.log('here')
 
   if (responses.length === 4) {
     const jwtIsExpired = responses[3]

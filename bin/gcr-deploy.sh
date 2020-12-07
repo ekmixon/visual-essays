@@ -11,10 +11,14 @@ gcloud config set run/region us-central1
 git checkout $BRANCH
 rm -rf gcr-build
 
+cd client-lib
+yarn build
+
+cd ..
+
 mkdir -p gcr-build/server
 cp -va server/Dockerfile gcr-build
-cp -va server/main.py server/essay.py server/sparql gcr-build/server
-echo ${gh_token} > gcr-build/server/gh-token
+cp -va server/main.py server/essay.py server/gh.py server/sparql server/gh-token gcr-build/server
 cp index.html gcr-build
 cp -va js gcr-build/js
 cp -va components gcr-build/components

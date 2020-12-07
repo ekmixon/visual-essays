@@ -26,6 +26,7 @@ from essay import get_essay
 from gh import gh_token, get_gh_file, gh_repo_info, has_gh_repo_prefix
 
 ENV = 'prod'
+CONTENT_ROOT = None
 
 KNOWN_SITES = {
     'default': ['jstor-labs', 've-docs'],
@@ -66,33 +67,32 @@ def _context(path):
         acct, repo = KNOWN_SITES.get(site, KNOWN_SITES['default'])
     return site, acct, repo, branch, path
 
+@app.route('/config.json', methods=['GET'])
+def local_config():
+    logger.info(f'local_config: ENV={ENV} CONTENT_ROOT={CONTENT_ROOT}')
+    if ENV == 'dev' and CONTENT_ROOT:
+        config_path = os.path.join(CONTENT_ROOT, 'config.json')
+        if os.path.exists(config_path):
+            return json.load(open(config_path, 'r')), 200
+    return 'Not found', 404
+
 @app.route('/config/<path:path>', methods=['GET'])
 @app.route('/config/', methods=['GET'])
-@app.route('/config.json', methods=['GET'])
 @app.route('/config', methods=['GET'])
 def config(path=None):
     site, acct, repo, branch, path = _context(path)
     logger.info(f'config: site={site} acct={acct} repo={repo} branch={branch} path={path}')
-    _config = None
-    if _is_local(site) and repo == KNOWN_SITES['default'][1]:
-        if os.path.exists(os.path.join(BASEDIR, 'config.json')):
-            _config = json.load(open(os.path.join(BASEDIR, 'config.json'), 'r'))
-    else:
-        raw, _ = get_gh_file( acct, repo, branch, '/config.json')
-        if raw is not None:
-            _config = json.loads(raw) if raw is not None else {} 
-            _config.update({'acct': acct, 'repo': repo, 'branch': branch})
-    if _config:   
-        return _config, 200
-    else:
-        return 'Not found', 404
+    raw, _ = get_gh_file( acct, repo, branch, '/config.json')
+    _config = json.loads(raw) if raw is not None else {} 
+    _config.update({'acct': acct, 'repo': repo, 'branch': branch})
+    return _config, 200
 
 @app.route('/essay/<path:path>', methods=['GET'])
 @app.route('/essay/', methods=['GET'])
 def essay(path=None):
     site, acct, repo, branch, path = _context(path)
     logger.info(f'essay: site={site} acct={acct} repo={repo} branch={branch} path={path}')
-    essay_args = {'site': site, 'acct': acct, 'repo': repo, 'branch': branch, 'path': path, 'root': BASEDIR, 'token': gh_token()}
+    essay_args = {'site': site, 'acct': acct, 'repo': repo, 'branch': branch, 'path': path, 'root': CONTENT_ROOT, 'token': gh_token()}
     return get_essay(**essay_args), 200
 
 @app.route('/info', methods=['GET'])
@@ -117,16 +117,17 @@ def main(path=None):
                 return html, 200
 
 def usage():
-    print('%s [hl:da:r:]' % sys.argv[0])
+    print('%s [hl:da:r:c:]' % sys.argv[0])
     print('   -h --help             Print help message')
     print('   -l --loglevel         Logging level (default=warning)')
     print('   -d --dev              Use local Visual Essay JS Lib')
     print('   -a --acct             Default Github account (jstor-labs)')
     print('   -r --repo             Default Github repository (ve-docs)')
+    print('   -c --root             Content root')
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hl:da:r:', ['help', 'loglevel', 'dev', 'acct', 'repo'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hl:da:r:c:', ['help', 'loglevel', 'dev', 'acct', 'repo', 'root'])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(str(err)) # will print something like "option -a not recognized"
@@ -146,6 +147,8 @@ if __name__ == '__main__':
             KNOWN_SITES['default'][0] = a
         elif o in ('-r', '--repo'):
             KNOWN_SITES['default'][1] = a
+        elif o in ('-c', '--root'):
+            CONTENT_ROOT = d
         elif o in ('-h', '--help'):
             usage()
             sys.exit()

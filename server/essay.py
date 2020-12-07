@@ -594,7 +594,7 @@ def parse(html, md_path, acct, repo):
     _add_data(soup, markup)
     return str(soup)
 
-def _check_local(site):
+def _is_local(site):
     is_local = site.startswith('localhost') or site.endswith('gitpod.io')
     logger.info(f'is_local={is_local}')
     return is_local
@@ -603,7 +603,7 @@ def get_essay(site, acct, repo, branch, path, root, token, **kwargs):
     if not path:  path = '/'
     logger.info(f'essay: site={site} acct={acct} repo={repo} branch={branch} root={root} path={path}')
     markdown = md_path = None
-    if _check_local(site):
+    if root and _is_local(site):
         markdown, md_path = get_local_markdown(path=path, root=root)
     if markdown is None:
         markdown, md_path = get_gh_markdown(acct, repo, branch, path, token)
