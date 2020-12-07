@@ -170,11 +170,10 @@ new Promise(function(resolve, reject) {
               return this.fetchRetry(url, retries-1, backoff * 2, lastError)
             }
           },
-          path(path) {
-            path = path || window.location.pathname
+          path(inPath) {
             return context.ghPagesSite
-              ? `/${path.split('/').filter(pathElem => pathElem !== '').slice(1).join('/')}`
-              : path
+              ? `/${inPath.split('/').filter(pathElem => pathElem !== '').slice(1).join('/')}`
+              : inPath
           },
           cachingFetch(path, raw) {
             let url
@@ -182,7 +181,7 @@ new Promise(function(resolve, reject) {
               url = `https://${this.context.codeBranch === 'develop' ? 'dev.' : ''}visual-essays.app/essay/jstor-labs/ve-content/${this.context.branch}/help`
             } else {
               if (context.ghPagesSite) {
-                url = `https://exp.visual-essays.app/essay${this.path()}`
+                url = `https://exp.visual-essays.app/essay${this.path(path)}`
               } else {
                 url = `/essay${path}`
               }
