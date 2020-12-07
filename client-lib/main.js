@@ -167,14 +167,15 @@ const getSiteConfig = async () => {
     ])
     console.log(`ghpConfig=${ghpConfig.ok} fromServer=${fromServer.ok}`)
 
+    if (fromServer.ok) {
+      siteConfig = { ...siteConfig, ...await fromServer.json() }
+    }
     if (ghpConfig.ok) {
       // configUpdate = await ghpConfig.json()
       siteConfig = { ...siteConfig, ...await ghpConfig.json() }
       if (window.location.hostname.indexOf('github.io') > 0) context.ghPagesSite = true
     } 
-    if (fromServer.ok) {
-      siteConfig = { ...siteConfig, ...await fromServer.json() }
-    }
+
     context.acct = siteConfig.acct
     context.repo = siteConfig.repo
     context.branch = context.branch === null ? siteConfig.publishedVersion || 'main' : context.branch

@@ -1,13 +1,14 @@
 {
-    "title": "Visual Essays Documentation",
+    "title": "Visual Essays",
     "banner": "/banner.jpg",
     "acct": "JSTOR-Labs",
-    "repo": "ve-docs",
+    "repo": "visual-essays",
     "logo": "/labs.jpg",
     "favicon": "/favicon.ico",
     "nav": [
-        {"label": "Home", "icon": "home-alt", "path": "/visual-essays"},
+        {"label": "Home", "icon": "home-alt", "path": "/"},
         {"label": "About", "icon": "info", "path": "/about"},
+        {"label": "Documentation", "icon": "question"},
         {"label": "Login", "icon": "user"}
     ]
 }
