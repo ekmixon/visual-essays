@@ -111,9 +111,9 @@ def main(path=None):
                 html = fp.read()
                 if ENV == 'dev':
                     if site.endswith('gitpod.io'):
-                        html = re.sub(r'"https://visual-essays.netlify.app/visual-essays.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
+                        html = re.sub(r'"static/js/visual-essays.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
                     else:
-                        html = re.sub(r'"/static/js/visual-essays.+"', f'"http://{site}:8088/js/visual-essays.js"', html)
+                        html = re.sub(r'"static/js/visual-essays.+"', f'"http://{site}:8088/js/visual-essays.js"', html)
                 return html, 200
 
 def usage():

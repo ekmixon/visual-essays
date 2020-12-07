@@ -209,7 +209,8 @@ const getSiteConfig = async () => {
   return siteConfig
 }
 const baseComponentsIndex = async(componentsBaseURL) => {
-  let response = await fetch(`${componentsBaseURL}/components/index.json`)
+  // let response = await fetch(`${componentsBaseURL}/components/index.json`)
+  let response = await fetch(`static/components/index.json`)
   let components = []
   const componentsList = await response.json()
   componentsList.forEach(comp => {
@@ -230,7 +231,7 @@ const doRemoteRequests = async () => {
     // : context.service
     */
   const remoteRequests = [
-    baseComponentsIndex('/static'),
+    baseComponentsIndex(),
     getSiteConfig(),
     getRepoInfo()
   ]
