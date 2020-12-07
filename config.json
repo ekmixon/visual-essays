@@ -1,10 +1,10 @@
 {
     "title": "Visual Essays",
-    "banner": "https://JSTOR-Labs.github.io/visual-essays/static/images/header.jpg",
+    "banner": "https://www.visual-essays.app/static/images/header.jpg",
     "acct": "JSTOR-Labs",
     "repo": "visual-essays",
-    "logo": "https://JSTOR-Labs.github.io/visual-essays/static/images/labs.jpg",
-    "favicon": "https://JSTOR-Labs.github.io/visual-essays/static/images/favicon.ico",
+    "logo": "https://www.visual-essays.app/static/images/labs.jpg",
+    "favicon": "https://www.visual-essays.app/static/images/favicon.ico",
     "nav": [
         {"label": "Home", "icon": "home-alt", "path": "/"},
         {"label": "About", "icon": "info", "path": "/about"},
