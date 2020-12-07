@@ -20,6 +20,9 @@ console.log(`visual-essays: version=${version} branch=${codeBranch}`)
 
 const hash = window.location.hash || location.hash
 
+console.log(window.location)
+let baseurl = ''
+
 const referrerUrl = document.referrer
 if (referrerUrl) {
   console.log(`referrer=${referrerUrl}`)
@@ -163,7 +166,7 @@ const getSiteConfig = async () => {
     const configUrl = `${context.service}/config${window.location.pathname}${context.branch && context.branch !== 'main' ? '?ref='+context.branch : ''}`
     console.log(configUrl)
     let [ghpConfig, fromServer] = await Promise.all([
-      fetch('config.json'),
+      fetch(`${baseurl}/config.json`),
       fetch(configUrl)
     ])
     console.log(`ghpConfig=${ghpConfig.ok} fromServer=${fromServer.ok}`)
@@ -212,11 +215,11 @@ const getSiteConfig = async () => {
 }
 const baseComponentsIndex = async(componentsBaseURL) => {
   // let response = await fetch(`${componentsBaseURL}/components/index.json`)
-  let response = await fetch(`components/index.json`)
+  let response = await fetch(`${baseurl}/components/index.json`)
   let components = []
   const componentsList = await response.json()
   componentsList.forEach(comp => {
-    if (comp.src.indexOf('http') !== 0) comp.src = `${context.browserRoot}/${comp.src}`
+    if (comp.src.indexOf('http') !== 0) comp.src = `${baseurl}${comp.src}`
     components.push(comp)
   })
   return components
@@ -446,7 +449,7 @@ function initApp() {
 
 let current = undefined
 const waitForContent = () => {
-  // console.log(`waitForContent: current=${current} window._essay=${window._essay}`)
+  console.log(`waitForContent: current=${current} window._essay=${window._essay}`)
   const essayElem = document.getElementById('essay') // article
   if (!window._essay && essayElem && essayElem.innerText.length > 0) {
     window._essay = essayElem.dataset.name

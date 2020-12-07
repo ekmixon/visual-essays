@@ -98,7 +98,7 @@
   </div>
 
   <script>window.context = null</script>
-  <script src="static/js/visual-essays.min.js"></script>
+  <script src="/static/js/visual-essays.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://kit.fontawesome.com/19541ddce8.js" crossorigin="anonymous"></script>
 
@@ -121,7 +121,8 @@ new Promise(function(resolve, reject) {
         components: {
           'indexHeader': httpVueLoader(context.components.indexHeader && context.components.indexHeader.src),
           'essayHeader': httpVueLoader(context.components.essayHeader && context.components.essayHeader.src),
-          'siteFooter': httpVueLoader(context.components.siteFooter && context.components.siteFooter.src)        },
+          'siteFooter': httpVueLoader(context.components.siteFooter && context.components.siteFooter.src)        
+        },
         data: () => ({
           context,
           html: undefined,
@@ -140,9 +141,9 @@ new Promise(function(resolve, reject) {
         computed: {
           isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
           readOnly() { return this.context.qargs.readonly },
-          contentAcct() { return this.context.content.acct ? this.context.content.acct : this.context.acct },
-          contentRepo() { return this.context.content.repo ? this.context.content.repo : this.context.repo },
-          contentBranch() { return this.context.content.branch ? this.context.content.branch : this.branch }
+          contentAcct() { return this.context.content && this.context.content.acct ? this.context.content.acct : this.context.acct },
+          contentRepo() { return this.context.content && this.context.content.repo ? this.context.content.repo : this.context.repo },
+          contentBranch() { return this.context.content && this.context.content.branch ? this.context.content.branch : this.branch }
         },
         mounted() {
           const loc = window.location
@@ -183,7 +184,8 @@ new Promise(function(resolve, reject) {
             if ( path === '/help') {
               url = `https://${this.context.codeBranch === 'develop' ? 'dev.' : ''}visual-essays.app/essay/jstor-labs/ve-content/${this.context.branch}/help`
             } else {
-                url = `https://exp.visual-essays.app/essay${this.path(path)}`
+                // url = `https://exp.visual-essays.app/essay${this.path(path)}`
+                url = `/essay${this.path(path)}`
             }
             if (this.contentBranch !== 'main') {
               url += `?ref=${this.contentBranch}`
@@ -216,7 +218,7 @@ new Promise(function(resolve, reject) {
               this.$nextTick(() => {
                 const essayElem = document.getElementById('essay')
                 if (essayElem) window._essay = essayElem.dataset.name
-                const essayFname = essayElem.dataset.name.split('/').pop()
+                const essayFname = essayElem ? essayElem.dataset.name.split('/').pop() : null
                 console.log(`essayFname=${essayFname}`)
                 if (essayFname === 'README' || essayFname === 'index') {
                     console.log(window.location.pathname)

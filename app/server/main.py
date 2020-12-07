@@ -18,6 +18,9 @@ logging.getLogger('requests').setLevel(logging.INFO)
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 BASEDIR = os.path.dirname(SCRIPT_DIR)
+while BASEDIR != '/' and not os.path.exists(os.path.join(BASEDIR, 'index.html')):
+    BASEDIR = os.path.dirname(BASEDIR)
+logger.info(f'SCRIPT_DIR={SCRIPT_DIR} BASEDIR={BASEDIR}')
 
 from flask import Flask, request, send_from_directory, redirect, Response, jsonify, g
 app = Flask(__name__, static_url_path='/static', static_folder=os.path.join(BASEDIR, 'static'))
@@ -53,11 +56,11 @@ def _is_ve_site(site):
 def qargs():
     return dict([(k, request.args.get(k)) for k in request.args])
 
-def _fix_path(path):
-    return f'/{path}' if path else '/'
+def _normalize_path(path):
+    return f'/{path[:-1] if path[-1] == "/" else path}' if path else '/'
 
 def _context(path):
-    path = _fix_path(path)
+    path = _normalize_path(path)
     site = urlparse(request.base_url).hostname
     branch = qargs().get('ref', 'main')
     logger.info(f'_context: _is_ve_site={_is_ve_site(site)} gh_repo_prefix={has_gh_repo_prefix(path)}')
@@ -117,17 +120,16 @@ def info():
 def main(path=None):
     site, acct, repo, branch, path = _context(path)
     logger.info(f'main: site={site} acct={acct} repo={repo} branch={branch} path={path}')
-    for _dir in (SCRIPT_DIR, BASEDIR):
-        abs_path = os.path.join(_dir, 'index.html')
-        if os.path.exists(abs_path):
-            with open(abs_path, 'r') as fp:
-                html = fp.read()
-                if ENV == 'dev':
-                    if site.endswith('gitpod.io'):
-                        html = re.sub(r'"static/js/visual-essays.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
-                    else:
-                        html = re.sub(r'"static/js/visual-essays.+"', f'"http://{site}:8088/js/visual-essays.js"', html)
-                return html, 200
+    with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
+        html = fp.read()
+        if ENV == 'dev':
+            if site.endswith('gitpod.io'):
+                html = re.sub(r'"/static/js/visual-essays.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
+            else:
+                html = re.sub(r'"/static/js/visual-essays.+"', f'"http://{site}:8088/js/visual-essays.js"', html)
+        return html, 200
+
+    return 'Not found', 404
 
 def usage():
     print('%s [hl:da:r:c:]' % sys.argv[0])
