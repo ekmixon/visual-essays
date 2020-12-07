@@ -141,7 +141,7 @@ new Promise(function(resolve, reject) {
           isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
           readOnly() { return this.context.qargs.readonly },
           contentAcct() { return context.content.acct ? context.content.acct : context.acct },
-          contentRepo() { return context.content.repo ? context.content.acct : context.repo }
+          contentRepo() { return context.content.repo ? context.content.repo : context.repo }
         },
         mounted() {
           const loc = window.location
