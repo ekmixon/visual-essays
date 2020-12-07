@@ -173,7 +173,7 @@ new Promise(function(resolve, reject) {
           path(inPath) {
             return context.ghPagesSite
               ? `/${inPath.split('/').filter(pathElem => pathElem !== '').slice(1).join('/')}`
-              : inPath
+              : `/${this.context.acct}/${this.context.repo}/${inPath}`
           },
           cachingFetch(path, raw) {
             let url
