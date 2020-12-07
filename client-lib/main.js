@@ -170,7 +170,7 @@ const getSiteConfig = async () => {
     if (ghpConfig.ok) {
       // configUpdate = await ghpConfig.json()
       siteConfig = { ...siteConfig, ...await ghpConfig.json() }
-      context.ghPagesSite = true
+      if (window.location.hostname.indexOf('github.io') > 0) context.ghPagesSite = true
     } 
     if (fromServer.ok) {
       siteConfig = { ...siteConfig, ...await fromServer.json() }
