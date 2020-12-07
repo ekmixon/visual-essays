@@ -20,7 +20,7 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 BASEDIR = os.path.dirname(SCRIPT_DIR)
 
 from flask import Flask, request, send_from_directory, redirect, Response, jsonify, g
-app = Flask(__name__, static_url_path='/static', static_folder=BASEDIR)
+app = Flask(__name__, static_url_path='/static', static_folder=os.path.join(BASEDIR, 'static'))
 
 from essay import get_essay
 from gh import gh_token, get_gh_file, gh_repo_info, has_gh_repo_prefix
