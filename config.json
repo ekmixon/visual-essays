@@ -1,10 +1,10 @@
 {
     "title": "Visual Essays",
-    "banner": "/banner.jpg",
+    "banner": "/static/images/header.jpg",
     "acct": "JSTOR-Labs",
     "repo": "visual-essays",
-    "logo": "/labs.jpg",
-    "favicon": "/favicon.ico",
+    "logo": "/static/images/labs.jpg",
+    "favicon": "/static/images/favicon.ico",
     "nav": [
         {"label": "Home", "icon": "home-alt", "path": "/"},
         {"label": "About", "icon": "info", "path": "/about"},
