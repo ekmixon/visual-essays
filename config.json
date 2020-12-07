@@ -6,7 +6,7 @@
     "logo": "/labs.jpg",
     "favicon": "/favicon.ico",
     "nav": [
-        {"label": "Home", "icon": "home-alt", "path": "/"},
+        {"label": "Home", "icon": "home-alt", "path": "/visual-essays"},
         {"label": "About", "icon": "info", "path": "/about"},
         {"label": "Login", "icon": "user"}
     ]
