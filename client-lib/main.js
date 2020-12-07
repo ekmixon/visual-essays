@@ -210,11 +210,11 @@ const getSiteConfig = async () => {
 }
 const baseComponentsIndex = async(componentsBaseURL) => {
   // let response = await fetch(`${componentsBaseURL}/components/index.json`)
-  let response = await fetch(`static/components/index.json`)
+  let response = await fetch(`components/index.json`)
   let components = []
   const componentsList = await response.json()
   componentsList.forEach(comp => {
-    if (comp.src.indexOf('http') !== 0) comp.src = `${context.browserRoot}/static/${comp.src}`
+    if (comp.src.indexOf('http') !== 0) comp.src = `${context.browserRoot}/${comp.src}`
     components.push(comp)
   })
   return components

@@ -95,6 +95,16 @@ def essay(path=None):
     essay_args = {'site': site, 'acct': acct, 'repo': repo, 'branch': branch, 'path': path, 'root': CONTENT_ROOT, 'token': gh_token()}
     return get_essay(**essay_args), 200, cors_headers
 
+@app.route('/components/<path:path>', methods=['GET'])
+def assets(path):
+    full_path = f'{BASEDIR}/components/{path}'
+    logger.info(f'components: path={path} full_path={full_path} exists={os.path.exists(full_path)}')
+    if os.path.exists(full_path):
+        path_elems = full_path.split('/')
+        return send_from_directory(f'/{"/".join(path_elems[:-1])}', path_elems[-1], as_attachment=False)
+    else:
+        return 'Not found', 404
+
 @app.route('/info', methods=['GET'])
 def info():
     return {'SCRIPT_DIR': SCRIPT_DIR, 'BASEDIR': BASEDIR}, 200
