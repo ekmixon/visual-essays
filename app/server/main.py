@@ -93,7 +93,10 @@ def essay(path=None):
     site, acct, repo, branch, path = _context(path)
     logger.info(f'essay: site={site} acct={acct} repo={repo} branch={branch} path={path}')
     essay_args = {'site': site, 'acct': acct, 'repo': repo, 'branch': branch, 'path': path, 'root': CONTENT_ROOT, 'token': gh_token()}
-    return get_essay(**essay_args), 200, cors_headers
+    essay_html = get_essay(**essay_args)
+    if essay_html:
+        return essay_html, 200, cors_headers
+    return 'Not found', 404
 
 @app.route('/components/<path:path>', methods=['GET'])
 def assets(path):

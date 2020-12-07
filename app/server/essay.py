@@ -608,9 +608,9 @@ def get_essay(site, acct, repo, branch, path, root, token, **kwargs):
     if markdown is None:
         markdown, md_path = get_gh_markdown(acct, repo, branch, path, token)
     logger.info(md_path)
-    html = markdown_to_html5(markdown, site, acct, repo, branch, md_path, root)
-
-    return parse(html, md_path, acct, repo)
+    if markdown:
+        html = markdown_to_html5(markdown, site, acct, repo, branch, md_path, root)
+        return parse(html, md_path, acct, repo)
 
 def usage():
     print(f'{sys.argv[0]} [hl:a:r:b:s:t:] path')
