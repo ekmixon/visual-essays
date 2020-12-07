@@ -236,7 +236,7 @@ new Promise(function(resolve, reject) {
             console.log(window.location.pathname)
             console.log(window._essay)
             // let url = `${this.context.service}/markdown-viewer${window.location.pathname}/${window._essay}.md`
-            let url = `${this.context.service}/markdown-viewer/${this.contentAcct}/${this.contentRepo}${window._essay}.md`
+            let url = `https://visual-essays.app/markdown-viewer/${this.contentAcct}/${this.contentRepo}/${this.contentBranch}${window._essay}.md`
             console.log(url)
             if (this.externalWindow) { this.externalWindow.close() }
             this.markdownViewer = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
