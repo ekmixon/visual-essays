@@ -85,7 +85,7 @@ def config(path=None):
     raw, _ = get_gh_file( acct, repo, branch, '/config.json')
     _config = json.loads(raw) if raw is not None else {} 
     _config.update({'acct': acct, 'repo': repo, 'branch': branch})
-    return _config, 200
+    return _config, 200, cors_headers
 
 @app.route('/essay/<path:path>', methods=['GET'])
 @app.route('/essay/', methods=['GET'])
@@ -93,7 +93,7 @@ def essay(path=None):
     site, acct, repo, branch, path = _context(path)
     logger.info(f'essay: site={site} acct={acct} repo={repo} branch={branch} path={path}')
     essay_args = {'site': site, 'acct': acct, 'repo': repo, 'branch': branch, 'path': path, 'root': CONTENT_ROOT, 'token': gh_token()}
-    return get_essay(**essay_args), 200
+    return get_essay(**essay_args), 200, cors_headers
 
 @app.route('/info', methods=['GET'])
 def info():

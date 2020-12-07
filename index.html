@@ -175,7 +175,7 @@ new Promise(function(resolve, reject) {
             if ( path === '/help') {
               url = `https://${this.context.codeBranch === 'develop' ? 'dev.' : ''}visual-essays.app/essay/jstor-labs/ve-content/${this.context.branch}/help`
             } else {
-              url = `/essay${path}`
+              url = `https://exp.visual-essays.app/essay${path}`
             }
             if (this.branch !== 'main') {
               url += `?ref=${this.branch}`
