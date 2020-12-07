@@ -227,7 +227,7 @@ new Promise(function(resolve, reject) {
                       if (this.contentBranch !== 'main') {
                         browserPath += `?ref=${this.contentBranch}`
                       }
-                      window.history.replaceState(null, null, browserPath)
+                      window.history.replaceState({file: path || ''}, '', browserPath)
                     }
                 }
               })
