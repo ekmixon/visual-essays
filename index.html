@@ -175,7 +175,6 @@ new Promise(function(resolve, reject) {
             return context.ghPagesSite
               ? `/${path.split('/').filter(pathElem => pathElem !== '').slice(1).join('/')}`
               : path
-            }
           },
           cachingFetch(path, raw) {
             let url
