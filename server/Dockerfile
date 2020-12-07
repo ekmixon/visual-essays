@@ -16,6 +16,7 @@ WORKDIR /usr/src/app
 ADD server server
 ADD index.html .
 ADD static static
+ADD components components
 
 # ADD mappings mappings
 

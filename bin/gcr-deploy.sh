@@ -20,6 +20,7 @@ mkdir -p gcr-build/server
 cp -va server/Dockerfile gcr-build
 cp -va server/main.py server/essay.py server/gh.py server/sparql server/gh-token gcr-build/server
 cp index.html gcr-build
+cp -va components gcr-build/components
 cp -va static gcr-build/static
 
 cd gcr-build
