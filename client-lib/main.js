@@ -92,7 +92,7 @@ function pageContext() {
     repo: 've-content',
     site: _loc.hostname,
     siteTitle: '',
-    service: isKnownSite(_loc.hostname) && _loc.hostname !== 'docs.visual-essays.app' ? _loc.origin : 'https://visual-essays.app',
+    service: isKnownSite(_loc.hostname) && _loc.hostname !== 'docs.visual-essays.app' ? _loc.origin : 'https://exp.visual-essays.app',
     isMobile,
     isTouchDevice,
     jwt,
