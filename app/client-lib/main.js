@@ -98,7 +98,8 @@ function pageContext() {
     jwt,
     hash,
     referrer: document.referrer,
-    qargs
+    qargs,
+    content: {}
   }
   const isGithubCommitHash = RegExp(`[0-9a-f]{${_path[0].length}}`)
   const isGithubVersionTag = RegExp(`v?[0-9.]+$`)

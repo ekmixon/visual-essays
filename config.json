@@ -10,5 +10,9 @@
         {"label": "About", "icon": "info", "path": "/about"},
         {"label": "Documentation", "icon": "question"},
         {"label": "Login", "icon": "user"}
-    ]
+    ],
+    "content": {
+        "acct": "JSTOR-Labs",
+        "repo": "ve-content"
+    }
 }
