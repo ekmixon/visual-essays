@@ -276,6 +276,7 @@ new Promise(function(resolve, reject) {
                     }
                   }
                   link.addEventListener('click', (e) => {
+                    console.log('click', e, target)
                     if (target[0] === '#') {
                       document.querySelector(target).scrollIntoView({block:'center'})
                     } else {
