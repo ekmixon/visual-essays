@@ -214,7 +214,7 @@ const baseComponentsIndex = async(componentsBaseURL) => {
   let components = []
   const componentsList = await response.json()
   componentsList.forEach(comp => {
-    if (comp.src.indexOf('http') !== 0) comp.src = `static/${comp.src}`
+    if (comp.src.indexOf('http') !== 0) comp.src = `${context.browserRoot}/static/${comp.src}`
     components.push(comp)
   })
   return components
