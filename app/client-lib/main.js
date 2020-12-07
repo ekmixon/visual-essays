@@ -218,8 +218,10 @@ const baseComponentsIndex = async(componentsBaseURL) => {
   let response = await fetch(`${baseurl}/components/index.json`)
   let components = []
   const componentsList = await response.json()
+  const base = window.location.origin
+  console.log('base', window.location.origin)
   componentsList.forEach(comp => {
-    if (comp.src.indexOf('http') !== 0) comp.src = `${window.location.origin}/${comp.src}`
+    if (comp.src.indexOf('http') !== 0) comp.src = `${base}/${comp.src}`
     components.push(comp)
   })
   return components
@@ -390,6 +392,7 @@ function initApp() {
     Vue.component(customComponent.name, customComponent.component)
     components[customComponent.name] = customComponent
   })
+  console.log('components', components)
 
   vm = new Vue({
     template: '<App/>',
