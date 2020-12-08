@@ -78,8 +78,8 @@
         :is-authenticated="isAuthenticated"
         :read-only="readOnly"
         :href="href"
-        :appVersion="appVersion"
-        :libVersion="libVersion"
+        :app-version="appVersion"
+        :lib-version="libVersion"
         @menu-item-clicked="menuItemClicked"
         @logout="logout"
         @view-markdown="viewMarkdown"
@@ -97,7 +97,7 @@
   
   </div>
 
-  <script>window.context = null</script>
+  <script>window.context = null;</script>
   <script src="/static/js/visual-essays.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://kit.fontawesome.com/19541ddce8.js" crossorigin="anonymous"></script>
@@ -129,7 +129,7 @@ new Promise(function(resolve, reject) {
           isLoaded: false,
           essayConfig: null,
           essayCache: {},
-          appVersion: '0.8.0',
+          appVersion: 'APP_VERSION',
           libVersion: undefined,
           current: undefined,
           externalWindow: undefined,

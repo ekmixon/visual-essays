@@ -18,11 +18,12 @@ cd ../..
 
 mkdir -p gcr-build/server
 cp -va app/Dockerfile gcr-build
-cp -va app/server gcr-build
+cp -va app/server/*.py app/server/gh-token app/server/*.txt app/server/*.html app/server/sparql gcr-build/server
 cp index.html gcr-build
+VERSION=`git rev-parse HEAD | cut -c -7`; cat index.html | sed "s/APP_VERSION/$VERSION/" > gcr-build/index.html
 cp -va components gcr-build
 cp -va static gcr-build
 
 cd gcr-build
-gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
-gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
+#gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
+#gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi

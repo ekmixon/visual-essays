@@ -36,6 +36,10 @@
           <li v-if="isAuthenticated && !readOnly" @click="gotoGithub">
             <i class="fab fa-github"></i>Github repository
           </li>
+          <hr>
+          <li>
+            Version: {{appVersion}}
+          </li>
         </ul>
       </div>
     </nav>
