@@ -10,7 +10,7 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
     gcloud config set compute/region us-central1
     gcloud config set run/region us-central1
 
-    git checkout $BRANCH
+    git checkout $VERSION
     rm -rf gcr-build
 
     cd app/client-lib
