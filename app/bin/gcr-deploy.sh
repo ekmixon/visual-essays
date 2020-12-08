@@ -25,5 +25,5 @@ cp -va components gcr-build
 cp -va static gcr-build
 
 cd gcr-build
-#gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
-#gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
+gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
+gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
