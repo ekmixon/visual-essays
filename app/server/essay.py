@@ -599,18 +599,18 @@ def _is_local(site):
     logger.info(f'is_local={is_local}')
     return is_local
 
-def get_essay(site, acct, repo, branch, path, root, token, **kwargs):
+def get_essay(markdown, site, acct, repo, branch, path, root, token, **kwargs):
     if not path:  path = '/'
     logger.info(f'essay: site={site} acct={acct} repo={repo} branch={branch} root={root} path={path}')
-    markdown = md_path = None
+    augmented_html = md_path = url = sha = None
     if root and _is_local(site):
         markdown, md_path = get_local_markdown(path=path, root=root)
     if markdown is None:
-        markdown, md_path = get_gh_markdown(acct, repo, branch, path, token)
-    logger.info(md_path)
+        markdown, md_path, url, sha = get_gh_markdown(acct, repo, branch, path, token)
     if markdown:
         html = markdown_to_html5(markdown, site, acct, repo, branch, md_path, root)
-        return parse(html, md_path, acct, repo)
+        augmented_html = parse(html, md_path, acct, repo)
+    return augmented_html, url, sha
 
 def usage():
     print(f'{sys.argv[0]} [hl:a:r:b:s:t:] path')

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <style>
+    [v-cloak] { display: none; }
+    pre {
+      overflow-x: auto;
+      white-space: pre-wrap;
+      white-space: -moz-pre-wrap;
+      white-space: -pre-wrap;
+      white-space: -o-pre-wrap;
+      word-wrap: break-word;
+    }
+    .hljs{display:block;overflow-x:auto;padding:0.5em;background:#FFF}
+    .hljs,.hljs-subst{color:#333}
+    .hljs-comment{color:#888888}
+    .hljs-keyword,.hljs-attribute,.hljs-selector-tag,.hljs-meta-keyword,.hljs-doctag,.hljs-name{font-weight:bold}
+    .hljs-type,.hljs-string,.hljs-number,.hljs-selector-id,.hljs-selector-class,.hljs-quote,.hljs-template-tag,.hljs-deletion{color:#880000}
+    .hljs-title,.hljs-section{color:#880000;font-weight:bold}
+    .hljs-regexp,.hljs-symbol,.hljs-variable,.hljs-template-variable,.hljs-link,.hljs-selector-attr,.hljs-selector-pseudo{color:#BC6060}
+    .hljs-literal{color:#78A960}
+    .hljs-built_in,.hljs-bullet,.hljs-code,.hljs-addition{color:#397300}
+    .hljs-meta{color:#1f7199}.hljs-meta-string{color:#4d99bf}
+    .hljs-emphasis{font-style:italic}
+    .hljs-strong{font-weight:bold}
+    .hljs-attr{color:blue}
+    .hljs-name{color:green}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <v-card class="markdown-viewer">
+      <v-card-title v-html="title"></v-card-title>
+      <div>
+        <pre v-highlightjs="markdown"><code class="markdown"></code></pre>
+      </div>
+    </v-card>      
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+
+  <script>
+    Vue.directive('highlightjs', {
+      deep: true,
+      bind: function(el, binding) {
+        let targets = el.querySelectorAll('code')
+        targets.forEach((target) => {
+          if (binding.value) {
+            target.textContent = binding.value
+          }
+          hljs.highlightBlock(target)
+        })
+      },
+      componentUpdated: function(el, binding) {
+        let targets = el.querySelectorAll('code')
+        targets.forEach((target) => {
+          if (binding.value) {
+            target.textContent = binding.value
+            hljs.highlightBlock(target)
+          }
+        })
+      }
+    })
+
+  window.app = new Vue({
+    el: '#app',
+    vuetify: new Vuetify(),
+    data: () => ({
+      service: undefined,
+      acct: undefined,
+      repo: undefined,
+      path: undefined,
+      branch: 'main',
+      root: '',
+      markdown: undefined
+    }),
+    computed: {
+      title() { return `/${this.acct}/${this.repo}/${this.branch}${this.root}${this.path ? this.path : ''}` }
+    },
+    mounted() {
+      console.log(window.location)
+      const pathElems = window.location.pathname.slice(1).split('/')
+      const qargs = this.parseQueryString()
+      this.acct = pathElems[1]
+      this.repo = pathElems[2]
+      this.path = `/${pathElems.slice(3).join('/')}`
+      this.branch = qargs.branch || this.branch
+      this.root = qargs.root || this.root
+      console.log(`markdown-viewer: acct=${this.acct} repo=${this.repo} path=${this.path} branch=${this.branch} root=${this.root}`)
+      url = this.path === '/help' && hostname !== 'localhost'
+        ? 'https://visual-essays.app/essay/help?raw'
+        : `/essay/${this.acct}/${this.repo}${this.path}?raw&branch=${this.branch}&root=${this.root}`
+
+      fetch(url).then(resp => resp.text()).then(markdown => this.markdown = markdown)
+    },
+    methods: {
+      parseQueryString(queryString) {
+        queryString = queryString || window.location.search;
+        const dictionary = {};
+        try {
+          if (queryString.indexOf('?') === 0) {
+            queryString = queryString.substr(1);
+          }
+          const parts = queryString.split('&');
+          for (let i = 0; i < parts.length; i++) {
+            const p = parts[i];
+            const keyValuePair = p.split('=');
+            if (keyValuePair[0] !== '') {
+              const key = keyValuePair[0];
+              if (keyValuePair.length === 2) {
+                let value = keyValuePair[1];
+                // decode URI encoded string
+                value = decodeURIComponent(value);
+                value = value.replace(/\+/g, ' ');
+                dictionary[key] = value;
+              } else {
+                dictionary[key] = 'true'
+              }
+            }
+          }
+        } catch (err) {
+          console.log(err);
+        }
+        return dictionary;
+    }
+    }
+  })
+
+  </script>
+</body>
+</html>

@@ -26,7 +26,11 @@ from flask import Flask, request, send_from_directory, redirect, Response, jsoni
 app = Flask(__name__, static_url_path='/static', static_folder=os.path.join(BASEDIR, 'static'))
 
 from essay import get_essay
-from gh import gh_token, get_gh_file, gh_repo_info, has_gh_repo_prefix
+from gh import gh_token, query_gh_file, get_gh_file, gh_repo_info, has_gh_repo_prefix
+
+from expiringdict import ExpiringDict
+expiration = 60 * 60 * 24 # one day
+cache = ExpiringDict(max_len=200, max_age_seconds=expiration)
 
 ENV = 'prod'
 CONTENT_ROOT = None
@@ -62,13 +66,13 @@ def _normalize_path(path):
 def _context(path):
     path = _normalize_path(path)
     site = urlparse(request.base_url).hostname
-    branch = qargs().get('ref', 'main')
+    branch = qargs().pop('ref', 'main')
     logger.info(f'_context: _is_ve_site={_is_ve_site(site)} gh_repo_prefix={has_gh_repo_prefix(path)}')
     if _is_ve_site(site) and has_gh_repo_prefix(path):
         acct, repo = path[1:].split('/')[:2]
     else:
         acct, repo = KNOWN_SITES.get(site, KNOWN_SITES['default'])
-    return site, acct, repo, branch, path
+    return site, acct, repo, branch, path, qargs
 
 @app.route('/config.json', methods=['GET'])
 def local_config():
@@ -83,9 +87,9 @@ def local_config():
 @app.route('/config/', methods=['GET'])
 @app.route('/config', methods=['GET'])
 def config(path=None):
-    site, acct, repo, branch, path = _context(path)
+    site, acct, repo, branch, path, qargs = _context(path)
     logger.info(f'config: site={site} acct={acct} repo={repo} branch={branch} path={path}')
-    raw, _ = get_gh_file( acct, repo, branch, '/config.json')
+    raw, _, _ = query_gh_file( acct, repo, branch, '/config.json')
     _config = json.loads(raw) if raw is not None else {} 
     _config.update({'acct': acct, 'repo': repo, 'branch': branch})
     return _config, 200, cors_headers
@@ -93,10 +97,24 @@ def config(path=None):
 @app.route('/essay/<path:path>', methods=['GET'])
 @app.route('/essay/', methods=['GET'])
 def essay(path=None):
-    site, acct, repo, branch, path = _context(path)
-    logger.info(f'essay: site={site} acct={acct} repo={repo} branch={branch} path={path}')
-    essay_args = {'site': site, 'acct': acct, 'repo': repo, 'branch': branch, 'path': path, 'root': CONTENT_ROOT, 'token': gh_token()}
-    essay_html = get_essay(**essay_args)
+    global cache
+    markdown = essay_html = None
+    site, acct, repo, branch, path, qargs = _context(path)
+    cache_key = f'{site}|{acct}|{repo}|{branch}|{path}'
+    cached_essay = cache.get(cache_key) if not ENV == 'dev' else None
+    if cached_essay:
+        markdown, _ , md_sha = get_gh_file(cached_essay['url'])
+        if cached_essay['sha'] == md_sha:
+            essay_html = cached_essay['html']
+    
+    logger.info(f'essay: site={site} acct={acct} repo={repo} branch={branch} path={path} cached={cached_essay is not None and essay_html is not None}')
+    
+    if essay_html is None:
+        essay_args = {'markdown': markdown, 'site': site, 'acct': acct, 'repo': repo, 'branch': branch, 'path': path, 'root': CONTENT_ROOT, 'token': gh_token()}
+        essay_html, md_url, md_sha = get_essay(**essay_args)
+        if essay_html:
+            cache[cache_key] = {'html': essay_html, 'url': md_url, 'sha': md_sha}
+
     if essay_html:
         return essay_html, 200, cors_headers
     return 'Not found', 404
@@ -118,7 +136,7 @@ def info():
 @app.route('/<path:path>', methods=['GET'])
 @app.route('/', methods=['GET'])
 def main(path=None):
-    site, acct, repo, branch, path = _context(path)
+    site, acct, repo, branch, path, qargs = _context(path)
     logger.info(f'main: site={site} acct={acct} repo={repo} branch={branch} path={path}')
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
