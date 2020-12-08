@@ -22,8 +22,8 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
     cp -va app/Dockerfile gcr-build
     cp -va app/server/*.py app/server/gh-token app/server/*.txt app/server/*.html app/server/sparql gcr-build/server
     cp index.html gcr-build
-    HASH=`git rev-parse HEAD | cut -c -7`
-    cat index.html | sed "s/APP_VERSION/$VERSION ($HASH)/" > gcr-build/index.html
+    HASH=`git show --oneline -s | awk '{print $1}'`
+    cat index.html | sed "s/APP_VERSION/$HASH/" > gcr-build/index.html
     cp -va components gcr-build
     cp -va static gcr-build
 
