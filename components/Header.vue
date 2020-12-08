@@ -36,9 +36,9 @@
           <li v-if="isAuthenticated && !readOnly" @click="gotoGithub">
             <i class="fab fa-github"></i>Github repository
           </li>
-          <hr>
+          <hr><br>
           <li>
-            Version: {{appVersion}}
+            <span v-html="appVersion" class="app-version"></span>
           </li>
         </ul>
       </div>
@@ -354,6 +354,10 @@
     z-index: 1;
     -webkit-user-select: none;
     user-select: none;
+  }
+
+  .app-version {
+    font-size: 0.9rem;
   }
 
 </style>
