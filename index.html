@@ -107,6 +107,7 @@
 const defaultGhAcct = 'jstor-labs'
 const defaultGhRepo = 'visual-essays'
 const defaultGhRef = 'main'
+const isGithubCommitHash = RegExp(`[0-9a-f]+$`)
 
 new Promise(function(resolve, reject) {
   function waitForContext() {
@@ -158,7 +159,15 @@ new Promise(function(resolve, reject) {
         methods: {
           async getSiteInfo() {
             let hostname = window.location.hostname
-            let siteInfo = {ghpSite: false, baseurl: '', acct: defaultGhAcct, repo: defaultGhRepo, defaultBranch: null, ref: defaultGhRef}
+            let siteInfo = {
+              ghpSite: false,
+              baseurl: '',
+              acct: defaultGhAcct,
+              repo: defaultGhRepo,
+              ref: defaultGhRef,
+              defaultBranch: null,
+              editBranch: null
+            }
             let siteConfigUrl
             console.log(`getSiteInfo: hostname=${hostname}`)
             let configResp
@@ -200,13 +209,25 @@ new Promise(function(resolve, reject) {
                 repo: siteConfig.content && siteConfig.content.repo ? siteConfig.content.repo : siteConfig.repo || siteInfo.repo,
                 ref:  siteConfig.content && siteConfig.content.ref ? siteConfig.content.ref : siteConfig.ref || siteInfo.ref
               }}
-              if (!siteInfo.defaultBranch) {
-                const resp = await fetch(`https://api.github.com/repos/${siteInfo.acct}/${siteInfo.repo}`)
-                if (resp.ok) {
-                  let repoInfo = await resp.json()
-                  siteInfo.defaultBranch = repoInfo.default_branch
-                }
+            }
+            if (!siteInfo.defaultBranch) {
+              const resp = await fetch(`https://api.github.com/repos/${siteInfo.acct}/${siteInfo.repo}`)
+              if (resp.ok) {
+                let repoInfo = await resp.json()
+                siteInfo.defaultBranch = repoInfo.default_branch
               }
+            }
+            if (siteInfo.ref.length === 7 && isGithubCommitHash.test(siteInfo.ref)) {
+              const resp = await fetch(
+                `https://api.github.com/repos/${siteInfo.acct}/${siteInfo.repo}/commits/${siteInfo.ref}/branches-where-head`, {
+                headers: { Accept: 'application/vnd.github.groot-preview+json'}
+              })
+              if (resp.ok) {
+                let commitInfo = await resp.json()
+                siteInfo.editBranch = commitInfo[0].name
+              }
+            } else {
+              siteInfo.editBranch = siteInfo.ref
             }
             return siteInfo
           },
@@ -289,7 +310,7 @@ new Promise(function(resolve, reject) {
           editMarkdown(editor) {
             this.openWindow(editor == 'custom'
               ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${window._essay}.md`
-              : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.defaultBranch}${window._essay}.md`
+              : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${window._essay}.md`
             ) 
           },
           gotoGithub() {
