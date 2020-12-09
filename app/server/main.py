@@ -103,7 +103,9 @@ def _get_site_info(href):
     else:
         siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
     siteConfigUrl = siteConfigUrl if siteConfigUrl else f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
+    logger.info(f'siteConfig: {siteConfigUrl} {resp.status_code}')
     resp = requests.get(siteConfigUrl)
+    logger.info(f'siteConfig: {siteConfigUrl} {resp.status_code}')
     if resp.status_code == 200:
         site_config = resp.json()
         site_info.update({
@@ -112,7 +114,9 @@ def _get_site_info(href):
             'ref':  site_info['ref'] if site_info['ref'] else site_config.get('ref') 
         })
     if site_info['ref'] is None or site_info['defaultBranch'] is None:
-        resp = requests.get(f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}')
+        url = f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}'
+        resp = requests.get(url)
+        logger.info(f'repos: {url} {resp.status_code}')
         if resp.status_code == 200:
             repo_info = resp.json()
             if site_info['ref'] is None:
