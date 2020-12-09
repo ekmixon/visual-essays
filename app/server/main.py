@@ -103,7 +103,6 @@ def _get_site_info(href):
     else:
         siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
     siteConfigUrl = siteConfigUrl if siteConfigUrl else f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
-    logger.info(f'siteConfig: {siteConfigUrl} {resp.status_code}')
     resp = requests.get(siteConfigUrl)
     logger.info(f'siteConfig: {siteConfigUrl} {resp.status_code}')
     if resp.status_code == 200:
