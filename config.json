@@ -3,6 +3,7 @@
     "banner": "https://www.visual-essays.app/static/images/header.jpg",
     "acct": "JSTOR-Labs",
     "repo": "visual-essays",
+    "ref": "main",
     "logo": "https://www.visual-essays.app/static/images/labs.jpg",
     "favicon": "https://www.visual-essays.app/static/images/favicon.ico",
     "nav": [
@@ -10,9 +11,5 @@
         {"label": "About", "icon": "info", "path": "/about"},
         {"label": "Documentation", "icon": "question"},
         {"label": "Login", "icon": "user"}
-    ],
-    "content": {
-        "acct": "JSTOR-Labs",
-        "repo": "ve-docs"
-    }
+    ]
 }

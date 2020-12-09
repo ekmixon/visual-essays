@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 import os
 import base64
+import json
 
 import requests
 logging.getLogger('requests').setLevel(logging.INFO)
@@ -35,9 +36,9 @@ def get_gh_file(url, token=None):
         sha = resp['sha']
     return content, url, sha
 
-def query_gh_file(acct, repo, branch, path, token=None):
-    logger.info(f'query_gh_file: acct={acct} repo={repo} branch={branch} path={path}')
-    url = f'https://api.github.com/repos/{acct}/{repo}/contents{path}?ref={branch}'
+def query_gh_file(acct, repo, ref, path, token=None):
+    logger.info(f'query_gh_file: acct={acct} repo={repo} ref={ref} path={path}')
+    url = f'https://api.github.com/repos/{acct}/{repo}/contents{path}?ref={ref}'
     return get_gh_file(url, token)
 
 def gh_repo_info(acct, repo):
@@ -60,7 +61,7 @@ def has_gh_repo_prefix(path):
     logger.info(f'has_gh_repo_prefix: prefix={prefix} _is_repo_prefix={_is_repo_prefix}')
     return _is_repo_prefix
 
-def get_gh_markdown(acct, repo, branch, path, token):
+def get_gh_markdown(acct, repo, ref, path, token):
     logger.info(path)
     if has_gh_repo_prefix(path):
         path = f'/{"/".join(path.split("/")[3:])}'    
@@ -77,8 +78,23 @@ def get_gh_markdown(acct, repo, branch, path, token):
             else:
                 paths = [f'{path}.md'] + [f'{path}/{file}' for file in ('README.md', 'index.md')]
     for _path in paths:
-        markdown, url, sha = query_gh_file(acct, repo, branch, _path, token)
+        markdown, url, sha = query_gh_file(acct, repo, ref, _path, token)
         if markdown:
             md_path = _path.replace('.md', '')
             break
     return markdown, md_path, url, sha
+
+def get_default_branch(acct, repo):
+    repo_info = gh_repo_info(acct, repo)
+    return repo_info['default_branch'] if repo_info else None
+
+_configs = {}
+def get_site_config(acct, repo):
+    if not f'{acct}/{repo}' in _configs:
+        content, _, _ = get_gh_file(f'https://api.github.com/repos/{acct}/{repo}/contents/config.json')
+        config = json.loads(content) if content else {}
+        config.update({ 'acct': acct, 'repo': repo, 'ref': config.get('ref') })
+        if config['ref'] is None:
+            config['ref'] = get_default_branch(acct, repo)
+        _configs[f'{acct}/{repo}'] = config
+    return _configs[f'{acct}/{repo}']

@@ -87,14 +87,14 @@ def _img_to_figure(soup):
         elem.replace_with(figure)
     return soup
 
-def convert_relative_links(soup, site, acct, repo, branch, path, root=None):
+def convert_relative_links(soup, site, acct, repo, ref, path, root=None):
     path_elems = path[1:].split('/')
     if False and site == 'localhost' and root is not None:
         abs_baseurl = f'http://{site}/static'
     else:
-        abs_baseurl = f'https://raw.githubusercontent.com/{acct}/{repo}/{branch}'
+        abs_baseurl = f'https://raw.githubusercontent.com/{acct}/{repo}/{ref}'
     rel_baseurl = f'{abs_baseurl}/{"/".join(path_elems[:-1])}' if len(path_elems) > 1 else abs_baseurl
-    logger.info(f'convert_relative_links: site={site} acct={acct} repo={repo} branch={branch} root={root} path={path} abs_baseurl={abs_baseurl} rel_baseurl={rel_baseurl}')
+    logger.info(f'convert_relative_links: site={site} acct={acct} repo={repo} ref={ref} root={root} path={path} abs_baseurl={abs_baseurl} rel_baseurl={rel_baseurl}')
 
     for tag in ('img', 'var', 'span', 'param'):
         for elem in soup.find_all(tag):
@@ -107,7 +107,7 @@ def convert_relative_links(soup, site, acct, repo, branch, path, root=None):
                         elem.attrs[attr] = f'{rel_baseurl}/{elem.attrs[attr]}'
                     logger.info(f'{before} {elem.attrs[attr]}')
 
-def markdown_to_html5(markdown, site, acct, repo, branch, path, root):
+def markdown_to_html5(markdown, site, acct, repo, ref, path, root):
     '''Transforms markdown generated HTML to semantic HTML'''
     html = markdown_parser.markdown(
         markdown,
@@ -119,7 +119,7 @@ def markdown_to_html5(markdown, site, acct, repo, branch, path, root):
             }
         })
     soup = BeautifulSoup(f'<div id="md-content">{html}</div>', 'html5lib')
-    convert_relative_links(soup, site, acct, repo, branch, path, root)
+    convert_relative_links(soup, site, acct, repo, ref, path, root)
 
     base_html = f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title></title></head><body></body></html>'
     html5 = BeautifulSoup(base_html, 'html5lib')
@@ -599,18 +599,21 @@ def _is_local(site):
     logger.info(f'is_local={is_local}')
     return is_local
 
-def get_essay(markdown, site, acct, repo, branch, path, root, token, **kwargs):
+def get_essay(markdown, site, acct, repo, ref, path, root, raw, token, **kwargs):
     if not path:  path = '/'
-    logger.info(f'essay: site={site} acct={acct} repo={repo} branch={branch} root={root} path={path}')
-    augmented_html = md_path = url = sha = None
+    logger.info(f'essay: site={site} acct={acct} repo={repo} ref={ref} root={root} path={path}')
+    content = md_path = url = sha = None
     if root and _is_local(site):
         markdown, md_path = get_local_markdown(path=path, root=root)
     if markdown is None:
-        markdown, md_path, url, sha = get_gh_markdown(acct, repo, branch, path, token)
+        markdown, md_path, url, sha = get_gh_markdown(acct, repo, ref, path, token)
     if markdown:
-        html = markdown_to_html5(markdown, site, acct, repo, branch, md_path, root)
-        augmented_html = parse(html, md_path, acct, repo)
-    return augmented_html, url, sha
+        if raw:
+            content = markdown
+        else:
+            html = markdown_to_html5(markdown, site, acct, repo, ref, md_path, root)
+            content = parse(html, md_path, acct, repo)
+    return content, url, sha
 
 def usage():
     print(f'{sys.argv[0]} [hl:a:r:b:s:t:] path')
@@ -618,7 +621,7 @@ def usage():
     print(f'   -l --loglevel      Logging level (default=warning)')
     print(f'   -a --acct          Github account (default="jstor-labs")')
     print(f'   -r --repo          Github repo (default="{DEFAULT_REPO}")')
-    print(f'   -b --branch        Github branch (default="main")')
+    print(f'   -b --ref           Github ref (default="main")')
     print(f'   -s --site          Site (default="localhost")')
     print(f'   -t --token         Github token')
 
@@ -626,10 +629,10 @@ if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
     site = 'localhost'
     token = None
-    site_config = {'acct': 'jstor-labs', 'repo': DEFAULT_REPO, 'branch': 'main'}
+    site_config = {'acct': 'jstor-labs', 'repo': DEFAULT_REPO, 'ref': 'main'}
     try:
         opts, args = getopt.getopt(
-            sys.argv[1:], 'hl:a:r:b:s:t:', ['help', 'loglevel', 'acct', 'repo', 'branch', 'site', 'tokeh'])
+            sys.argv[1:], 'hl:a:r:b:s:t:', ['help', 'loglevel', 'acct', 'repo', 'ref', 'site', 'tokeh'])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(str(err))  # will print something like "option -a not recognized"
@@ -647,8 +650,8 @@ if __name__ == '__main__':
             site_config['acct'] = a
         elif o in ('-r', '--repo'):
             site_config['repo'] = a
-        elif o in ('-b', '--branch'):
-            site_config['branch'] = a
+        elif o in ('-b', '--ref'):
+            site_config['ref'] = a
         elif o in ('-s', '--site'):
             site = a
         elif o in ('-t', '--token'):

@@ -79,7 +79,6 @@
         :read-only="readOnly"
         :href="href"
         :app-version="appVersion"
-        :lib-version="libVersion"
         @menu-item-clicked="menuItemClicked"
         @logout="logout"
         @view-markdown="viewMarkdown"
@@ -136,29 +135,63 @@ new Promise(function(resolve, reject) {
           jwt: context.jwt,
           href: undefined,
           host: undefined,
-          branch: 'main'
+          ref: undefined,
+          baseurl: undefined
         }),
         computed: {
           isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
           readOnly() { return this.context.qargs.readonly },
           contentAcct() { return this.context.content && this.context.content.acct ? this.context.content.acct : this.context.acct },
           contentRepo() { return this.context.content && this.context.content.repo ? this.context.content.repo : this.context.repo },
-          contentBranch() { return this.context.content && this.context.content.branch ? this.context.content.branch : this.branch }
+          contentBranch() { return this.context.content && this.context.content.branch ? this.context.content.branch : this.branch },
+          refArg() { return context.qargs.ref && context.qargs.ref !== this.ref ? `?ref=${context.qargs.ref}` : '' }
         },
         mounted() {
-          const loc = window.location
-          this.host = window.location.host
-          this.branch = this.context.qargs.ref || this.branch
-          console.log(`branch=${this.branch}`)
           window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
-          this.loadEssay(loc.pathname)
+          this.host = window.location.host
+
+          const pathElems = window.location.pathname.split('/').filter(pathElem => pathElem !== '')
+          if (pathElems.length >= 2) {
+            this.siteConfig(pathElems[0], pathElems[1])
+            .then(siteConfig => {
+              let path
+              if (siteConfig) {
+                console.log('index.siteConfig', siteConfig)
+                this.ref = siteConfig.ref
+                if (!this.isDomainSite()) this.baseurl = `/${pathElems[0]}/${pathElems[1]}`
+                // path = `/${pathElems.slice(2).join('/')}`
+                path = window.location.pathname
+              } else {
+                path = window.location.pathname
+              }
+              this.loadEssay(path)
+            })
+          } else {
+            this.loadEssay(window.location.pathname)
+          }
         },
         methods: {
+          isDomainSite() {
+            const hostname = window.location.hostname
+            return hostname !== 'localhost' && hostname.indexOf('visual-essays.app') < 0 && hostname.indexOf('gitpod.io') < 0
+          },
+          async siteConfig (acct, repo) {
+            const url = `https://api.github.com/repos/${acct}/${repo}`
+            let resp = await fetch(url)
+            if (resp.ok) {
+              let repoInfo = await resp.json()
+              resp = await fetch(`https://raw.githubusercontent.com/${acct}/${repo}/${repoInfo.default_branch}/config.json`)
+              let config = await resp.json()
+              if (!config.ref) config.ref = repoInfo.default_branch
+              return config
+            }
+          },
           logout() {
             this.jwt = undefined
             window.localStorage.removeItem('ghcreds')
           },
           menuItemClicked(path) {
+            path = `${this.baseurl}${path}`
             if (path !== this.current) this.loadEssay(path)
           },
           async fetchRetry (url, retries=3, backoff=300, lastError=null) {
@@ -174,25 +207,8 @@ new Promise(function(resolve, reject) {
               return this.fetchRetry(url, retries-1, backoff * 2, lastError)
             }
           },
-          path(inPath) {
-            const pathElems = inPath.split('/').filter(pathElem => pathElem !== '')
-            return context.ghPagesSite
-              ? `/${pathElems.slice(1).join('/')}`
-              : pathElems.length > 1 && pathElems[0] === this.contentAcct
-                ? inPath
-                : `/${this.contentAcct}/${this.contentRepo}${inPath}`
-          },
-          cachingFetch(path, raw) {
-            let url
-            if ( path === '/help') {
-              url = `https://${this.context.codeBranch === 'develop' ? 'dev.' : ''}visual-essays.app/essay/jstor-labs/ve-content/${this.context.branch}/help`
-            } else {
-                // url = `https://exp.visual-essays.app/essay${this.path(path)}`
-                url = `/essay${this.path(path)}`
-            }
-            if (this.contentBranch !== 'main') {
-              url += `?ref=${this.contentBranch}`
-            }
+          cachingFetch(path) {
+            let url = `/essay${path}`
             console.log(`fetch=${url}`)
             if (!this.essayCache[url]) {
               this.essayCache[url] = this.fetchRetry(url).then(resp => resp.ok ? resp.text() : null)
@@ -200,14 +216,10 @@ new Promise(function(resolve, reject) {
             return this.essayCache[url]
           },
           loadEssay(path, replace, retries) {
+            path = `${path}${this.refArg}`
             this.cachingFetch(path)
             .then(html => {
-              browserPath = path === '/help'
-                ? '/help'
-                : path.replace(/\.md$/, '')
-              if (this.contentBranch !== 'main') {
-                browserPath += `?ref=${this.contentBranch}`
-              }
+              browserPath = path.replace(/\.md$/, '')
               if (replace) {
                 history.replaceState({file: path || ''}, '', browserPath)
               } else {
@@ -226,10 +238,7 @@ new Promise(function(resolve, reject) {
                 if (essayFname === 'README' || essayFname === 'index') {
                     console.log(window.location.pathname)
                     if (window.location.pathname.length === 0 || window.location.pathname[window.location.pathname.length-1] !== '/') {
-                      let browserPath = `${window.location.pathname}/`
-                      if (this.contentBranch !== 'main') {
-                        browserPath += `?ref=${this.contentBranch}`
-                      }
+                      let browserPath = `${window.location.pathname}/${this.refArg}`
                       window.history.replaceState({file: path || ''}, '', browserPath)
                     }
                 }
@@ -241,10 +250,10 @@ new Promise(function(resolve, reject) {
             console.log(window.location.pathname)
             console.log(window._essay)
             // let url = `${this.context.service}/markdown-viewer${window.location.pathname}/${window._essay}.md`
-            let url = `https://visual-essays.app/markdown-viewer/${this.contentAcct}/${this.contentRepo}/${this.contentBranch}${window._essay}.md`
+            let url = `/markdown-viewer/${this.contentAcct}/${this.contentRepo}/${this.ref}${window._essay}.md`
             console.log(url)
             if (this.externalWindow) { this.externalWindow.close() }
-            this.markdownViewer = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
+            this.externalWindow = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
           },
           editMarkdown(editor) {
             const url = editor == 'custom'
@@ -274,8 +283,12 @@ new Promise(function(resolve, reject) {
                   if (!target) { 
                     const parsedUrl = parseUrl(link.href)
                     if (parsedUrl.hash === '' ) {
-                      const pathElems = parsedUrl.pathname.split('/').filter(pathElem => pathElem !== '')
-                      target = parsedUrl.pathname
+                      //const pathElems = parsedUrl.pathname.split('/').filter(pathElem => pathElem !== '')
+                      if (this.baseurl && parsedUrl.pathname.indexOf(this.baseurl) !== 0) {
+                        target = `${this.baseurl}${parsedUrl.pathname}`
+                      } else {
+                        target = parsedUrl.pathname
+                      }
                     } else {
                       target = parsedUrl.hash.split('?')[0]
                     }

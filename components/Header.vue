@@ -24,7 +24,7 @@
             </li>
           </template>
           <hr>
-          <li style="margin-top:50px;" @click="viewMarkdown">
+          <li style="margin-top:10px;" @click="viewMarkdown">
             <i class="fas fa-file-code"></i>View page markdown
           </li>
           <li v-if="isAuthenticated && !readOnly" @click="editMarkdown('default')">
@@ -36,9 +36,8 @@
           <li v-if="isAuthenticated && !readOnly" @click="gotoGithub">
             <i class="fab fa-github"></i>Github repository
           </li>
-          <hr><br>
-          <li>
-            <span v-html="appVersion" class="app-version"></span>
+          <li style="margin-top:10px;">
+            <div v-text="appVersion" class="app-version"></div>
           </li>
         </ul>
       </div>
