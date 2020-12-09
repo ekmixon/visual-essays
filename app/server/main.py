@@ -34,6 +34,8 @@ cache = ExpiringDict(max_len=200, max_age_seconds=expiration)
 
 ENV = 'prod'
 CONTENT_ROOT = None
+DEFAULT_GH_ACCT = 'jstor-labs'
+DEFAULT_GH_REPO = 'visual-essays'
 
 KNOWN_SITES = {
     'default': ['jstor-labs', 've-docs'],
@@ -71,9 +73,9 @@ def _get_site_info(href):
     logger.info(f'hostname={hostname} path_elems={path_elems} query={qargs}')
     site_info = {
         'ghpSite': False,
-        'baseurl': None,
-        'acct': None,
-        'repo': None,
+        'baseurl': '',
+        'acct': DEFAULT_GH_ACCT,
+        'repo': DEFAULT_GH_REPO,
         'ref': qargs['ref'][0] if 'ref' in qargs else None,
         'defaultBranch': None,
         'editBranch': None
@@ -86,11 +88,6 @@ def _get_site_info(href):
             'repo':    path_elems[0],
             'baseurl': f'/{path_elems[0]}'
         })
-        if site_info['ref'] is None:
-            resp = requests.get(f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}')
-            if resp.status_code == 200:
-                repo_info = resp.json()
-                site_info.update({'ref': repo_info['default_branch'], 'defaultBranch': repo_info['default_branch']})
     elif hostname == 'localhost' or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io'):
         if len(path_elems) >= 2:
             resp = requests.get(f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}')
@@ -114,10 +111,12 @@ def _get_site_info(href):
             'repo': site_config.get('repo', site_info['repo']),
             'ref':  site_info['ref'] if site_info['ref'] else site_config.get('ref') 
         })
-    if not site_info['defaultBranch']:
+    if site_info['ref'] is None or site_info['defaultBranch'] is None:
         resp = requests.get(f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}')
         if resp.status_code == 200:
             repo_info = resp.json()
+            if site_info['ref'] is None:
+                site_info['ref'] = repo_info['default_branch']
             site_info['defaultBranch'] = repo_info['default_branch']
     if site_info['ref'] and len(site_info['ref']) == 7 and re.match(r'^[0-9a-f]+$', site_info['ref']):
         resp = requests.get(
