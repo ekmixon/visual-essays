@@ -104,6 +104,10 @@
 
 <script>
 
+const defaultGhAcct = 'jstor-labs'
+const defaultGhRepo = 'visual-essays'
+const defaultGhRef = 'main'
+
 new Promise(function(resolve, reject) {
   function waitForContext() {
     if (window.context) {
@@ -134,69 +138,98 @@ new Promise(function(resolve, reject) {
           externalWindow: undefined,
           jwt: context.jwt,
           href: undefined,
-          host: undefined,
-          ref: undefined,
-          baseurl: undefined
+          siteInfo: {}
         }),
         computed: {
           isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
           readOnly() { return this.context.qargs.readonly },
-          contentAcct() { return this.context.content && this.context.content.acct ? this.context.content.acct : this.context.acct },
-          contentRepo() { return this.context.content && this.context.content.repo ? this.context.content.repo : this.context.repo },
-          contentBranch() { return this.context.content && this.context.content.branch ? this.context.content.branch : this.branch },
-          refArg() { return context.qargs.ref && context.qargs.ref !== this.ref ? `?ref=${context.qargs.ref}` : '' }
+          ref() { return context.qargs && context.qargs.ref ? context.qargs.ref : this.siteInfo.ref},
+          refQueryArg() { return this.ref && this.ref !== this.siteInfo.ref ? `?ref=${this.ref}` : '' }
         },
         mounted() {
           window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
-          this.host = window.location.host
-
-          const pathElems = window.location.pathname.split('/').filter(pathElem => pathElem !== '')
-          if (pathElems.length >= 2) {
-            this.siteConfig(pathElems[0], pathElems[1])
-            .then(siteConfig => {
-              let path
-              if (siteConfig) {
-                console.log('index.siteConfig', siteConfig)
-                this.ref = siteConfig.ref
-                if (!this.isDomainSite()) this.baseurl = `/${pathElems[0]}/${pathElems[1]}`
-                // path = `/${pathElems.slice(2).join('/')}`
-                path = window.location.pathname
-              } else {
-                path = window.location.pathname
-              }
-              this.loadEssay(path)
-            })
-          } else {
+          this.getSiteInfo().then(siteInfo => {
+            console.log(siteInfo)
+            this.siteInfo = siteInfo
             this.loadEssay(window.location.pathname)
-          }
+          })
+          
         },
         methods: {
-          isDomainSite() {
-            const hostname = window.location.hostname
-            return hostname !== 'localhost' && hostname.indexOf('visual-essays.app') < 0 && hostname.indexOf('gitpod.io') < 0
-          },
-          async siteConfig (acct, repo) {
-            const url = `https://api.github.com/repos/${acct}/${repo}`
-            let config = {}
-            try {
-              let resp = await fetch(url)
-              if (resp.ok) {
-                let repoInfo = await resp.json()
-                config.ref = repoInfo.default_branch
-                resp = await fetch(`https://raw.githubusercontent.com/${acct}/${repo}/${repoInfo.default_branch}/config.json`)
-                config = { ...config, ...await resp.json()}
-                return config
+          async getSiteInfo() {
+            let hostname = window.location.hostname
+            let siteInfo = {ghpSite: false, baseurl: '', acct: defaultGhAcct, repo: defaultGhRepo, defaultBranch: null, ref: defaultGhRef}
+            let siteConfigUrl
+            console.log(`getSiteInfo: hostname=${hostname}`)
+            let configResp
+            if (hostname.indexOf('.github.io') > 0) { // Github Pages site
+              siteInfo = {...siteInfo, ...{
+                ghpSite: true,
+                acct:    hostname.slice(0, hostname.length-10),
+                repo:    window.location.pathname.split('/')[1],
+                baseurl: `/${siteInfo.repo}`
+              }}
+              const resp = await fetch(`https://api.github.com/repos/${siteInfo.acct}/${siteInfo.repo}`)
+              let repoInfo = await resp.json()
+              siteInfo.defaultBranch = repoInfo.default_branch
+              siteInfo.ref = siteInfo.defaultBranch
+            } else if (hostname === 'localhost' || hostname.indexOf('visual-essays.app') > 0 || hostname.indexOf('gitpod.io') > 0) {
+              const pathElems = window.location.pathname.split('/').filter(pathElem => pathElem !== '')
+              if (pathElems.length >= 2) {
+                const resp = await fetch(`https://api.github.com/repos/${pathElems[0]}/${pathElems[1]}`)
+                if (resp.ok) {
+                  let repoInfo = await resp.json()
+                  siteInfo = {...siteInfo, ...{
+                    acct: pathElems[0],
+                    repo: pathElems[1], 
+                    defaultBranch: repoInfo.default_branch,
+                    ref: repoInfo.default_branch,
+                    baseurl: `/${pathElems[0]}/${pathElems[1]}`
+                  }}
+                }
               }
-            } catch (e) {
-              return config
+            } else {
+              siteConfigUrl = `${window.location.origin}/config.json`
             }
+            siteConfigUrl = siteConfigUrl || `https://raw.githubusercontent.com/${siteInfo.acct}/${siteInfo.repo}/${siteInfo.ref}/config.json`
+            configResp = await fetch(siteConfigUrl)
+            if (configResp.ok) {
+              let siteConfig = await configResp.json()
+              siteInfo = {...siteInfo, ...{
+                acct: siteConfig.content && siteConfig.content.acct ? siteConfig.content.acct : siteConfig.acct || siteInfo.acct,
+                repo: siteConfig.content && siteConfig.content.repo ? siteConfig.content.repo : siteConfig.repo || siteInfo.repo,
+                ref:  siteConfig.content && siteConfig.content.ref ? siteConfig.content.ref : siteConfig.ref || siteInfo.ref
+              }}
+              if (!siteInfo.defaultBranch) {
+                const resp = await fetch(`https://api.github.com/repos/${siteInfo.acct}/${siteInfo.repo}`)
+                if (resp.ok) {
+                  let repoInfo = await resp.json()
+                  siteInfo.defaultBranch = repoInfo.default_branch
+                }
+              }
+            }
+            return siteInfo
+          },
+          async isGithubPagesSite (hostname) {
+            hostname = hostname || window.location.hostname
+            /*
+            let resp = await fetch(`https://dns.google/resolve?name=${hostname}`)
+            if (resp.ok) {
+              let dnsInfo = await resp.json()
+              return dnsInfo.Answer
+                ? dnsInfo.Answer.find(rec => rec.data.indexOf('.github.io') > 0 ) !== undefined
+                : false
+            }
+            return false
+            */
+            return hostname.indexOf('.github.io' > 0)
           },
           logout() {
             this.jwt = undefined
             window.localStorage.removeItem('ghcreds')
           },
           menuItemClicked(path) {
-            path = `${this.baseurl}${path}`
+            path = `${this.siteInfo.baseurl}${path}`
             if (path !== this.current) this.loadEssay(path)
           },
           async fetchRetry (url, retries=3, backoff=300, lastError=null) {
@@ -221,7 +254,7 @@ new Promise(function(resolve, reject) {
             return this.essayCache[url]
           },
           loadEssay(path, replace, retries) {
-            path = `${path}${this.refArg}`
+            path = `${path}${this.refQueryArg}`
             this.cachingFetch(path)
             .then(html => {
               browserPath = path.replace(/\.md$/, '')
@@ -243,7 +276,7 @@ new Promise(function(resolve, reject) {
                 if (essayFname === 'README' || essayFname === 'index') {
                     console.log(window.location.pathname)
                     if (window.location.pathname.length === 0 || window.location.pathname[window.location.pathname.length-1] !== '/') {
-                      let browserPath = `${window.location.pathname}/${this.refArg}`
+                      let browserPath = `${window.location.pathname}/${this.refQueryArg}`
                       window.history.replaceState({file: path || ''}, '', browserPath)
                     }
                 }
@@ -251,31 +284,24 @@ new Promise(function(resolve, reject) {
             })
           },
           viewMarkdown() {
-            console.log(`viewMarkdown: window.location.pathname=${window.location.pathname} window._essay=${window._essay} contentAcct=${this.contentAcct} contentRepo=${this.contentRepo} contentBranch=${this.contentBranch}`)
-            console.log(window.location.pathname)
-            console.log(window._essay)
-            // let url = `${this.context.service}/markdown-viewer${window.location.pathname}/${window._essay}.md`
-            let url = `/markdown-viewer/${this.contentAcct}/${this.contentRepo}/${this.ref}${window._essay}.md`
-            console.log(url)
-            if (this.externalWindow) { this.externalWindow.close() }
-            this.externalWindow = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
+            this.openWindow(`/markdown-viewer/${this.siteInfo.acct}/${this.siteInfo.repo}/${this.ref}${window._essay}.md`)
           },
           editMarkdown(editor) {
-            const url = editor == 'custom'
-              ? `https://editor.visual-essays.app/${this.context.acct}/${this.context.repo}${window._essay}.md`
-              : `https://github.com/${this.context.acct}/${this.context.repo}/edit/${this.ref}/${window._essay}.md`
-            if (this.externalWindow) { this.externalWindow.close() }
-            this.externalWindow = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1300,height=1600,scrollbars=yes,status=yes`)
+            this.openWindow(editor == 'custom'
+              ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${window._essay}.md`
+              : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.defaultBranch}${window._essay}.md`
+            ) 
           },
           gotoGithub() {
-            const url = `https://github.com/${this.context.acct}/${this.context.repo}/tree/${this.ref}`
-            if (this.externalWindow) { this.externalWindow.close() }
-            this.externalWindow = window.open(url, '_blank')
+            this.openWindow(`https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/tree/${this.ref}`, null)
           },
           openDocsSite(editor) {
-            const url = `https://docs.visual-essays.app?readonly`
+            this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
+          },
+          openWindow(url, options) {
             if (this.externalWindow) { this.externalWindow.close() }
-            this.externalWindow = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
+            if (options === undefined) options = 'toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes'
+            this.externalWindow = window.open(url, '_blank', options)
           },
           convertLinks() {
             // convert links
@@ -283,14 +309,14 @@ new Promise(function(resolve, reject) {
             if (essayElem) {
               essayElem.querySelectorAll('a').forEach(link => {
                 console.log(link.href)
-                if (!link.href || link.href.indexOf(this.host) > 0 || link.href.indexOf('/help#') > 0 ) {
+                if (!link.href || link.href.indexOf(window.location.host) > 0 || link.href.indexOf('/help#') > 0 ) {
                   let target = link.dataset.target
                   if (!target) { 
                     const parsedUrl = parseUrl(link.href)
                     if (parsedUrl.hash === '' ) {
                       //const pathElems = parsedUrl.pathname.split('/').filter(pathElem => pathElem !== '')
-                      if (this.baseurl && parsedUrl.pathname.indexOf(this.baseurl) !== 0) {
-                        target = `${this.baseurl}${parsedUrl.pathname}`
+                      if (this.siteInfo.baseurl && parsedUrl.pathname.indexOf(this.siteInfo.baseurl) !== 0) {
+                        target = `${this.siteInfo.baseurl}${parsedUrl.pathname}`
                       } else {
                         target = parsedUrl.pathname
                       }
