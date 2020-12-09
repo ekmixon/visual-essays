@@ -35,7 +35,7 @@ cache = ExpiringDict(max_len=200, max_age_seconds=expiration)
 ENV = 'prod'
 CONTENT_ROOT = None
 DEFAULT_GH_ACCT = 'jstor-labs'
-DEFAULT_GH_REPO = 'visual-essays'
+DEFAULT_GH_REPO = 've-docs'
 
 KNOWN_SITES = {
     'default': ['jstor-labs', 've-docs'],
@@ -71,6 +71,7 @@ def _get_site_info(href):
     path_elems = [elem for elem in parsed.path.split('/') if elem]
     qargs = parse_qs(parsed.query)
     logger.info(f'hostname={hostname} path_elems={path_elems} query={qargs}')
+    repo_info = None
     site_info = {
         'ghpSite': False,
         'baseurl': '',
@@ -102,6 +103,17 @@ def _get_site_info(href):
                 })
     else:
         siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
+
+    if repo_info is None:
+        url = f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}'
+        resp = requests.get(url)
+        logger.info(f'repos: {url} {resp.status_code}')
+        if resp.status_code == 200:
+            repo_info = resp.json()
+            if site_info['ref'] is None:
+                site_info['ref'] = repo_info['default_branch']
+            site_info['defaultBranch'] = repo_info['default_branch']
+
     siteConfigUrl = siteConfigUrl if siteConfigUrl else f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
     resp = requests.get(siteConfigUrl)
     logger.info(f'siteConfig: {siteConfigUrl} {resp.status_code}')
@@ -112,15 +124,17 @@ def _get_site_info(href):
             'repo': site_config.get('repo', site_info['repo']),
             'ref':  site_info['ref'] if site_info['ref'] else site_config.get('ref') 
         })
-    if site_info['ref'] is None or site_info['defaultBranch'] is None:
-        url = f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}'
-        resp = requests.get(url)
-        logger.info(f'repos: {url} {resp.status_code}')
-        if resp.status_code == 200:
-            repo_info = resp.json()
-            if site_info['ref'] is None:
-                site_info['ref'] = repo_info['default_branch']
-            site_info['defaultBranch'] = repo_info['default_branch']
+        
+        if CONTENT_ROOT:
+            resource_baseurl = f'{parsed.scheme}://{parsed.netloc}/static'
+        else:
+            resource_baseurl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}'
+        for key, value in site_config.items():
+            if key not in ('acct', 'repo', 'ref'):
+                if key in ('banner', 'favicon', 'logo') and not value.startswith('http'):
+                    value = f'{resource_baseurl}{"" if value[0] == "/" else "/"}{value}'
+                site_info[key] = value
+
     if site_info['ref'] and len(site_info['ref']) == 7 and re.match(r'^[0-9a-f]+$', site_info['ref']):
         resp = requests.get(
             f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}/commits/{site_info["ref"]}/branches-where-head',

@@ -74,7 +74,7 @@
       <component v-if="essayConfig" :is="essayConfig.layout === 'index' ? 'indexHeader' : 'essayHeader'"
         :height="400"
         :essay-config="essayConfig"
-        :site-config="context"
+        :site-config="siteInfo"
         :is-authenticated="isAuthenticated"
         :read-only="readOnly"
         :href="href"
@@ -92,7 +92,7 @@
     <div id="content" v-html="html" class="content hidden"></div>
 
     <div class="footer">
-      <component is="siteFooter" :site-config="context"></component>
+      <component is="siteFooter" :site-config="siteInfo"></component>
     </div>
   
   </div>
@@ -103,11 +103,6 @@
   <script src="https://kit.fontawesome.com/19541ddce8.js" crossorigin="anonymous"></script>
 
 <script>
-
-const defaultGhAcct = 'jstor-labs'
-const defaultGhRepo = 'visual-essays'
-const defaultGhRef = 'main'
-const isGithubCommitHash = RegExp(`[0-9a-f]+$`)
 
 new Promise(function(resolve, reject) {
   function waitForContext() {
@@ -129,7 +124,6 @@ new Promise(function(resolve, reject) {
           'siteFooter': httpVueLoader(context.components.siteFooter && context.components.siteFooter.src)        
         },
         data: () => ({
-          context,
           html: undefined,
           isLoaded: false,
           essayConfig: null,
@@ -138,13 +132,14 @@ new Promise(function(resolve, reject) {
           current: undefined,
           externalWindow: undefined,
           jwt: context.jwt,
+          qargs: context.qargs,
           href: undefined,
           siteInfo: {}
         }),
         computed: {
           isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
-          readOnly() { return this.context.qargs.readonly },
-          ref() { return context.qargs && context.qargs.ref ? context.qargs.ref : this.siteInfo.ref},
+          readOnly() { return this.qargs.readonly },
+          ref() { return this.qargs && this.qargs.ref ? this.qargs.ref : this.siteInfo.ref},
           refQueryArg() { return this.ref && this.ref !== this.siteInfo.ref ? `?ref=${this.ref}` : '' }
         },
         mounted() {
@@ -159,99 +154,7 @@ new Promise(function(resolve, reject) {
         methods: {
           async getSiteInfo() {
             const resp = await fetch(`/site-info?href=${window.location.href}`)
-            if (resp.ok) {
-              return await resp.json()
-            }
-          },
-          /*
-          async getSiteInfo() {
-            let hostname = window.location.hostname
-            let siteInfo = {
-              ghpSite: false,
-              baseurl: '',
-              acct: defaultGhAcct,
-              repo: defaultGhRepo,
-              ref: defaultGhRef,
-              defaultBranch: null,
-              editBranch: null
-            }
-            let siteConfigUrl
-            console.log(`getSiteInfo: hostname=${hostname}`)
-            let configResp
-            if (hostname.indexOf('.github.io') > 0) { // Github Pages site
-              siteInfo = {...siteInfo, ...{
-                ghpSite: true,
-                acct:    hostname.slice(0, hostname.length-10),
-                repo:    window.location.pathname.split('/')[1],
-                baseurl: `/${siteInfo.repo}`
-              }}
-              const resp = await fetch(`https://api.github.com/repos/${siteInfo.acct}/${siteInfo.repo}`)
-              let repoInfo = await resp.json()
-              siteInfo.defaultBranch = repoInfo.default_branch
-              siteInfo.ref = siteInfo.defaultBranch
-            } else if (hostname === 'localhost' || hostname.indexOf('visual-essays.app') > 0 || hostname.indexOf('gitpod.io') > 0) {
-              const pathElems = window.location.pathname.split('/').filter(pathElem => pathElem !== '')
-              if (pathElems.length >= 2) {
-                const resp = await fetch(`https://api.github.com/repos/${pathElems[0]}/${pathElems[1]}`)
-                if (resp.ok) {
-                  let repoInfo = await resp.json()
-                  siteInfo = {...siteInfo, ...{
-                    acct: pathElems[0],
-                    repo: pathElems[1], 
-                    defaultBranch: repoInfo.default_branch,
-                    ref: repoInfo.default_branch,
-                    baseurl: `/${pathElems[0]}/${pathElems[1]}`
-                  }}
-                }
-              }
-            } else {
-              siteConfigUrl = `${window.location.origin}/config.json`
-            }
-            siteConfigUrl = siteConfigUrl || `https://raw.githubusercontent.com/${siteInfo.acct}/${siteInfo.repo}/${siteInfo.ref}/config.json`
-            configResp = await fetch(siteConfigUrl)
-            if (configResp.ok) {
-              let siteConfig = await configResp.json()
-              siteInfo = {...siteInfo, ...{
-                acct: siteConfig.content && siteConfig.content.acct ? siteConfig.content.acct : siteConfig.acct || siteInfo.acct,
-                repo: siteConfig.content && siteConfig.content.repo ? siteConfig.content.repo : siteConfig.repo || siteInfo.repo,
-                ref:  siteConfig.content && siteConfig.content.ref ? siteConfig.content.ref : siteConfig.ref || siteInfo.ref
-              }}
-            }
-            if (!siteInfo.defaultBranch) {
-              const resp = await fetch(`https://api.github.com/repos/${siteInfo.acct}/${siteInfo.repo}`)
-              if (resp.ok) {
-                let repoInfo = await resp.json()
-                siteInfo.defaultBranch = repoInfo.default_branch
-              }
-            }
-            if (siteInfo.ref.length === 7 && isGithubCommitHash.test(siteInfo.ref)) {
-              const resp = await fetch(
-                `https://api.github.com/repos/${siteInfo.acct}/${siteInfo.repo}/commits/${siteInfo.ref}/branches-where-head`, {
-                headers: { Accept: 'application/vnd.github.groot-preview+json'}
-              })
-              if (resp.ok) {
-                let commitInfo = await resp.json()
-                siteInfo.editBranch = commitInfo[0].name
-              }
-            } else {
-              siteInfo.editBranch = siteInfo.ref
-            }
-            return siteInfo
-          },
-          */
-          async isGithubPagesSite (hostname) {
-            hostname = hostname || window.location.hostname
-            /*
-            let resp = await fetch(`https://dns.google/resolve?name=${hostname}`)
-            if (resp.ok) {
-              let dnsInfo = await resp.json()
-              return dnsInfo.Answer
-                ? dnsInfo.Answer.find(rec => rec.data.indexOf('.github.io') > 0 ) !== undefined
-                : false
-            }
-            return false
-            */
-            return hostname.indexOf('.github.io' > 0)
+            return await resp.json()
           },
           logout() {
             this.jwt = undefined
@@ -301,9 +204,7 @@ new Promise(function(resolve, reject) {
                 const essayElem = document.getElementById('essay')
                 if (essayElem) window._essay = essayElem.dataset.name
                 const essayFname = essayElem ? essayElem.dataset.name.split('/').pop() : null
-                console.log(`essayFname=${essayFname}`)
                 if (essayFname === 'README' || essayFname === 'index') {
-                    console.log(window.location.pathname)
                     if (window.location.pathname.length === 0 || window.location.pathname[window.location.pathname.length-1] !== '/') {
                       let browserPath = `${window.location.pathname}/${this.refQueryArg}`
                       window.history.replaceState({file: path || ''}, '', browserPath)
@@ -337,7 +238,7 @@ new Promise(function(resolve, reject) {
             const essayElem = document.getElementById('essay')
             if (essayElem) {
               essayElem.querySelectorAll('a').forEach(link => {
-                console.log(link.href)
+                // console.log(link.href)
                 if (!link.href || link.href.indexOf(window.location.host) > 0 || link.href.indexOf('/help#') > 0 ) {
                   let target = link.dataset.target
                   if (!target) { 
@@ -354,7 +255,6 @@ new Promise(function(resolve, reject) {
                     }
                   }
                   link.addEventListener('click', (e) => {
-                    console.log('click', e, target)
                     if (target[0] === '#') {
                       document.querySelector(target).scrollIntoView({block:'center'})
                     } else {
