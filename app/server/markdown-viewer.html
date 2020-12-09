@@ -82,7 +82,7 @@
       markdown: undefined
     }),
     computed: {
-      title() { return `/${this.acct}/${this.repo}/${this.branch}${this.root}${this.path ? this.path : ''}` }
+      title() { return `/${this.acct}/${this.repo}/${this.ref}${this.root}${this.path ? this.path : ''}` }
     },
     mounted() {
       console.log(window.location)

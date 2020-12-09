@@ -130,10 +130,17 @@ def _get_site_info(href):
         else:
             resource_baseurl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}'
         for key, value in site_config.items():
-            if key not in ('acct', 'repo', 'ref'):
-                if key in ('banner', 'favicon', 'logo') and not value.startswith('http'):
-                    value = f'{resource_baseurl}{"" if value[0] == "/" else "/"}{value}'
-                site_info[key] = value
+            if key == 'ref' and 'ref' in qargs:
+                continue
+            if key == 'components':
+                site_info['components'] = []
+                for comp in value:
+                    if not comp['src'].startswith('http'):
+                        comp['src'] = f'{resource_baseurl}{"" if comp["src"][0] == "/" else "/"}{comp["src"]}'
+                    site_info['components'].append(comp)
+            elif key in ('banner', 'favicon', 'logo') and not value.startswith('http'):
+                value = f'{resource_baseurl}{"" if value[0] == "/" else "/"}{value}'
+            site_info[key] = value
 
     if site_info['ref'] and len(site_info['ref']) == 7 and re.match(r'^[0-9a-f]+$', site_info['ref']):
         resp = requests.get(
