@@ -79,6 +79,7 @@
         :read-only="readOnly"
         :href="href"
         :app-version="appVersion"
+        :content-ref="ref"
         @menu-item-clicked="menuItemClicked"
         @logout="logout"
         @view-markdown="viewMarkdown"
@@ -129,7 +130,6 @@ new Promise(function(resolve, reject) {
           essayConfig: null,
           essayCache: {},
           appVersion: 'APP_VERSION',
-          libVersion: undefined,
           current: undefined,
           externalWindow: undefined,
           jwt: context.jwt,
@@ -177,12 +177,17 @@ new Promise(function(resolve, reject) {
           },
           async siteConfig (acct, repo) {
             const url = `https://api.github.com/repos/${acct}/${repo}`
-            let resp = await fetch(url)
-            if (resp.ok) {
-              let repoInfo = await resp.json()
-              resp = await fetch(`https://raw.githubusercontent.com/${acct}/${repo}/${repoInfo.default_branch}/config.json`)
-              let config = await resp.json()
-              if (!config.ref) config.ref = repoInfo.default_branch
+            let config = {}
+            try {
+              let resp = await fetch(url)
+              if (resp.ok) {
+                let repoInfo = await resp.json()
+                config.ref = repoInfo.default_branch
+                resp = await fetch(`https://raw.githubusercontent.com/${acct}/${repo}/${repoInfo.default_branch}/config.json`)
+                config = { ...config, ...await resp.json()}
+                return config
+              }
+            } catch (e) {
               return config
             }
           },
@@ -257,13 +262,13 @@ new Promise(function(resolve, reject) {
           },
           editMarkdown(editor) {
             const url = editor == 'custom'
-              ? `https://editor.visual-essays.app/${this.context.acct}/${this.context.repo}${this.context.mdRoot}/${window._essay}.md`
-              : `https://github.com/${this.context.acct}/${this.context.repo}/edit/${this.context.branch}${this.context.mdRoot}/${window._essay}.md`
+              ? `https://editor.visual-essays.app/${this.context.acct}/${this.context.repo}${window._essay}.md`
+              : `https://github.com/${this.context.acct}/${this.context.repo}/edit/${this.ref}/${window._essay}.md`
             if (this.externalWindow) { this.externalWindow.close() }
             this.externalWindow = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1300,height=1600,scrollbars=yes,status=yes`)
           },
-          gotoGithub(editor) {
-            const url = `https://github.com/${this.context.acct}/${this.context.repo}/tree/${this.context.branch}`
+          gotoGithub() {
+            const url = `https://github.com/${this.context.acct}/${this.context.repo}/tree/${this.ref}`
             if (this.externalWindow) { this.externalWindow.close() }
             this.externalWindow = window.open(url, '_blank')
           },

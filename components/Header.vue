@@ -7,22 +7,25 @@
         <span></span>
         <span></span>
         <ul id="menu">
+          <li @click="nav('/')">
+            <i :class="`fas fa-home`"></i>Home
+          </li>
           <template v-for="item in siteConfig.nav">
-            <li v-if="item.label !== 'Login' && item.label !== 'Documentation'" :key="item.path" @click="nav(item.path)">
+            <li :key="item.path" @click="nav(item.path)">
               <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
             </li>
-            <li v-if="item.label === 'Documentation'" :key="item.path" @click="openDocsSite">
-              <i :class="`fas fa-${item.icon}`"></i>Documentation
-            </li>
-            <li v-if="item.label === 'Login' && !readOnly" :key="item.path">
-              <a v-if="isAuthenticated" @click="logout">
-                <i :class="`fas fa-${item.icon}`"></i>Logout
-              </a>
-              <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
-                <i :class="`fas fa-${item.icon}`"></i>Login
-              </a>
-            </li>
           </template>
+          <li @click="openDocsSite">
+            <i :class="`fas fa-question`"></i>Documentation
+          </li>
+          <li v-if="!readOnly">
+            <a v-if="isAuthenticated" @click="logout">
+              <i :class="`fas fa-user`"></i>Logout
+            </a>
+            <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
+              <i :class="`fas fa-user`"></i>Login
+            </a>
+          </li>
           <hr>
           <li style="margin-top:10px;" @click="viewMarkdown">
             <i class="fas fa-file-code"></i>View page markdown
@@ -36,8 +39,11 @@
           <li v-if="isAuthenticated && !readOnly" @click="gotoGithub">
             <i class="fab fa-github"></i>Github repository
           </li>
-          <li style="margin-top:10px;">
-            <div v-text="appVersion" class="app-version"></div>
+          <li style="margin-top:10px; padding:0;">
+            <div class="app-version">App: {{appVersion}}</div>
+          </li>
+          <li style="padding:0;">
+            <div class="app-version">Content: {{contentRef}}</div>
           </li>
         </ul>
       </div>
@@ -58,7 +64,7 @@
       progress: { type: Number, default: 0 },
       height: Number, // initial height
       appVersion: { type: String },
-      libVersion: { type: String },
+      contentRef: { type: String },
       isAuthenticated: { type: Boolean, default: false },
       readOnly: { type: Boolean, default: false },
       href: { type: String, default: '' }
@@ -88,7 +94,7 @@
     },
     mounted() {
       console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
-      console.log(`href=${this.href} isAuthenticated=${this.isAuthenticated}`)
+      console.log(`href=${this.href} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
     
       // set initial height
       this.$refs.header.style.height = `${this.height}px`
