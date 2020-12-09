@@ -158,6 +158,13 @@ new Promise(function(resolve, reject) {
         },
         methods: {
           async getSiteInfo() {
+            const resp = await fetch(`/site-info?href=${window.location.href}`)
+            if (resp.ok) {
+              return await resp.json()
+            }
+          },
+          /*
+          async getSiteInfo() {
             let hostname = window.location.hostname
             let siteInfo = {
               ghpSite: false,
@@ -231,6 +238,7 @@ new Promise(function(resolve, reject) {
             }
             return siteInfo
           },
+          */
           async isGithubPagesSite (hostname) {
             hostname = hostname || window.location.hostname
             /*

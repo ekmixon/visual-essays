@@ -11,7 +11,7 @@ import re
 import json
 import getopt
 import base64
-from urllib.parse import urlparse, unquote, urlencode
+from urllib.parse import urlparse, parse_qs, unquote, urlencode
 
 import requests
 logging.getLogger('requests').setLevel(logging.INFO)
@@ -63,7 +63,75 @@ def qargs():
 def _normalize_path(path):
     return f'/{path[:-1] if path[-1] == "/" else path}' if path else '/'
 
-def _context(path):
+def _get_site_info(href):
+    parsed = urlparse(href)
+    hostname = parsed.hostname
+    path_elems = [elem for elem in parsed.path.split('/') if elem]
+    qargs = parse_qs(parsed.query)
+    logger.info(f'hostname={hostname} path_elems={path_elems} query={qargs}')
+    site_info = {
+        'ghpSite': False,
+        'baseurl': None,
+        'acct': None,
+        'repo': None,
+        'ref': qargs['ref'][0] if 'ref' in qargs else None,
+        'defaultBranch': None,
+        'editBranch': None
+    }
+    siteConfigUrl = None
+    if hostname.endswith('.github.io'):
+        site_info.update({
+            'ghpSite': True,
+            'acct':    hostname[:-10],
+            'repo':    path_elems[0],
+            'baseurl': f'/{path_elems[0]}'
+        })
+        if site_info['ref'] is None:
+            resp = requests.get(f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}')
+            if resp.status_code == 200:
+                repo_info = resp.json()
+                site_info.update({'ref': repo_info['default_branch'], 'defaultBranch': repo_info['default_branch']})
+    elif hostname == 'localhost' or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io'):
+        if len(path_elems) >= 2:
+            resp = requests.get(f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}')
+            if resp.status_code == 200:
+                repo_info = resp.json()
+                site_info.update({
+                    'acct': path_elems[0],
+                    'repo': path_elems[1], 
+                    'defaultBranch': repo_info['default_branch'],
+                    'ref': site_info['ref'] if site_info['ref'] else repo_info['default_branch'],
+                    'baseurl': f'/{path_elems[0]}/{path_elems[1]}'
+                })
+    else:
+        siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
+    siteConfigUrl = siteConfigUrl if siteConfigUrl else f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
+    resp = requests.get(siteConfigUrl)
+    if resp.status_code == 200:
+        site_config = resp.json()
+        site_info.update({
+            'acct': site_config.get('acct', site_info['acct']),
+            'repo': site_config.get('repo', site_info['repo']),
+            'ref':  site_info['ref'] if site_info['ref'] else site_config.get('ref') 
+        })
+    if not site_info['defaultBranch']:
+        resp = requests.get(f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}')
+        if resp.status_code == 200:
+            repo_info = resp.json()
+            site_info['defaultBranch'] = repo_info['default_branch']
+    if site_info['ref'] and len(site_info['ref']) == 7 and re.match(r'^[0-9a-f]+$', site_info['ref']):
+        resp = requests.get(
+            f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}/commits/{site_info["ref"]}/branches-where-head',
+            headers = {'Accept': 'application/vnd.github.groot-preview+json'}
+        )
+        if resp.status_code == 200:
+            commit_info = resp.json()
+            site_info['editBranch'] = commit_info[0]['name']
+    else:
+        site_info['editBranch'] = site_info['ref']
+    return site_info
+
+def _context(path=None):
     path = _normalize_path(path)
     site = urlparse(request.base_url).hostname
     logger.info(f'_context: _is_ve_site={_is_ve_site(site)} gh_repo_prefix={has_gh_repo_prefix(path)}')
@@ -145,6 +213,16 @@ def components(path):
 def markdown_viewer(path=None):
     logger.info(f'markdown-viewer: path={path}')
     return (open(os.path.join(SCRIPT_DIR, 'markdown-viewer.html'), 'r').read(), 200, cors_headers)
+
+_site_info_cache = {}
+@app.route('/site-info/', methods=['GET']) 
+def siteinfo(path=None):
+    site, acct, repo, ref, path, qargs = _context()
+    href = qargs.get('href')
+    if href not in _site_info_cache:
+        _site_info_cache[href] = _get_site_info(href)
+    logger.info(f'site-info: href={href} site_info={_site_info_cache[href]}')
+    return _site_info_cache[href], 200, cors_headers
 
 @app.route('/<path:path>', methods=['GET'])
 @app.route('/', methods=['GET'])
