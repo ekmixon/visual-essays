@@ -132,7 +132,8 @@ new Promise(function(resolve, reject) {
           jwt: null,
           qargs: {},
           href: undefined,
-          siteInfo: {}
+          siteInfo: {},
+          ghpSite: false
         }),
         computed: {
           isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
@@ -141,6 +142,7 @@ new Promise(function(resolve, reject) {
           refQueryArg() { return this.ref && this.ref !== this.siteInfo.ref ? `?ref=${this.ref}` : '' }
         },
         mounted() {
+          this.ghpSite = window.location.host.indexOf('.github.io') > 0
           console.log('siteInfo', this.siteInfo)
           this.parseQargs()
           window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
@@ -180,8 +182,8 @@ new Promise(function(resolve, reject) {
             }
           },
           cachingFetch(path) {
-            let url = `${this.siteInfo.ghpSite ? 'https://exp.visual-essays.app' : ''}/essay${path}`
-            console.log(`ghpSite=${this.siteInfo.ghpSite} fetch=${url}`)
+            let url = `${this.ghpSite ? 'https://exp.visual-essays.app' : ''}/essay${path}`
+            console.log(`ghpSite=${this.ghpSite} fetch=${url}`)
             if (!this.essayCache[url]) {
               this.essayCache[url] = this.fetchRetry(url).then(resp => resp.ok ? resp.text() : null)
             }
