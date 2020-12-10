@@ -11,6 +11,10 @@ import 'lodash'
 import VueYoutube from 'vue-youtube'
 // import 'leaflet-polylinedecorator'
 
+console.log(window.location)
+const baseurl = window.location.hostname.indexOf('.github.io') > 0 ? 'https://exp.visual-essays.app' : ''
+console.log(`baseurl=${baseurl}`)
+
 const hash = window.location.hash || location.hash
 let vm, siteInfo, jwt, qargs
 
@@ -51,7 +55,7 @@ if (qargs.token) {
 }
 
 const checkJWTExpiration = async(jwt) => {
-  let response = await fetch(`/jwt-expiration/${jwt}`)
+  let response = await fetch(`${baseurl}/jwt-expiration/${jwt}`)
   const expiration = parseInt(await response.text())
   const isExpired =  Date.now()/1000 >= expiration
   if (isExpired) window.localStorage.removeItem('ghcreds')
@@ -59,12 +63,12 @@ const checkJWTExpiration = async(jwt) => {
 }
 
 async function getSiteInfo() {
-  const resp = await fetch(`/site-info?href=${window.location.href}`)
+  const resp = await fetch(`${baseurl}/site-info?href=${window.location.href}`)
   return await resp.json()
 }
 
 const baseComponentsIndex = async() => {
-  let response = await fetch(`/components/index.json`)
+  let response = await fetch(`${baseurl}/components/index.json`)
   let components = []
   const componentsList = await response.json()
   const base = window.location.origin
@@ -193,7 +197,7 @@ function initApp() {
     store,
     render: h => h(App)
   })
-  
+
   vm.$store.dispatch('setAcct', siteInfo.acct)
   vm.$store.dispatch('setRepo', siteInfo.repo)
   vm.$store.dispatch('setBranch', siteInfo.branch)
