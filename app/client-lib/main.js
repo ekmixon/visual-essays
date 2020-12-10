@@ -67,8 +67,8 @@ async function getSiteInfo(url) {
   const resp = await fetch(url)
   return await resp.json()
 }
-
 getSiteInfo(`${baseurl}/site-info`).then(siteInfo => console.log('siteInfo', siteInfo))
+getSiteInfo(`${baseurl}/site-info/`).then(siteInfo => console.log('siteInfo', siteInfo))
 getSiteInfo(`${baseurl}/site-info?url=${encodeURIComponent(window.location.href)}`).then(siteInfo => console.log('siteInfo', siteInfo))
 
 const baseComponentsIndex = async() => {
