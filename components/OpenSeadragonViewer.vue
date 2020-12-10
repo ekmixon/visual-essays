@@ -662,7 +662,9 @@ module.exports = {
       if (this.viewer && current && (!previous || current['@id'] !== previous['@id'])) {
         this.loadAnnotations().then(() => this.initAnnotator())
       } else {
-        if (previous && previous.annotations) this.currentItem = { ...this.currentItem, ...{ annotations: [...previous.annotations] } }
+        // vvvvv this causes an infinite loop!!!!
+        // if (previous && previous.annotations) this.currentItem = { ...this.currentItem, ...{ annotations: [...previous.annotations] } }
+        if (previous && previous.annotations) this.currentItem.annotations = [...previous.annotations]
       }
     },
     mode() {

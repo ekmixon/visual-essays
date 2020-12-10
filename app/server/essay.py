@@ -55,7 +55,7 @@ def get_local_markdown(path, root):
             markdown = open(abs_path, 'r').read()
             md_path = path
         else:
-            to_check = [f'{abs_path}{file}' for file in ('README.md', 'index.md')]
+            to_check = [f'{abs_path}/{file}' for file in ('README.md', 'index.md')]
     else:
         to_check = [f'{abs_path}.md'] + [f'{abs_path}{file}' for file in ('README.md', 'index.md')]
     if not markdown:

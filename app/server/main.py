@@ -31,6 +31,9 @@ app = Flask(__name__, static_url_path='/static', static_folder=os.path.join(BASE
 from gh import query_gh_file, get_gh_file, has_gh_repo_prefix, get_site_config
 from essay import get_essay
 from annotations import query_annotations, get_annotation, create_annotation, update_annotation, delete_annotation, NotFoundException
+from entity import KnowledgeGraph, as_uri
+from fingerprints import get_fingerprints
+from specimens import get_specimens
 
 from expiringdict import ExpiringDict
 expiration = 60 * 60 * 24 # one day
@@ -309,7 +312,7 @@ def file_reader(arg):
 
 def file_writer(arg):
     logger.info(f'file_writer {arg}')
-    
+
 @app.route('/annotations/<path:annoid>', methods=['GET', 'OPTIONS'])
 @app.route('/annotations', methods=['GET', 'OPTIONS'])
 @app.route('/annotations/', methods=['GET', 'OPTIONS'])
@@ -351,6 +354,69 @@ def annotations_protected(annoid=None):
             return (delete_annotation(annoid, **kwargs), 204, cors_headers)
     except NotFoundException:
         return 'Not found', 404
+
+@app.route('/fingerprints', methods=['GET'])  
+def fingerprints():
+    site, acct, repo, ref, path, qargs = _context()
+    if request.method == 'OPTIONS':
+        return ('', 204, cors_headers)
+    else:
+        logger.info(f'fingerprints: qargs={qargs}')
+        if 'qids' in qargs:
+            qids = set()
+            for qid in qargs['qids'].split(','):
+                # ensure qids are namespaced
+                ns, qid = qid.split(':') if ':' in qid else ('wd', qid)
+                qids.add(f'{ns.strip()}:{qid.strip()}')
+        fingerprints = get_fingerprints(qids, qargs.get('language', 'en'))
+        return fingerprints, 200, cors_headers
+
+@app.route('/entity/<path:eid>', methods=['GET'])  
+@app.route('/entity', methods=['GET'])  
+def entity(eid=None):
+    site, acct, repo, ref, path, qargs = _context()
+    qargs['refresh'] = qargs.get('refresh', 'false') in ('true', '') or 'article' in qargs
+    logger.info(f'entity: eid={eid} qargs={qargs}')
+    if request.method == 'OPTIONS':
+        return ('', 204, cors_headers)
+    else:
+        if eid:
+            qargs['uri'] = as_uri(eid, **qargs)
+        entity = KnowledgeGraph(cache=cache, **qargs).entity(**qargs)
+        return entity, 200, cors_headers
+
+@app.route('/specimens/<path:path>', methods=['GET'])
+@app.route('/specimen/<path:path>', methods=['GET'])
+def specimens(path):
+    site, acct, repo, ref, path, qargs = _context()
+    accept = request.headers.get('Accept', 'application/json').split(',')
+    content_type = ([ct for ct in accept if ct in ('text/html', 'application/json', 'text/csv', 'text/tsv')] + ['application/json'])[0]
+    logger.info(f'specimens: path={path} qargs={qargs}')
+    if request.method == 'OPTIONS':
+        return ('', 204, cors_headers)
+    else:
+        taxon_name = gpid = wdid = None
+        path_elems = path.split('/')
+        if len(path_elems) == 1:
+            if _is_entity_id(path_elems[0]):
+                wdid = path_elems[0] if path_elems[0].startswith('wd:') else f'wd:{path_elems[0]}'
+            else:
+                taxon_name = path_elems[0].replace('_', ' ')
+        else:
+            gpid = '/'.join(path_elems)
+        qargs['preload'] = qargs.pop('preload', 'false').lower() in ('true', '')
+        refresh = qargs.pop('refresh', 'false').lower() in ('true', '')
+        specimens = cache.get(path) if not refresh else None
+        if specimens is None:
+            specimens = get_specimens(taxon_name=taxon_name, gpid=gpid, wdid=wdid, **qargs)
+            if specimens['specimens']:
+                cache[path] = specimens
+        else:
+            specimens['from_cache'] = True
+        if content_type == 'text/html':
+            return (open(os.path.join(BASEDIR, 'src', 'json-viewer.html'), 'r').read().replace("'{{DATA}}'", json.dumps(specimens)), 200, cors_headers)
+        else:
+            return (specimens, 200, cors_headers)
 
 @app.route('/<path:path>', methods=['GET'])
 @app.route('/', methods=['GET'])
@@ -401,12 +467,12 @@ if __name__ == '__main__':
         elif o in ('-r', '--repo'):
             KNOWN_SITES['default'][1] = a
         elif o in ('-c', '--root'):
-            CONTENT_ROOT = d
+            CONTENT_ROOT = os.path.abspath(a)
         elif o in ('-h', '--help'):
             usage()
             sys.exit()
         else:
             assert False, 'unhandled option'
 
-    logger.info(f'ENV={ENV}')
+    logger.info(f'ENV={ENV} CONTENT_ROOT={CONTENT_ROOT}')
     app.run(debug=True, host='0.0.0.0', port=8080)

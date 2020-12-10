@@ -18,8 +18,6 @@ ADD index.html .
 ADD static static
 ADD components components
 
-# ADD mappings mappings
-
 ENV PORT 8080
 
 WORKDIR /usr/src/app/server
