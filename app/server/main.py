@@ -157,7 +157,13 @@ def _get_site_info(href):
                     'baseurl': f'/{path_elems[0]}/{path_elems[1]}'
                 })
     else:
-        siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
+        _site = hostname[4:] if hostname[:4] in ('dev.', 'exp.') else hostname
+        if _site in KNOWN_SITES:
+            acct, repo = KNOWN_SITES[_site]
+            site_info['acct'] = acct
+            site_info['repo'] = repo
+        else:
+            siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
 
     if repo_info is None:
         resp = requests.get(f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}')
@@ -172,6 +178,7 @@ def _get_site_info(href):
             siteConfigUrl = f'https://{hostname}{site_info["baseurl"]}/config.json'
         else:
             siteConfigUrl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
+    logger.info(siteConfigUrl)
     resp = requests.get(siteConfigUrl)
     if resp.status_code == 200:
         site_config = resp.json()
@@ -219,7 +226,7 @@ def _context(path=None):
     if _is_ve_site(site) and has_gh_repo_prefix(path):
         acct, repo = path[1:].split('/')[:2]
     else:
-        acct, repo = KNOWN_SITES.get(site, KNOWN_SITES['default'])
+        acct, repo = KNOWN_SITES.get(site[4:] if site[:4] in ('dev.', 'exp.') else site, KNOWN_SITES['default'])
     ref = qargs().pop('ref', None)
     if ref is None:
         ref = get_site_config(acct, repo)['ref']
@@ -274,6 +281,28 @@ def components(path):
 def markdown_viewer(path=None):
     logger.info(f'markdown-viewer: path={path}')
     return (open(os.path.join(SCRIPT_DIR, 'markdown-viewer.html'), 'r').read(), 200, cors_headers)
+
+'''
+@app.route('/config.json', methods=['GET'])
+def local_config():
+    logger.info(f'local_config: ENV={ENV} CONTENT_ROOT={CONTENT_ROOT}')
+    if ENV == 'dev' and CONTENT_ROOT:
+        config_path = os.path.join(CONTENT_ROOT, 'config.json')
+        if os.path.exists(config_path):
+            return json.load(open(config_path, 'r')), 200
+    return 'Not found', 404
+
+@app.route('/config/<path:path>', methods=['GET'])
+@app.route('/config/', methods=['GET'])
+@app.route('/config', methods=['GET'])
+def config(path=None):
+    site, acct, repo, ref, path, qargs = _context(path)
+    logger.info(f'config: site={site} acct={acct} repo={repo} ref={ref} path={path}')
+    raw, _, _ = query_gh_file( acct, repo, ref, '/config.json')
+    _config = json.loads(raw) if raw is not None else {} 
+    _config.update({'acct': acct, 'repo': repo, 'ref': ref})
+    return _config, 200, cors_headers
+'''
 
 _site_info_cache = {}
 @app.route('/site-info/', methods=['GET'])
