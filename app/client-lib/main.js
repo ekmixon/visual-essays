@@ -63,7 +63,7 @@ const checkJWTExpiration = async(jwt) => {
 }
 
 async function getSiteInfo() {
-  const resp = await fetch(`${baseurl}/site-info?href=${window.location.href}`)
+  const resp = await fetch(`${baseurl}/site-info?href=${encodeURIComponent(window.location.href)}`)
   return await resp.json()
 }
 

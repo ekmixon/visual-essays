@@ -225,7 +225,7 @@ def components(path):
     logger.info(f'components: path={path} full_path={full_path} exists={os.path.exists(full_path)}')
     if os.path.exists(full_path):
         path_elems = full_path.split('/')
-        return send_from_directory(f'/{"/".join(path_elems[:-1])}', path_elems[-1], as_attachment=False)
+        return send_from_directory(f'/{"/".join(path_elems[:-1])}', path_elems[-1], as_attachment=False), 200, cors_headers
     else:
         return 'Not found', 404
 
@@ -252,6 +252,8 @@ def main(path=None):
     logger.info(f'main: site={site} acct={acct} repo={repo} ref={ref} path={path}')
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
+        if site == 'localhost':
+            html = re.sub(r'"/visual-essays/static/', f'"/static/', html)
         if ENV == 'dev':
             if site.endswith('gitpod.io'):
                 html = re.sub(r'"/static/js/visual-essays.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
