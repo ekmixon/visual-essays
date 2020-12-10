@@ -7,7 +7,6 @@
     "logo": "https://www.visual-essays.app/static/images/labs.jpg",
     "favicon": "https://www.visual-essays.app/static/images/favicon.ico",
     "nav": [
-        {"label": "Home", "icon": "home-alt", "path": "/"},
         {"label": "About", "icon": "info", "path": "/about"},
         {"label": "Documentation", "icon": "question"},
         {"label": "Login", "icon": "user"}
