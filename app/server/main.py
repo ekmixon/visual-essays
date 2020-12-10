@@ -170,6 +170,7 @@ def _context(path=None):
         ref = get_site_config(acct, repo)['ref']
     return site, acct, repo, ref, path, qargs()
 
+'''
 @app.route('/config.json', methods=['GET'])
 def local_config():
     logger.info(f'local_config: ENV={ENV} CONTENT_ROOT={CONTENT_ROOT}')
@@ -189,6 +190,7 @@ def config(path=None):
     _config = json.loads(raw) if raw is not None else {} 
     _config.update({'acct': acct, 'repo': repo, 'ref': ref})
     return _config, 200, cors_headers
+'''
 
 @app.route('/essay/<path:path>', methods=['GET'])
 @app.route('/essay/', methods=['GET'])
