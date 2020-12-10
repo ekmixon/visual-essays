@@ -235,7 +235,8 @@ def markdown_viewer(path=None):
     return (open(os.path.join(SCRIPT_DIR, 'markdown-viewer.html'), 'r').read(), 200, cors_headers)
 
 _site_info_cache = {}
-@app.route('/site-info/', methods=['GET']) 
+@app.route('/site-info/', methods=['GET'])
+@app.route('/site-info', methods=['GET'])
 def siteinfo(path=None):
     site, acct, repo, ref, path, qargs = _context()
     href = qargs.get('url')

@@ -62,14 +62,10 @@ const checkJWTExpiration = async(jwt) => {
   return isExpired
 }
 
-async function getSiteInfo(url) {
-  console.log('getSiteInfo', url)
-  const resp = await fetch(url)
+async function getSiteInfo() {
+  const resp = await fetch(`${baseurl}/site-info?href=${encodeURIComponent(window.location.href)}`)
   return await resp.json()
 }
-getSiteInfo(`${baseurl}/site-info`).then(siteInfo => console.log('siteInfo', siteInfo))
-getSiteInfo(`${baseurl}/site-info/`).then(siteInfo => console.log('siteInfo', siteInfo))
-getSiteInfo(`${baseurl}/site-info?url=${encodeURIComponent(window.location.href)}`).then(siteInfo => console.log('siteInfo', siteInfo))
 
 const baseComponentsIndex = async() => {
   let response = await fetch(`${baseurl}/components/index.json`)
@@ -84,7 +80,7 @@ const baseComponentsIndex = async() => {
 }
 
 const doRemoteRequests = async () => {
-  const remoteRequests = [baseComponentsIndex(), getSiteInfo(`${baseurl}/site-info?url=${encodeURIComponent(window.location.href)}`)]
+  const remoteRequests = [baseComponentsIndex(), getSiteInfo()]
   if (jwt !== null) remoteRequests.push(checkJWTExpiration(jwt))
 
   let responses = await Promise.all(remoteRequests)
