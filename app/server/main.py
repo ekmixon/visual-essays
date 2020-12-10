@@ -239,7 +239,7 @@ _site_info_cache = {}
 @app.route('/site-info', methods=['GET'])
 def siteinfo(path=None):
     site, acct, repo, ref, path, qargs = _context()
-    href = qargs.get('url')
+    href = qargs.get('href')
     if href not in _site_info_cache:
         site_info = _get_site_info(href)
         _site_info_cache[href] = site_info
