@@ -304,6 +304,12 @@ def expires(token):
         decoded = {'exp': 0}
     return str(decoded['exp']), 200, cors_headers
 
+def file_reader(arg):
+    logger.info(f'file_reader {arg}')
+
+def file_writer(arg):
+    logger.info(f'file_writer {arg}')
+    
 @app.route('/annotations/<path:annoid>', methods=['GET', 'OPTIONS'])
 @app.route('/annotations', methods=['GET', 'OPTIONS'])
 @app.route('/annotations/', methods=['GET', 'OPTIONS'])
