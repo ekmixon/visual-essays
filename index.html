@@ -192,7 +192,6 @@ new Promise(function(resolve, reject) {
             this.cachingFetch(path)
             .then(html => {
               browserPath = path.replace(/\.md$/, '')
-              console.log(path, browserPath)
               if (replace) {
                 history.replaceState({file: path || ''}, '', browserPath)
               } else {

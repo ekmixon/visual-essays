@@ -223,6 +223,7 @@ function initApp() {
 
   if (window.app) {
     window.app.siteInfo = siteInfo
+    console.log('window.app.siteInfo', window.app.siteInfo)
     // window.app.jwt = jwt
     // window.app.qargs = qargs
     window.app.essayConfig = essayConfig
