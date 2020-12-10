@@ -76,9 +76,8 @@ const baseComponentsIndex = async() => {
   let response = await fetch(`${staticBase}/components/index.json`)
   let components = []
   const componentsList = await response.json()
-  const base = window.location.origin
   componentsList.forEach(comp => {
-    if (comp.src.indexOf('http') !== 0) comp.src = `${base}/${comp.src}`
+    if (comp.src.indexOf('http') !== 0) comp.src = `${staticBase}${comp.src}`
     components.push(comp)
   })
   return components
