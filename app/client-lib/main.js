@@ -12,8 +12,13 @@ import VueYoutube from 'vue-youtube'
 // import 'leaflet-polylinedecorator'
 
 console.log(window.location)
-const baseurl = window.location.hostname.indexOf('.github.io') > 0 ? 'https://exp.visual-essays.app' : ''
-console.log(`baseurl=${baseurl}`)
+let baseURL = ''
+let staticBase = ''
+if (window.location.hostname.indexOf('.github.io') > 0) {
+  baseurl = 'https://exp.visual-essays.app'
+  staticBase = `/${window.location.pathname.split('/')[1]}`
+}
+console.log(`baseurl=${baseurl} staticBase=${staticBase}`)
 
 const hash = window.location.hash || location.hash
 let vm, siteInfo, jwt, qargs
@@ -55,7 +60,7 @@ if (qargs.token) {
 }
 
 const checkJWTExpiration = async(jwt) => {
-  let response = await fetch(`${baseurl}/jwt-expiration/${jwt}`)
+  let response = await fetch(`${baseURL}/jwt-expiration/${jwt}`)
   const expiration = parseInt(await response.text())
   const isExpired =  Date.now()/1000 >= expiration
   if (isExpired) window.localStorage.removeItem('ghcreds')
@@ -63,12 +68,12 @@ const checkJWTExpiration = async(jwt) => {
 }
 
 async function getSiteInfo() {
-  const resp = await fetch(`${baseurl}/site-info?href=${encodeURIComponent(window.location.href)}`)
+  const resp = await fetch(`${baseURL}/site-info?href=${encodeURIComponent(window.location.href)}`)
   return await resp.json()
 }
 
 const baseComponentsIndex = async() => {
-  let response = await fetch(`${baseurl}/components/index.json`)
+  let response = await fetch(`${staticBase}/components/index.json`)
   let components = []
   const componentsList = await response.json()
   const base = window.location.origin
