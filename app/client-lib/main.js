@@ -15,10 +15,10 @@ console.log(window.location)
 let baseURL = ''
 let staticBase = ''
 if (window.location.hostname.indexOf('.github.io') > 0) {
-  baseurl = 'https://exp.visual-essays.app'
+  baseURL = 'https://exp.visual-essays.app'
   staticBase = `/${window.location.pathname.split('/')[1]}`
 }
-console.log(`baseurl=${baseurl} staticBase=${staticBase}`)
+console.log(`baseURL=${baseURL} staticBase=${staticBase}`)
 
 const hash = window.location.hash || location.hash
 let vm, siteInfo, jwt, qargs
