@@ -97,7 +97,6 @@
   
   </div>
 
-  <script>window.context = null;</script>
   <script src="/static/js/visual-essays.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://kit.fontawesome.com/19541ddce8.js" crossorigin="anonymous"></script>
@@ -105,23 +104,22 @@
 <script>
 
 new Promise(function(resolve, reject) {
-  function waitForContext() {
-    if (window.context) {
-      resolve(window.context)
+  function waitForComponents() {
+    if (window.components) {
+      resolve(window.components)
     } else {
-      setTimeout(waitForContext, 250)
+      setTimeout(waitForComponents, 250)
     }
   }
-  waitForContext()
+  waitForComponents()
 })
-.then(context => {
-      console.log('context', context)
+.then(components => {
       window.app = new Vue({
         el: '#app',
         components: {
-          'indexHeader': httpVueLoader(context.components.indexHeader && context.components.indexHeader.src),
-          'essayHeader': httpVueLoader(context.components.essayHeader && context.components.essayHeader.src),
-          'siteFooter': httpVueLoader(context.components.siteFooter && context.components.siteFooter.src)        
+          'indexHeader': httpVueLoader(components.indexHeader && components.indexHeader.src),
+          'essayHeader': httpVueLoader(components.essayHeader && components.essayHeader.src),
+          'siteFooter': httpVueLoader(components.siteFooter && components.siteFooter.src)        
         },
         data: () => ({
           html: undefined,
@@ -131,8 +129,8 @@ new Promise(function(resolve, reject) {
           appVersion: 'APP_VERSION',
           current: undefined,
           externalWindow: undefined,
-          jwt: context.jwt,
-          qargs: context.qargs,
+          jwt: null,
+          qargs: {},
           href: undefined,
           siteInfo: {}
         }),
@@ -143,18 +141,21 @@ new Promise(function(resolve, reject) {
           refQueryArg() { return this.ref && this.ref !== this.siteInfo.ref ? `?ref=${this.ref}` : '' }
         },
         mounted() {
+          this.parseQargs()
           window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
-          this.getSiteInfo().then(siteInfo => {
-            console.log(siteInfo)
-            this.siteInfo = siteInfo
-            this.loadEssay(window.location.pathname)
-          })
-          
+          this.loadEssay(window.location.pathname)          
         },
         methods: {
-          async getSiteInfo() {
-            const resp = await fetch(`/site-info?href=${window.location.href}`)
-            return await resp.json()
+          parseQargs() {
+            this.qargs = window.location.href.indexOf('?') > 0
+              ? parseQueryString(window.location.href.split('?')[1])
+              : {}
+            if (this.qargs.token) {
+              this.jwt = this.qargs.token
+              window.localStorage.setItem('ghcreds', jwt)
+            } else {
+              this.jwt = window.localStorage.getItem('ghcreds')
+            }
           },
           logout() {
             this.jwt = undefined
@@ -186,10 +187,11 @@ new Promise(function(resolve, reject) {
             return this.essayCache[url]
           },
           loadEssay(path, replace, retries) {
-            path = `${path}${this.refQueryArg}`
+            path = `${path}${replace ? '' : this.refQueryArg}`
             this.cachingFetch(path)
             .then(html => {
               browserPath = path.replace(/\.md$/, '')
+              console.log(path, browserPath)
               if (replace) {
                 history.replaceState({file: path || ''}, '', browserPath)
               } else {
@@ -282,6 +284,9 @@ new Promise(function(resolve, reject) {
           }
         },
         watch: {
+          siteInfo() {
+            console.log('siteInfo', this.siteInfo)
+          },
           isLoaded() {    
             if (this.isLoaded) {
               this.isLoaded = false
@@ -294,6 +299,35 @@ new Promise(function(resolve, reject) {
     function parseUrl (href) {
       const match = href.match(/^(https?)\:\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/)
       return match && {protocol: match[1], host: match[2], hostname: match[3], origin: `${match[1]}://${match[2]}`, port: match[4], pathname: match[5], search: match[6], hash: match[7]}
+    }
+    function parseQueryString(queryString) {
+      queryString = queryString || window.location.search;
+      const dictionary = {};
+      try {
+        if (queryString.indexOf("?") === 0) {
+          queryString = queryString.substr(1);
+        }
+        const parts = queryString.split("&");
+        for (let i = 0; i < parts.length; i++) {
+          const p = parts[i];
+          const keyValuePair = p.split("=");
+          if (keyValuePair[0] !== "") {
+            const key = keyValuePair[0];
+            if (keyValuePair.length === 2) {
+              let value = keyValuePair[1];
+              // decode URI encoded string
+              value = decodeURIComponent(value);
+              value = value.replace(/\+/g, " ");
+              dictionary[key] = value;
+            } else {
+              dictionary[key] = "true";
+            }
+          }
+        }
+      } catch (err) {
+        // console.log(err);
+      }
+      return dictionary;
     }
   </script>
 </body>

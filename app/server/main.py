@@ -69,15 +69,14 @@ def _get_site_info(href):
     parsed = urlparse(href)
     hostname = parsed.hostname
     path_elems = [elem for elem in parsed.path.split('/') if elem]
-    qargs = parse_qs(parsed.query)
-    logger.info(f'hostname={hostname} path_elems={path_elems} query={qargs}')
+    logger.info(f'hostname={hostname} path_elems={path_elems}')
     repo_info = None
     site_info = {
         'ghpSite': False,
         'baseurl': '',
         'acct': DEFAULT_GH_ACCT,
         'repo': DEFAULT_GH_REPO,
-        'ref': qargs['ref'][0] if 'ref' in qargs else None,
+        'ref': None,
         'defaultBranch': None,
         'editBranch': None
     }
@@ -130,8 +129,6 @@ def _get_site_info(href):
         else:
             resource_baseurl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}'
         for key, value in site_config.items():
-            if key == 'ref' and 'ref' in qargs:
-                continue
             if key == 'components':
                 site_info['components'] = []
                 for comp in value:
