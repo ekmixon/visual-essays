@@ -291,8 +291,7 @@ def siteinfo(path=None):
 #   - "http://localhost:8080/callback"
 @app.route('/login')
 def login():
-    qargs = dict([(k, request.args.get(k)) for k in request.args])
-    site = urlparse(request.base_url).hostname
+    site, acct, repo, ref, path, qargs = _context()
     redirect_url = qargs.get('redirect', site)
     return redirect(f'{OAUTH_ENDPOINT}/auth/login/github?redirect={redirect_url}')
 
@@ -309,12 +308,9 @@ def expires(token):
 @app.route('/annotations', methods=['GET', 'OPTIONS'])
 @app.route('/annotations/', methods=['GET', 'OPTIONS'])
 def annotations(annoid=None):
-    logger.info(f'annotations: method={request.method}')
+    site, acct, repo, ref, path, qargs = _context()
     if request.method == 'OPTIONS':
         return ('', 204, cors_headers)
-
-    qargs = dict([(k, unquote(request.args.get(k))) for k in request.args])
-    _set_logging_level(qargs)
     kwargs = {'auth_token': gh_token(), 'reader': file_reader}
     for arg in ('target',):
         if arg in qargs:
@@ -335,8 +331,7 @@ def annotations(annoid=None):
 @app.route('/annotations/<path:annoid>', methods=['DELETE', 'PUT'])
 @login_required
 def annotations_protected(annoid=None):
-    logger.info(f'annotations_protected: {request.method} {annoid}')
-    qargs = dict([(k, unquote(request.args.get(k))) for k in request.args])
+    site, acct, repo, ref, path, qargs = _context()
     kwargs = {'auth_token': gh_token()}
     for arg in ('target',):
         if arg in qargs:
