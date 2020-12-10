@@ -6,7 +6,5 @@
     "ref": "main",
     "logo": "/static/images/labs.jpg",
     "favicon": "/static/images/favicon.ico",
-    "nav": [
-        {"label": "About", "icon": "info", "path": "/about"}
-    ]
+    "nav": []
 }
