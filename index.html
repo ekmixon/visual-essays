@@ -141,6 +141,7 @@ new Promise(function(resolve, reject) {
           refQueryArg() { return this.ref && this.ref !== this.siteInfo.ref ? `?ref=${this.ref}` : '' }
         },
         mounted() {
+          console.log('siteInfo', this.siteInfo)
           this.parseQargs()
           window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
           this.loadEssay(window.location.pathname)          
@@ -180,7 +181,7 @@ new Promise(function(resolve, reject) {
           },
           cachingFetch(path) {
             let url = `${this.siteInfo.ghpSite ? 'https://exp.visual-essays.app' : ''}/essay${path}`
-            console.log(`fetch=${url}`)
+            console.log(`ghpSite=${this.siteInfo.ghpSite} fetch=${url}`)
             if (!this.essayCache[url]) {
               this.essayCache[url] = this.fetchRetry(url).then(resp => resp.ok ? resp.text() : null)
             }
