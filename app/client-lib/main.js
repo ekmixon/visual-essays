@@ -85,6 +85,7 @@ const baseComponentsIndex = async() => {
 
 const doRemoteRequests = async () => {
   const remoteRequests = [baseComponentsIndex(), getSiteInfo()]
+  console.log(`jwt=${jwt}`)
   if (jwt !== null) remoteRequests.push(checkJWTExpiration(jwt))
 
   let responses = await Promise.all(remoteRequests)
@@ -204,7 +205,9 @@ function initApp() {
 
   vm.$store.dispatch('setAcct', siteInfo.acct)
   vm.$store.dispatch('setRepo', siteInfo.repo)
-  vm.$store.dispatch('setBranch', siteInfo.branch)
+  vm.$store.dispatch('setMdPath', window.location.pathname)
+  vm.$store.dispatch('setMdPath', window._essay)
+  vm.$store.dispatch('setBranch', siteInfo.editBranch)
 
   vm.$store.dispatch('setJWT', jwt)
   vm.$store.dispatch('setHash', hash)
@@ -221,10 +224,12 @@ function initApp() {
   vm.$store.dispatch('setShowBanner', window.app === undefined && !(qargs.nobanner === 'true' || qargs.nobanner === ''))
   vm.$store.dispatch('setDebug', qargs.debug === 'true' || qargs.debug === '')
 
+  console.log(vm.$store)
+
   if (window.app) {
     window.app.siteInfo = siteInfo
     console.log('window.app.siteInfo', window.app.siteInfo)
-    // window.app.jwt = jwt
+    window.app.jwt = jwt
     // window.app.qargs = qargs
     window.app.essayConfig = essayConfig
     // window.app.$store = vm.$store

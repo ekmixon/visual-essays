@@ -11,6 +11,9 @@ import re
 import json
 import getopt
 import base64
+import jwt
+from functools import wraps
+
 from urllib.parse import urlparse, parse_qs, unquote, urlencode
 
 import requests
@@ -25,8 +28,9 @@ logger.info(f'SCRIPT_DIR={SCRIPT_DIR} BASEDIR={BASEDIR}')
 from flask import Flask, request, send_from_directory, redirect, Response, jsonify, g
 app = Flask(__name__, static_url_path='/static', static_folder=os.path.join(BASEDIR, 'static'))
 
+from gh import query_gh_file, get_gh_file, has_gh_repo_prefix, get_site_config
 from essay import get_essay
-from gh import gh_token, query_gh_file, get_gh_file, has_gh_repo_prefix, get_site_config
+from annotations import query_annotations, get_annotation, create_annotation, update_annotation, delete_annotation, NotFoundException
 
 from expiringdict import ExpiringDict
 expiration = 60 * 60 * 24 # one day
@@ -36,6 +40,7 @@ ENV = 'prod'
 CONTENT_ROOT = None
 DEFAULT_GH_ACCT = 'jstor-labs'
 DEFAULT_GH_REPO = 've-docs'
+OAUTH_ENDPOINT = 'https://labs-auth-atjcn6za6q-uc.a.run.app'
 
 KNOWN_SITES = {
     'default': ['jstor-labs', 've-docs'],
@@ -51,6 +56,53 @@ cors_headers = {
     'Access-Control-Expose-Headers': 'ETag, Vary, Accept, Authorization, Prefer, Content-type, Link, Allow, Content-location, Location',
     'Allow': 'PUT, PATCH, GET, POST, DELETE, OPTIONS, HEAD'
 }
+
+# Fetch the public key from the auth service so we can validate tokens,
+# we're assuming a locally running auth service here
+# In production, the URL would be something like
+# https://auth.labs.jstor.org/publickey or https://labs.jstor.org/auth/publickey
+try:
+    r = requests.get(f'{OAUTH_ENDPOINT}/publickey')
+    public_key = r.text
+except:
+   public_key = None
+
+default_gh_token = os.environ.get('gh_token')
+if default_gh_token is None and os.path.exists(f'{BASEDIR}/gh-token'):
+    with open(f'{BASEDIR}/gh-token', 'r') as fp:
+        default_gh_token = fp.read().strip()
+
+def gh_token():
+    try:
+        return g.token
+    except:
+        return default_gh_token
+
+# Middleware decorator to enforce logins
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Ensure an Authorization header is provided
+        if request.headers.get('Authorization', '') == '':
+            return jsonify({'msg': 'login required'}), 401
+        # Bearer tokens are always prefixed with 'Bearer '
+        token_type, token_value = request.headers.get('Authorization').split()
+        if token_type == 'GHToken':
+            g.token = token_value
+            return f(*args, **kwargs)
+        elif token_type == 'Bearer':
+            try:
+                # Validate the JWT against the public key, must be RS256 since we're using RSA keys
+                decoded = jwt.decode(token_value, public_key.encode('utf-8'), algorithms='RS256')
+                # Store the ghtoken from decoded JWT on the application context for use in request handlers            
+                g.token = decoded['token']
+                return f(*args, **kwargs)
+            except jwt.DecodeError:
+                # JWT is not valid (may have expired, or fake token)
+                return jsonify({'msg': 'not a valid token'}), 401
+        else:
+            return jsonify({'msg': 'must be a bearer or github token'})
+    return decorated_function
 
 def _is_local(site):
     return site.startswith('localhost') or site.endswith('gitpod.io')
@@ -105,9 +157,7 @@ def _get_site_info(href):
         siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
 
     if repo_info is None:
-        url = f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}'
-        resp = requests.get(url)
-        logger.info(f'repos: {url} {resp.status_code}')
+        resp = requests.get(f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}')
         if resp.status_code == 200:
             repo_info = resp.json()
             if site_info['ref'] is None:
@@ -120,7 +170,6 @@ def _get_site_info(href):
         else:
             siteConfigUrl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
     resp = requests.get(siteConfigUrl)
-    logger.info(f'siteConfig: {siteConfigUrl} {resp.status_code}')
     if resp.status_code == 200:
         site_config = resp.json()
         site_info.update({
@@ -172,28 +221,6 @@ def _context(path=None):
     if ref is None:
         ref = get_site_config(acct, repo)['ref']
     return site, acct, repo, ref, path, qargs()
-
-'''
-@app.route('/config.json', methods=['GET'])
-def local_config():
-    logger.info(f'local_config: ENV={ENV} CONTENT_ROOT={CONTENT_ROOT}')
-    if ENV == 'dev' and CONTENT_ROOT:
-        config_path = os.path.join(CONTENT_ROOT, 'config.json')
-        if os.path.exists(config_path):
-            return json.load(open(config_path, 'r')), 200
-    return 'Not found', 404
-
-@app.route('/config/<path:path>', methods=['GET'])
-@app.route('/config/', methods=['GET'])
-@app.route('/config', methods=['GET'])
-def config(path=None):
-    site, acct, repo, ref, path, qargs = _context(path)
-    logger.info(f'config: site={site} acct={acct} repo={repo} ref={ref} path={path}')
-    raw, _, _ = query_gh_file( acct, repo, ref, '/config.json')
-    _config = json.loads(raw) if raw is not None else {} 
-    _config.update({'acct': acct, 'repo': repo, 'ref': ref})
-    return _config, 200, cors_headers
-'''
 
 @app.route('/essay/<path:path>', methods=['GET'])
 @app.route('/essay/', methods=['GET'])
@@ -257,11 +284,77 @@ def siteinfo(path=None):
     logger.info(f'site-info: href={href} site_info={_site_info_cache[href]}')
     return _site_info_cache[href], 200, cors_headers
 
+# Redirect the user to the auth server, the redirect callback URL must be added to the auth service whitelist
+# For the following request to be valid, the config.yaml for the auth service will need to look something like:
+# general:
+#   allowed_redirect_urls:
+#   - "http://localhost:8080/callback"
+@app.route('/login')
+def login():
+    qargs = dict([(k, request.args.get(k)) for k in request.args])
+    site = urlparse(request.base_url).hostname
+    redirect_url = qargs.get('redirect', site)
+    return redirect(f'{OAUTH_ENDPOINT}/auth/login/github?redirect={redirect_url}')
+
+@app.route('/jwt-expiration/<token>')
+def expires(token):
+    try:
+        decoded = jwt.decode(token, public_key.encode('utf-8'), algorithms='RS256')
+    except:
+        traceback.error(format_exc())
+        decoded = {'exp': 0}
+    return str(decoded['exp']), 200, cors_headers
+
+@app.route('/annotations/<path:annoid>', methods=['GET', 'OPTIONS'])
+@app.route('/annotations', methods=['GET', 'OPTIONS'])
+@app.route('/annotations/', methods=['GET', 'OPTIONS'])
+def annotations(annoid=None):
+    logger.info(f'annotations: method={request.method}')
+    if request.method == 'OPTIONS':
+        return ('', 204, cors_headers)
+
+    qargs = dict([(k, unquote(request.args.get(k))) for k in request.args])
+    _set_logging_level(qargs)
+    kwargs = {'auth_token': gh_token(), 'reader': file_reader}
+    for arg in ('target',):
+        if arg in qargs:
+            kwargs[arg] = qargs.pop(arg)
+    logger.info(kwargs)
+    try:
+        if 'target' in kwargs:
+            return (query_annotations(**kwargs), 200, cors_headers)
+        else:
+            return (get_annotation(annoid, **kwargs), 200, cors_headers)
+    except NotFoundException:
+        return 'Not found', 404
+    except:
+        logger.error(traceback.format_exc())
+        return ('Server error', 500, cors_headers)
+
+@app.route('/annotations/', methods=['POST'])
+@app.route('/annotations/<path:annoid>', methods=['DELETE', 'PUT'])
+@login_required
+def annotations_protected(annoid=None):
+    logger.info(f'annotations_protected: {request.method} {annoid}')
+    qargs = dict([(k, unquote(request.args.get(k))) for k in request.args])
+    kwargs = {'auth_token': gh_token()}
+    for arg in ('target',):
+        if arg in qargs:
+            kwargs[arg] = qargs.pop(arg)
+    try:
+        if request.method == 'POST':
+            return (create_annotation(request.json, **kwargs), 201, cors_headers)
+        if request.method == 'PUT':
+            return (update_annotation(request.json, annoid, **kwargs), 200, cors_headers)
+        elif request.method == 'DELETE': 
+            return (delete_annotation(annoid, **kwargs), 204, cors_headers)
+    except NotFoundException:
+        return 'Not found', 404
+
 @app.route('/<path:path>', methods=['GET'])
 @app.route('/', methods=['GET'])
 def main(path=None):
     site, acct, repo, ref, path, qargs = _context(path)
-    logger.info(f'main: site={site} acct={acct} repo={repo} ref={ref} path={path}')
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
         if site == 'localhost':
