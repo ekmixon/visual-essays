@@ -142,7 +142,10 @@ def _get_site_info(href):
                         comp['src'] = f'{resource_baseurl}{"" if comp["src"][0] == "/" else "/"}{comp["src"]}'
                     site_info['components'].append(comp)
             elif key in ('banner', 'favicon', 'logo') and not value.startswith('http'):
-                value = f'{resource_baseurl}{"" if value[0] == "/" else "/"}{value}'
+                if site_info['ghpSite'] and site_info['private']:
+                    value = f'https://{site_info["acct"]}.github.io/{site_info["repo"]}{"" if value[0] == "/" else "/"}{value}'
+                else:
+                    value = f'{resource_baseurl}{"" if value[0] == "/" else "/"}{value}'
             site_info[key] = value
 
     if site_info['ref'] and len(site_info['ref']) == 7 and re.match(r'^[0-9a-f]+$', site_info['ref']):
