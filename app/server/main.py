@@ -73,6 +73,7 @@ def _get_site_info(href):
     repo_info = None
     site_info = {
         'ghpSite': False,
+        'private': False,
         'baseurl': '',
         'acct': DEFAULT_GH_ACCT,
         'repo': DEFAULT_GH_REPO,
@@ -113,7 +114,11 @@ def _get_site_info(href):
                 site_info['ref'] = repo_info['default_branch']
             site_info['defaultBranch'] = repo_info['default_branch']
 
-    siteConfigUrl = siteConfigUrl if siteConfigUrl else f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
+    if not siteConfigUrl:
+        if repo_info is None and site_info['ghpSite'] == True: # Probably a private GH site 
+            siteConfigUrl = f'https://{hostname}{site_info["baseurl"]}/config.json'
+        else:
+            siteConfigUrl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
     resp = requests.get(siteConfigUrl)
     logger.info(f'siteConfig: {siteConfigUrl} {resp.status_code}')
     if resp.status_code == 200:
@@ -121,7 +126,8 @@ def _get_site_info(href):
         site_info.update({
             'acct': site_config.get('acct', site_info['acct']),
             'repo': site_config.get('repo', site_info['repo']),
-            'ref':  site_info['ref'] if site_info['ref'] else site_config.get('ref') 
+            'ref':  site_info['ref'] if site_info['ref'] else site_config.get('ref'),
+            'private': repo_info is None and site_info['ghpSite'] == True
         })
         
         if CONTENT_ROOT:
