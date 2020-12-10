@@ -179,7 +179,7 @@ new Promise(function(resolve, reject) {
             }
           },
           cachingFetch(path) {
-            let url = `/essay${path}`
+            let url = `${this.siteInfo.ghpSite ? 'https://exp.visual-essays.app' : ''}/essay${path}`
             console.log(`fetch=${url}`)
             if (!this.essayCache[url]) {
               this.essayCache[url] = this.fetchRetry(url).then(resp => resp.ok ? resp.text() : null)
