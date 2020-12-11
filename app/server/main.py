@@ -270,7 +270,7 @@ def essay(path=None):
             'root': CONTENT_ROOT,
             'raw': raw,
             'token': gh_token()}
-        content, md_url, md_sha md_path = get_essay(**essay_args)
+        content, md_url, md_sha, md_path = get_essay(**essay_args)
         if content and not raw:
             cache[cache_key] = {'html': content, 'url': md_url, 'sha': md_sha, 'md_path': md_path}
 
