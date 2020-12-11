@@ -1,0 +1,6 @@
+ports:
+  - port: 8080
+    onOpen: open-preview
+tasks:
+  - init: pip install -r app/server/requirements.txt
+    command: ./app/server/main.py -l info
