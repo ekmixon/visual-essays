@@ -35,9 +35,13 @@ from entity import KnowledgeGraph, as_uri
 from fingerprints import get_fingerprints
 from specimens import get_specimens
 
-from expiringdict import ExpiringDict
-expiration = 60 * 60 * 24 # one day
-cache = ExpiringDict(max_len=200, max_age_seconds=expiration)
+try:
+    from gc_cache import Cache
+    cache = Cache()
+except:
+    from expiringdict import ExpiringDict
+    expiration = 60 * 60 * 24 # one day
+    cache = ExpiringDict(max_len=200, max_age_seconds=expiration)
 
 ENV = 'prod'
 CONTENT_ROOT = None

@@ -31,13 +31,14 @@ expiration = 60 * 60 * 24 # one day
 class Cache(object):
 
     def __init__(self, **kwargs):
-        self.local = ExpiringDict(max_len=100, max_age_seconds=expiration)
+        self.local = ExpiringDict(max_len=200, max_age_seconds=expiration)
         self.project_name = kwargs.get('project', DEFAULT_PROJECT_NAME)
         self.bucket_name = kwargs.get('name', DEFAULT_BUCKET_NAME)
         self.creds_path = kwargs.get('creds_path', DEFAULT_CREDS_PATH)
         credentials = service_account.Credentials.from_service_account_file(self.creds_path)
         self.client = storage.Client(self.project_name, credentials)
         self.bucket = self.client.get_bucket(self.bucket_name)
+        logger.info(f'gcr-cache: project={self.project_name} bucket={self.bucket_name}')
 
     def __contains__(self, key):
         logger.debug(f'{key} local={key in self.local} gc={self.bucket.blob(key).exists()}')
