@@ -601,8 +601,9 @@ def _is_local(site):
 
 def get_essay(markdown, site, acct, repo, ref, path, root, raw, token, **kwargs):
     if not path:  path = '/'
-    logger.info(f'essay: site={site} acct={acct} repo={repo} ref={ref} root={root} path={path}')
-    content = md_path = url = sha = None
+    logger.info(f'essay: has_markdown={markdown is not None} site={site} acct={acct} repo={repo} ref={ref} root={root} path={path}')
+    md_path = path
+    content = url = sha = None
     if root and _is_local(site):
         markdown, md_path = get_local_markdown(path=path, root=root)
     if markdown is None:

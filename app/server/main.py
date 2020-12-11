@@ -250,14 +250,15 @@ def essay(path=None):
     raw = qargs.get('raw', 'false') in ('', 'true')
     refresh = qargs.get('refresh', 'false') in ('', 'true')
     cache_key = f'{site}|{acct}|{repo}|{ref}|{path}'
-    cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' else None
+    # cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' else None
+    cached_essay = cache.get(cache_key) if not refresh else None
     if cached_essay:
         markdown, _ , md_sha = get_gh_file(cached_essay['url'])
         path = cached_essay.get('md_path', path)
         if cached_essay['sha'] == md_sha:
             content = markdown if raw else cached_essay['html']
     
-    logger.info(f'essay: site={site} acct={acct} repo={repo} ref={ref} path={path} refresh={refresh} raw={raw} cached={cached_essay is not None and content is not None}')
+    logger.info(f'essay: site={site} acct={acct} repo={repo} ref={ref} path={path} refresh={refresh} raw={raw} cached={cached_essay is not None} content={content is not None}')
     
     if content is None:
         essay_args = {
