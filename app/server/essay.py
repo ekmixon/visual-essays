@@ -612,8 +612,8 @@ def get_essay(markdown, site, acct, repo, ref, path, root, raw, token, **kwargs)
             content = markdown
         else:
             html = markdown_to_html5(markdown, site, acct, repo, ref, md_path, root)
-            content = parse(html, md_path, acct, repo)
-    return content, url, sha
+            content = parse(html, md_path or path, acct, repo)
+    return content, url, sha, md_path
 
 def usage():
     print(f'{sys.argv[0]} [hl:a:r:b:s:t:] path')
