@@ -441,7 +441,7 @@ module.exports = {
     },
     openAnnotationsEditor() {
       // console.log('openAnnotationsEditor', this.currentItem)
-      const url = `https://jstor-labs.github.io/ve-annotations-tool?manifest=${encodeURIComponent(this.currentItem['manifest'])}&target=${encodeURIComponent(this.target)}&jwt=${this.jwt}`
+      const url = `/annotator?manifest=${encodeURIComponent(this.currentItem['manifest'])}&target=${encodeURIComponent(this.target)}&jwt=${this.jwt}`
       if (this.annosEditor) { this.annosEditor.close() }
       this.annosEditor = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1400,height=1200,scrollbars=yes,status=yes`)
     },

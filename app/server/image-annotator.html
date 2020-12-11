@@ -1,0 +1,672 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+
+    <style>
+        .v-btn {
+            text-transform: capitalize;
+            letter-spacing: unset;
+        }
+
+        .back-link {
+            background-color: #219653;
+            width: 50px;
+            height: 100%;
+            display: inline;
+            float: left;
+        }
+
+        .title-header-bg {
+            background-color: black;
+            height: 52px;
+        }
+
+        .image-title {
+            display: inline-block;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 8px 0 8px 16px;
+        }
+
+        .show-annotation {
+            margin: 8px 8px;
+            float: right;
+        }
+
+        .hide-annotation, .reorder-annotation {
+            margin: 8px;
+            background-color: #a8a8a8;
+
+        }
+
+        .save-cancel {
+            display: inline-block;
+            margin: 8px;
+        }
+
+        #top-overlay {
+            width: 400px;
+            height: 100px;
+            padding: 6px;
+            margin: 40px 0 0 28px;
+            font-size: 1.1em;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+
+        .main {
+            width: 100%;
+            height: calc(100vh - 50px);
+            margin: auto;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+
+        .main .overlay {
+            background-color: rgba(255, 255, 255, 0.8);
+            visibility: hidden;
+            opacity: 0;
+            transition: all 1s ease-out;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .containerStyle {
+            width: 100%;
+        }
+
+        .annotation-drawer {
+            width: 300px;
+            position: absolute;
+        }
+
+        .sticky-buttons {
+            position: fixed;
+            z-index: 11;
+            width: 100%;
+            box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.3);
+            background-color: #4e4e4e;
+        }
+
+        .main:hover .overlay {
+            visibility: visible;
+            opacity: 1;
+            transition: all 1s ease-in;
+        }
+
+        .annotation-info {
+            background-color: #ededed;
+        }
+
+        .annotation-info .v-btn:hover {
+            color: #398bb8;
+        }
+
+        .v-card__title {
+            font-size: 1rem !important;
+        }
+
+        .v-card__subtitle, .v-card__text, .v-card__title {
+            padding: 8px !important;
+        }
+
+        .list-enter, .list-leave-to {
+            opacity: 0;
+        }
+
+        .list-enter-active, .list-leave-active {
+            transition: opacity 0.5s ease;
+        }
+
+        .list-move {
+            transition: transform 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="app">
+    <v-app>
+        <div class="title-header-bg">
+            <div class="back-link">
+                <i class="fas fa-arrow-left fa-lg" style="color:#ffffff; margin: 16px;"></i>
+            </div>
+
+            <span v-html="label" class="image-title"></span>
+
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  color="#ffffff;"
+                  dark
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                <v-icon>fas fa-info-circle fa-lg</v-icon>
+                </v-btn>
+              </template>
+              <span v-if="manifest">
+                Attribution:
+                {{this.manifest.attribution}}
+              </span>
+            </v-tooltip>
+
+            <v-btn
+                    class="show-annotation"
+                    color="#219653"
+                    dark
+                    @click="showAnnotationList"
+            >
+                    <span v-if="!drawer">
+                      <i class="fas fa-chevron-left"></i>
+                      Show Annotations</span>
+                <span v-else>
+                       <i class="fas fa-chevron-right"></i>
+                      Hide Annotations</span>
+            </v-btn>
+
+        </div>
+
+        <div class="main">
+            <div id="top-overlay" class="overlay">
+                <template v-if="annotations && annotations.length > 0">
+                    <img :src="`${prefixUrl}next_rest.png`" style="float:right;" @click="viewNextAnnotation">
+                    <img :src="`${prefixUrl}previous_rest.png`" style="float:right;" @click="viewPreviousAnnotation">
+                    <img :src="`${prefixUrl}home_rest.png`" style="float:right;" @click="goHome">
+                </template>
+                <div v-html="label" style="float:left;"></div>
+            </div>
+
+            <div id="osd" class="containerStyle"></div>
+
+            <v-navigation-drawer
+                    v-model="drawer"
+                    absolute
+                    right
+                    mobile-breakpoint="0"
+                    class="annotation-drawer"
+            >
+                <div>
+                    <div class="sticky-buttons">
+                        <v-btn
+                                class="hide-annotation"
+                                color="#219653"
+                                dark
+                                @click="hideAnnotationList">
+                        <span>
+                          <i class="fas fa-chevron-right"></i>
+                          Hide
+                        </span>
+                        </v-btn>
+
+                        <v-btn
+                                v-if="!editOrder"
+                                class="reorder-annotation"
+                                color="#398bb8"
+                                dark
+                                @click="editAnnotationOrder">
+                      <span>
+                        <i class="fas fa-sort-alt"></i>
+                          Reorder
+                      </span>
+                        </v-btn>
+
+                        <div v-if="editOrder" class="save-cancel">
+                            <v-btn
+                                    class="save-annotation"
+                                    color="#398bb8"
+                                    dark
+                                    @click="saveAnnotationOrder">
+                              <span>
+                                Save
+                              </span>
+                            </v-btn>
+                            <v-btn
+                                    class="cancel-annotation"
+                                    color="#398bb8"
+                                    dark
+                                    @click="cancelAnnotationOrder">
+                              <span>
+                                Cancel
+                              </span>
+                            </v-btn>
+                        </div>
+                    </div>
+
+                    <v-item-group v-if="showAnnoList">
+                        <v-container class="d-block">
+                            <v-row style="margin-top: 52px">
+                                <v-col
+                                        v-for="(item, index) in visibleAnnotations"
+                                        :key="item[itemId]"
+                                        cols="12"
+                                >
+                                    <v-item v-slot:default="{ active, toggle }">
+
+                                        <v-card
+                                                :color="active ? '' : ''"
+                                                class="mx-auto"
+                                                max-height="200"
+                                                @click="toggle"
+                                        >
+                                            <v-img :src="`${item.cropSrc}`" height="100px" contain></v-img>
+                                            <div class="annotation-info">
+                                                <v-card-title>
+                                                    {{item.text}}
+
+                                                    <v-btn v-if="editOrder"
+                                                           :disabled="index + 1 >= visibleAnnotations.length"
+                                                           @click="down(index)" icon title="Move down">
+                                                        <i class="fas fa-arrow-down"></i>
+                                                    </v-btn>
+                                                    <v-btn v-if="editOrder" :disabled="index === 0" @click="up(index)"
+                                                           icon title="Move up">
+                                                        <i class="fas fa-arrow-up"></i>
+                                                    </v-btn>
+
+                                                </v-card-title>
+                                                <v-card-subtitle> id: {{item.id}}</v-card-subtitle>
+                                            </div>
+                                        </v-card>
+
+                                    </v-item>
+                                </v-col>
+
+                            </v-row>
+                        </v-container>
+
+                    </v-item-group>
+                </div>
+
+            </v-navigation-drawer>
+
+        </div>
+</div>
+</v-app>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+<script src="https://recogito.github.io/js/openseadragon-annotorious.min.js"></script>
+<script src="https://kit.fontawesome.com/19541ddce8.js" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+
+    const imageServer = 'https://iiif.visual-essays.app'
+    const annosEndpoint = '/annotations/'
+    const testManifest = 'https://iiif.visual-essays.app/presentation/ed36b26d3cba264d7f1a7202655f324ffe08f2ef5fee64ee7be8b770/manifest'
+
+    const options = {
+        dropzoneSelector: 'ul',
+        draggableSelector: 'li',
+        handlerSelector: null,
+        reactivityEnabled: true,
+        multipleDropzonesItemsDraggingEnabled: true,
+        showDropzoneAreas: true,
+        onDrop: function (event) {
+        },
+        onDragstart: function (event) {
+        },
+        onDragenter: function (event) {
+        },
+        onDragover: function (event) {
+        },
+        onDragend: function (event) {
+        }
+    }
+
+    window.app = new Vue({
+        el: '#app',
+        vuetify: new Vuetify(),
+        data: () => ({
+            drawer: false,
+            isAuthenticated: false,
+            prefixUrl: 'https://dev-visual-essays.netlify.app/images/',
+            manifest: undefined,
+            viewer: undefined,
+            annotorious: undefined,
+            annotations: undefined,
+            annoCursor: 0,
+            showAnnoList: false,
+            imageUrl: 'https://raw.githubusercontent.com/kent-map/kent/master/docs/dickens/images/Margate%20from%20the%20Parade.jpg',
+            //imageUrl: undefined,
+            cropPixels: [],
+            page: 1,
+            perPage: 9,
+            visibleAnnotationList: undefined,
+            itemId: {
+                type: String,
+                default: 'id'
+            },
+            editOrder: false,
+            target: undefined,
+            jwt: undefined,
+            imageSrc: undefined
+        }),
+        computed: {
+            label() {
+                return this.annoCursor > 0
+                    ? this.annotations[this.annoCursor - 1].text
+                    : this.manifest
+                        ? this.manifest.label
+                        : undefined
+            },
+            target() {
+                return this.attr('source')
+            },
+            jwt() {
+                return this.attr('token')
+            },
+            year() {
+              return this.attr('year')
+            },
+            visibleAnnotations() {
+                this.visibleAnnotationList = this.annotations.slice((this.page - 1) * this.perPage, this.page * this.perPage);
+                return this.visibleAnnotationList;
+            },
+        },
+        mounted() {
+          const qargs = this.parseQueryString()
+          console.log('ve-annotations-tool', qargs)
+          this.manifest = qargs.manifest
+          this.target = qargs.target
+          this.jwt = qargs.jwt
+          if (this.manifest) {
+            this.loadManifest(this.manifest)
+          }        
+        },
+        methods: {
+            loadManifest(manifestID) {
+                fetch(manifestID).then(resp => resp.json())
+                    .then(manifest => {
+                        this.manifest = manifest
+                        console.log(this.manifest)
+                        this.imageSrc = `${manifest.sequences[0].canvases[0].images[0].resource.service['@id']}`
+                        this.$nextTick(() => {
+                            console.log('init OpenSeadragon')
+                            this.viewer = OpenSeadragon({
+                                id: 'osd',
+                                prefixUrl: this.prefixUrl,
+                                tileSources: [`${manifest.sequences[0].canvases[0].images[0].resource.service['@id']}/info.json`],
+                                showNavigationControl: true,
+                                minZoomImageRatio: 0.2,
+                                maxZoomPixelRatio: 5,
+                                homeFillsViewer: false,
+                                // animationTime: 100,
+                                showHomeControl: true,
+                                showZoomControl: true,
+                                showFullPageControl: false,
+                                showNavigator: false,
+                                sequenceMode: true,
+                                showReferenceStrip: true,
+                                visibilityRatio: 1.0,
+                                constrainDuringPan: true
+                            })
+                            this.viewer.addHandler('home', () => {
+                                this.annoCursor = 0
+                            })
+                            this.initAnnotations()
+                        })
+                    })
+            },
+            goHome() {
+                this.viewer.viewport.goHome()
+            },
+            attr(label) {
+                const attr = this.manifest.metadata
+                    ? this.manifest.metadata.find(md => md.label === label)
+                    : undefined
+                return attr ? attr.value : undefined
+            },
+            initAnnotations() {
+                this.annotorious = OpenSeadragon.Annotorious(this.viewer, {readOnly: false})
+                this.annotorious.off()
+                this.annotorious.on('selectAnnotation', this.annotationSelected)
+                this.annotorious.on('createAnnotation', this.createAnnotation)
+                this.annotorious.on('updateAnnotation', this.updateAnnotation)
+                this.annotorious.on('deleteAnnotation', this.deleteAnnotation)
+                this.annotorious.on('changeSelectionTarget', this.changeSelectionTarget)
+                this.loadAnnotations()
+            },
+            loadAnnotations() {
+              const url = `${annosEndpoint}?target=${encodeURIComponent(this.target)}`
+              console.log('loadAnnotations', this.target, url)
+              return fetch(url)
+                .then(resp => resp.json())
+                .then(data => {
+                  const rawAnnotations = data.first
+                    ? data.first.items
+                    : data.items
+                      ? data.items
+                      : []
+                  this.annotations = rawAnnotations.map(anno => {
+                    this.annotorious.addAnnotation(anno)
+                    return {
+                      id: anno.id.split('/').pop(),
+                      region: anno.target.selector.value.split('=')[1],
+                      text: anno.body[0].value,
+                      crop: anno.target.selector.value.split('=')[1].replace('pixel:', '').split(',')
+                    }
+                  })                  
+                })
+            },
+            annotationSelected(anno) {
+                // this.annotorious.fitBounds(anno)
+            },
+            createAnnotation(anno) {
+              console.log('createAnnotation', anno)
+              anno.seq = this.annotations ? this.annotations.length : 0
+              anno.target.id = this.target
+              fetch(`${annosEndpoint}`, {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${this.jwt}`,
+                  'Content-type': 'application/json'
+                },
+                body: JSON.stringify(anno)
+              })
+              .then(resp => resp.json())
+              .then(createdAnno => {
+                console.log('created', createdAnno)
+                anno.id = createdAnno.id
+                const annotations = [
+                  ...this.annotations,
+                  {
+                    id: createdAnno.id,
+                    region: createdAnno.target.selector.value.split('=')[1],
+                    text: createdAnno.body[0].value,
+                    crop: createdAnno.target.selector.value.split('=')[1].replace('pixel:', '').split(',')
+                  }
+                ]
+                this.annotations = annotations
+              })
+            },
+            updateAnnotation(anno) {
+              console.log('updateAnnotation', anno)
+              const _id = anno.id.split('/').pop()
+              fetch(`${annosEndpoint}${this.target}/${_id}`, {
+                method: 'PUT',
+                headers: {
+                  Authorization: `Bearer ${this.jwt}`,
+                  'Content-type': 'application/json'
+                },
+                body: JSON.stringify(anno)
+              })
+              .then(resp => resp.json())
+              .then(updated => {
+                let idx
+                for (idx = 0; idx < this.annotations.length; idx++) {
+                  if (this.annotations[idx].id === updated.id) {
+                    break
+                  }
+                }
+                const annotations = this.annotations.filter(_anno => _anno.id !== updated.id)
+                annotations.splice(idx, 0, updated)
+                this.annotations = annotations
+              })
+            },
+            deleteAnnotation(anno) {
+              const _id = anno.id.split('/').pop()
+              fetch(`${annosEndpoint}${this.target}/${_id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${this.jwt}`}
+              })
+              .then(resp => {
+                if (resp.ok) {
+                  const annoId = resp.url.split('/').pop()
+                  this.annotations = this.annotations.filter(_anno => _anno.id !== annoId)
+                  this.goHome()
+                }
+              })
+            },
+            changeSelectionTarget(anno) {
+
+            },
+            viewNextAnnotation() {
+                console.log('viewNextAnnotation')
+                this.annoCursor = this.annoCursor < this.annotations.length ? this.annoCursor + 1 : 1
+                this.gotoAnnotation(this.annotations[this.annoCursor - 1])
+            },
+            viewPreviousAnnotation() {
+                console.log('viewPreviousAnnotation')
+                this.annoCursor = this.annoCursor > 1 ? this.annoCursor - 1 : this.annotations.length
+                this.gotoAnnotation(this.annotations[this.annoCursor - 1])
+            },
+            gotoAnnotation(anno) {
+                this.annoCursor = this.annotations.indexOf(anno) + 1
+                const region = this.parseRegionString(anno.region)
+                this.viewer.viewport.zoomSpring.animationTime = 2
+                this.viewer.viewport.fitBounds(region)
+                this.viewer.viewport.zoomSpring.animationTime = 1.2
+            },
+            parseRegionString(region) {
+                const s1 = region.split(':')
+                let ints = s1[s1.length - 1].split(',').map(v => parseInt(v))
+                if (ints.length === 4) {
+                    if (s1.length === 1 || (s1.length === 2 && (s1[0] === 'px' || s1[0] === 'pixel'))) {
+                        return this.viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(...ints))
+                    } else if (s1.length === 2 && (s1[0] === 'pct' || s1[0] === 'percent')) {
+                        const size = this.viewer.world.getItemAt(0).getContentSize()
+                        if (size.x > 0 && size.y > 0) {
+                            return this.viewer.viewport.imageToViewportRectangle(
+                                Math.round(size.x * ints[0] / 100),
+                                Math.round(size.y * ints[1] / 100),
+                                Math.round(size.x * ints[2] / 100),
+                                Math.round(size.y * ints[3] / 100)
+                            )
+                        }
+                    }
+                }
+            },
+
+            showAnnotationList() {
+                for (anno of this.annotations) {
+                    var crop = anno.region.replace('pixel:', '').split(',')
+                    var cropRound = crop.map(n => Math.round(n));
+                    anno.cropSrc = this.imageSrc + "/" + cropRound.toString() + "/full/0/default.jpg"
+                    //anno.cropSrc = imageServer + "/images/a58d7d72db0b59290c54d57e414d88d892efee1b88cc639ee0f6dc3f/" + cropRound.toString() + "/full/0/default.jpg"
+
+                }
+                this.showAnnoList = !this.showAnnoList;
+                this.drawer = !this.drawer;
+                document.getElementById("osd").style.width = "calc(100% - 256px)";
+            },
+            hideAnnotationList() {
+                this.showAnnoList = !this.showAnnoList;
+                this.drawer = !this.drawer;
+                document.getElementById("osd").style.width = "100%";
+            },
+
+            getImage() {
+                return this.imageUrl;
+            },
+
+            up(index) {
+                const newValue = [...this.annotations]
+                newValue[index] = this.annotations[index - 1]
+                newValue[index - 1] = this.annotations[index]
+                this.annotations = newValue
+                console.log('up this.annotations', this.annotations)
+                //this.$emit('input', newValue)
+            },
+            down(index) {
+                const newValue = [...this.annotations]
+                newValue[index] = this.annotations[index + 1]
+                newValue[index + 1] = this.annotations[index]
+                this.annotations = newValue
+                console.log('down this.annotations', this.annotations)
+                //this.$emit('input', newValue)
+            },
+            add() {
+                this.items.push({id: this.counter++})
+            },
+            editAnnotationOrder() {
+                this.editOrder = true;
+            },
+            saveAnnotationOrder() {
+                console.log('save order!');
+                this.editOrder = false;
+            },
+            cancelAnnotationOrder() {
+                this.editOrder = false;
+            },
+            parseRegionString(region) {
+            const s1 = region.split(':')
+            let ints = s1[s1.length-1].split(',').map(v => parseInt(v))
+            if (ints.length === 4) {
+              if (s1.length === 1 || (s1.length === 2 && (s1[0] === 'px' || s1[0] === 'pixel'))) {
+                return this.viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(...ints))
+              } else if (s1.length === 2 && (s1[0] === 'pct' || s1[0] === 'percent')) {
+                const size = this.viewer.world.getItemAt(0).getContentSize()
+                if (size.x > 0 && size.y > 0) {
+                  return this.viewer.viewport.imageToViewportRectangle(
+                    Math.round(size.x * ints[0]/100),
+                    Math.round(size.y * ints[1]/100),
+                    Math.round(size.x * ints[2]/100), 
+                    Math.round(size.y * ints[3]/100)
+                  )
+                }
+              }
+            }
+          },
+          parseQueryString(queryString) {
+            queryString = queryString || window.location.search
+            const dictionary = {}
+            try {
+              if (queryString.indexOf('?') === 0) {
+                queryString = queryString.substr(1)
+              }
+              const parts = queryString.split('&')
+              for (let i = 0; i < parts.length; i++) {
+                const p = parts[i]
+                const keyValuePair = p.split("=")
+                if (keyValuePair[0] !== '') {
+                  const key = keyValuePair[0]
+                  if (keyValuePair.length === 2) {
+                    let value = keyValuePair[1]
+                    // decode URI encoded string
+                    value = decodeURIComponent(value)
+                    value = value.replace(/\+/g, ' ')
+                    dictionary[key] = value
+                  } else {
+                    dictionary[key] = 'true'
+                  }
+                }
+              }
+            } catch (err) {
+              console.log(err)
+            }
+            return dictionary
+            }
+        }
+    })
+
+</script>
+
+</body>
+</html>

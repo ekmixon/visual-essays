@@ -80,8 +80,8 @@ except:
    public_key = None
 
 default_gh_token = os.environ.get('gh_token')
-if default_gh_token is None and os.path.exists(f'{BASEDIR}/gh-token'):
-    with open(f'{BASEDIR}/gh-token', 'r') as fp:
+if default_gh_token is None and os.path.exists(f'{SCRIPT_DIR}/gh-token'):
+    with open(f'{SCRIPT_DIR}/gh-token', 'r') as fp:
         default_gh_token = fp.read().strip()
 
 def gh_token():
@@ -352,6 +352,14 @@ def file_reader(arg):
 
 def file_writer(arg):
     logger.info(f'file_writer {arg}')
+
+
+@app.route('/annotator/<path:path>', methods=['GET']) 
+@app.route('/annotator/', methods=['GET']) 
+@app.route('/annotator', methods=['GET']) 
+def annotator(path=None):
+    logger.info(f'annotator: path={path}')
+    return (open(os.path.join(SCRIPT_DIR, 'image-annotator.html'), 'r').read(), 200, cors_headers)
 
 @app.route('/annotations/<path:annoid>', methods=['GET', 'OPTIONS'])
 @app.route('/annotations', methods=['GET', 'OPTIONS'])
