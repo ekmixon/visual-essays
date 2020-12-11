@@ -10,9 +10,14 @@ import sys
 import re
 import json
 import getopt
+import hashlib
 import base64
+import gzip
 import jwt
 from functools import wraps
+from PIL import Image
+from io import StringIO, BytesIO
+import shutil
 
 from urllib.parse import urlparse, parse_qs, unquote, urlencode
 
@@ -467,6 +472,73 @@ def main(path=None):
         return html, 200
 
     return 'Not found', 404
+
+@app.route('/thumbnail')
+def thumbnail():
+    qargs = dict([(k, request.args.get(k)) for k in request.args])
+    logger.info(json.dumps(qargs, indent=2))
+    if 'url' in qargs:
+        url = qargs.pop('url')
+        width, height = [int(v) for v in qargs.pop('size', '400x260').lower().replace('x', ' ').replace(',', ' ').split()]
+        quality = int(qargs.pop('quality', 50))
+        refresh = qargs.pop('refresh', 'false') in ('true', '')
+        if qargs:
+            url = f'{url}{"?" if "?" not in url else "&"}{urlencode(qargs)}'
+        logger.info(f'thumbnail: url={url} width={width} height={height} quality={quality} refresh={refresh}')
+
+        key = hashlib.sha256(f'{url}-{width}x{height}-{quality}'.encode()).hexdigest()
+        img = cache.get(key) if not refresh else None
+        logger.info(f'cached={img is not None}')
+        if img is None:
+            r = requests.get(url, stream=True)
+            if r.status_code == 200:
+                r.raw.decode_content = True
+                im = Image.open(r.raw)
+                im_format = im.format
+                aspect = im.width / im.height
+                logger.info(f'url={url} format={im_format} width={im.width} height={im.height} aspect={aspect}')
+
+                if width > height:
+                    if im.width > im.height:
+                        im.thumbnail([width, width])
+                        offset = math.ceil((im.height-height)/2)
+                        im = im.crop((0, offset, width, offset+height))
+                    else:
+                        im.thumbnail([math.ceil(width/aspect), math.ceil(width/aspect)])
+                        offset = math.ceil((im.height-height)/2)
+                        im = im.crop((0, offset, width, offset+height))
+                else:
+                    if im.width > im.height:
+                        im.thumbnail([math.ceil(height*aspect), math.ceil(height*aspect)])
+                        offset = math.ceil((im.width-width)/2)
+                        im = im.crop((offset, 0, offset+width, height))
+                    else:
+                        im.thumbnail([math.ceil(height), math.ceil(height)])
+                        offset = math.ceil((im.width-width)/2)
+                        im = im.crop((offset, 0, offset+width, height))
+                imgByteArr = BytesIO()
+                logger.info(f'format={im_format}')
+                im.save(imgByteArr, format=im_format, quality=quality)
+                img_b64 = base64.b64encode(imgByteArr.getvalue())
+                img = {'b64': str(img_b64, 'utf-8'), 'content_type': Image.MIME[im_format]}
+                cache.set(key, img)
+        decoded = base64.b64decode(bytes(img['b64'], 'utf-8'))
+        accept_encoding = request.headers.get('Accept-Encoding', '')
+        response = Response(status=200)
+        response.headers['Content-Type'] = img['content_type']
+        response.headers['Content-Length'] = len(decoded)
+        if 'gzip' in accept_encoding.lower():
+            gzip_buffer = BytesIO()
+            gzip_file = gzip.GzipFile(mode='wb', fileobj=gzip_buffer)
+            gzip_file.write(decoded)
+            gzip_file.close()
+            response.data = gzip_buffer.getvalue()
+            response.headers['Content-Encoding'] = 'gzip'
+            response.headers['Vary'] = 'Accept-Encoding'
+        else:
+            response.data = decoded
+        logger.info(f'size={len(decoded)}')
+        return response
 
 def usage():
     print('%s [hl:da:r:c:]' % sys.argv[0])
