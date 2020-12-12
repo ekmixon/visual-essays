@@ -7,3 +7,4 @@ node_modules
 venv
 client-lib/nohup.out
 .vscode
+nohup.out
