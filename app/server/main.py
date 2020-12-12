@@ -485,7 +485,7 @@ def main(path=None):
     site, acct, repo, ref, path, qargs = _context(path)
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
-        if site.startswith('localhost'):
+        if site.startswith('localhost') or site.endswith('gitpod.io'):
             html = re.sub(r'"/visual-essays/static/', f'"/static/', html)
         if ENV == 'dev':
             if site.endswith('gitpod.io'):
