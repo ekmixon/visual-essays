@@ -55,7 +55,7 @@ DEFAULT_GH_REPO = 've-docs'
 OAUTH_ENDPOINT = 'https://labs-auth-atjcn6za6q-uc.a.run.app'
 
 KNOWN_SITES = {
-    'default': ['jstor-labs', 've-docs'],
+    'default': ['jstor-labs', 'visual-essays'],
     'plant-humanities.app': ['jstor-labs', 'plant-humanities'],
     'kent-maps.online': ['kent-map', 'kent']
 }
