@@ -1,4 +1,5 @@
 #!/bin/bash
 
-cd /workspace/visual-essays/app/client-lib; yarn; nohup yarn serve & 
-/workspace/visual-essays/app/server/main.py -l info -d -c /workspace/visual-essays
+cd app/client-lib; yarn; nohup yarn serve & 
+cd ../..
+app/server/main.py -l info -d -c .
