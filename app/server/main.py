@@ -50,8 +50,6 @@ except:
 
 ENV = 'prod'
 CONTENT_ROOT = None
-DEFAULT_GH_ACCT = 'jstor-labs'
-DEFAULT_GH_REPO = 've-docs'
 OAUTH_ENDPOINT = 'https://labs-auth-atjcn6za6q-uc.a.run.app'
 
 KNOWN_SITES = {
@@ -140,8 +138,8 @@ def _get_site_info(href):
         'ghpSite': False,
         'private': False,
         'baseurl': '',
-        'acct': DEFAULT_GH_ACCT,
-        'repo': DEFAULT_GH_REPO,
+        'acct': KNOWN_SITES['default'][0],
+        'repo': KNOWN_SITES['default'][1],
         'ref': None,
         'defaultBranch': None,
         'editBranch': None
