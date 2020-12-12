@@ -86,8 +86,8 @@ module.exports = {
         const newActiveElements = this.elemIdPath(elemId)
         if (newActiveElements.length > 0 && !this.eqSet(new Set(this.activeElements), new Set(newActiveElements))) {
           this.$emit('set-active-elements', newActiveElements)
-          const contentParaIDs = Object.keys(this.paragraphs).filter(pid => pid.indexOf('section-') === 0)
-          const idx = contentParaIDs.indexOf(newActiveElements[0])
+          // const contentParaIDs = Object.keys(this.paragraphs).filter(pid => pid.indexOf('section-') === 0)
+          // const idx = contentParaIDs.indexOf(newActiveElements[0])
         }
       }
     },

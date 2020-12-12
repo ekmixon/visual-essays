@@ -54,7 +54,7 @@
       ></component>
     </div>
     <div v-if="footerEnabled" ref="footer" id="siteFooter" class="footer">
-      <site-footer></site-footer>
+      <component :is="footerComponent"></component>
     </div>
     <component v-bind:is="entityInfoboxModalComponent"
       :selected-item="selectedItemID"
@@ -102,7 +102,7 @@ export default {
         // viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         isEmbedded() { return !this.$store.getters.showBanner },
         layout() { return this.$store.getters.layout },
-        essayConfig() { return this.$store.getters.essayConfig },
+        essayConfig() { return this.$store.getters.essayConfig || {} },
         debug() { return this.$store.getters.debug },
         pageTitle() { return this.essayConfig.title || this.$store.getters.siteTitle },
         styleClass() { 
@@ -114,11 +114,27 @@ export default {
         },
 
         contentComponents() { return this.components.filter(compConf => compConf.type === 'content') },
-        contentComponent() { return this.contentComponents.find(c => c.layouts && c.layouts.indexOf(this.layout) >= 0).component },
+        contentComponent() { 
+          const found = this.contentComponents.find(c => c.layouts && c.layouts.indexOf(this.layout) >= 0)
+          return found ? found.component : 'essay'
+        },
         headerComponents() { return this.components.filter(compConf => compConf.type === 'header') },
-        headerComponent() { return this.headerComponents.find(c => c.layouts && c.layouts.indexOf(this.layout) >= 0).component },
-        entityInfoboxModalComponent() { return this.components.find(c => c.name === 'entityInfoboxModal').component },
-        viewerComponent() { return this.components.find(c => c.name === 'viewer').component },
+        headerComponent() {
+          const found = this.headerComponents.find(c => c.layouts && c.layouts.indexOf(this.layout) >= 0)
+          return found ? found.component : 'essayHeader'
+        },
+        footerComponent() {
+          const found = this.components.find(c => c.name === 'siteFooter')
+          return found ? found.component : 'siteFooter'
+        },
+        entityInfoboxModalComponent() {
+          const found = this.components.find(c => c.name === 'entityInfoboxModal')
+          return found ? found.component : null
+        },
+        viewerComponent() {
+          const found = this.components.find(c => c.name === 'viewer')
+          return found ? found.component : null
+        },
 
         activeElement() { return this.activeElements.length > 0 ? this.activeElements[0] : undefined },
         groups() { return groupItems(itemsInElements(elemIdPath(this.activeElement), this.allItems), this.$store.getters.componentSelectors) },

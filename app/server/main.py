@@ -14,6 +14,8 @@ import hashlib
 import base64
 import gzip
 import jwt
+import traceback
+
 from functools import wraps
 from PIL import Image
 from io import StringIO, BytesIO
@@ -259,12 +261,12 @@ def essay(path=None):
     refresh = qargs.get('refresh', 'false') in ('', 'true')
     cache_key = f'{site}|{acct}|{repo}|{ref}|{path}'
     cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' else None
-    if cached_essay:
+    if cached_essay and cached_essay['url']:
         markdown, _ , md_sha = get_gh_file(cached_essay['url'])
         path = cached_essay.get('md_path', path)
         if cached_essay['sha'] == md_sha:
             content = markdown if raw else cached_essay['html']
-    
+
     logger.info(f'essay: site={site} acct={acct} repo={repo} ref={ref} path={path} refresh={refresh} raw={raw} cached={cached_essay is not None} content={content is not None}')
     
     if content is None:
@@ -288,7 +290,7 @@ def essay(path=None):
 
 @app.route('/components/<path:path>', methods=['GET'])
 def components(path):
-    full_path = f'{BASEDIR}/components/{path}'
+    full_path = f'{BASEDIR}/app/client-lib/components/{path}'
     logger.info(f'components: path={path} full_path={full_path} exists={os.path.exists(full_path)}')
     if os.path.exists(full_path):
         path_elems = full_path.split('/')
@@ -360,7 +362,7 @@ def expires(token):
     try:
         decoded = jwt.decode(token, public_key.encode('utf-8'), algorithms='RS256')
     except:
-        traceback.error(format_exc())
+        logger.debug(traceback.format_exc())
         decoded = {'exp': 0}
     return str(decoded['exp']), 200, cors_headers
 

@@ -6,7 +6,8 @@
       :height="height"
       webkitallowfullscreen mozallowfullscreen allowfullscreen 
       frameborder="0">
-    </iframe>    
+    </iframe>
+  </div> 
 </template>
 <script>
 

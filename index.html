@@ -212,11 +212,11 @@ new Promise(function(resolve, reject) {
             })
           },
           viewMarkdown() {
-            this.openWindow(`/markdown-viewer/${this.siteInfo.acct}/${this.siteInfo.repo}/${this.ref}/${window._essay}`)
+            this.openWindow(`/markdown-viewer/${this.siteInfo.acct}/${this.siteInfo.repo}/${this.ref}${window._essay}.md`)
           },
           editMarkdown(editor) {
             this.openWindow(editor == 'custom'
-              ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}/${window._essay}`
+              ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${window._essay}.md`
               : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${window._essay}.md`
             ) 
           },

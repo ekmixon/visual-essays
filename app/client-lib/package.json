@@ -4,6 +4,7 @@
   "description": "Visual essay core library",
   "main": "webpack.config.js",
   "scripts": {
+    "serve-dev": "vue-cli-service --port 8080 serve main.js",
     "serve": "webpack-dev-server --mode development --hot --port 8088 --output-public-path js --contentBase public --disableHostCheck",
     "build": "webpack --mode production --progress",
     "bundle-report": "webpack-cli --profile --json > compilation-stats.json; webpack-bundle-analyzer --port 4200 compilation-stats.json"
