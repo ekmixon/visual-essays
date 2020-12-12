@@ -1,5 +1,5 @@
 <template>
-  <div ref="app" id="visual-essay" :class="`${layout} ${isEmbedded ? 'embedded' : ''}`">
+  <div ref="app" id="visual-essay" :class="`visual-essay ${layout} ${isEmbedded ? 'embedded' : ''}`">
     <div v-if="headerEnabled" ref="header" class="header">
       <component v-bind:is="headerComponent"
         :height="headerHeight"
@@ -53,8 +53,8 @@
         @toggle-viewer="toggleOption('viewerIsOpen')"
       ></component>
     </div>
-    <div v-if="footerEnabled" ref="footer" id="siteFooter" class="footer">
-      <component :is="footerComponent"></component>
+    <div v-if="footerEnabled && siteInfo" ref="footer" id="siteFooter" class="footer">
+      <component :is="footerComponent" :site-config="siteInfo"></component>
     </div>
     <component v-bind:is="entityInfoboxModalComponent"
       :selected-item="selectedItemID"
@@ -103,6 +103,7 @@ export default {
         isEmbedded() { return !this.$store.getters.showBanner },
         layout() { return this.$store.getters.layout },
         essayConfig() { return this.$store.getters.essayConfig || {} },
+        siteInfo() { return this.$store.getters.siteInfo || {} },
         debug() { return this.$store.getters.debug },
         pageTitle() { return this.essayConfig.title || this.$store.getters.siteTitle },
         styleClass() { 
@@ -140,23 +141,27 @@ export default {
         groups() { return groupItems(itemsInElements(elemIdPath(this.activeElement), this.allItems), this.$store.getters.componentSelectors) },
       },
       mounted() {
-        this.headerEnabled = this.footerEnabled = !this.isEmbedded
+        // this.headerEnabled = this.footerEnabled = !this.isEmbedded
+        this.headerEnabled = this.footerEnabled = true
         this.init()
       },
       methods: {
         init() {
-          this.viewerIsOpen = this.layout[0] === 'v'
+          // this.viewerIsOpen = this.layout[0] === 'v'
+          this.viewerIsOpen = false
           console.log(`App: ${this.acct}/${this.repo}/${this.branch}${this.path} layout=${this.layout} viewerIsOpen=${this.viewerIsOpen}`)
           console.log(`init: layout=${this.layout} touchDevice=${'ontouchstart' in window}`)
           window.addEventListener('resize', this.doLayout)
           this.waitForHeaderFooter() // header and footer are dynamically loaded external components
           this.doLayout(true)
+        
         },
         setActiveElements(activeElements) {
           this.activeElements = activeElements
           this.itemsInActiveElements = itemsInElements(activeElements, this.allItems)
         },
         resizeHeader(e) {
+          // console.log('resizeHeader')
           let delta
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 5
@@ -172,13 +177,14 @@ export default {
             this.header.style.height = `${newHeaderHeight}px`
             this.headerHeight = newHeaderHeight
             this.doLayout()
-            e.preventDefault()
+            //e.preventDefault()
             e.stopPropagation()
           }
         },
         waitForHeaderFooter() {
           if (!this.header) {
-            this.header = document.querySelector(`#header.${this.layout === 'index' ? 'index' : 'essay'}`)
+            // this.header = document.querySelector(`#header.${this.layout === 'index' ? 'index' : 'essay'}`)
+            this.header = document.querySelector(`#header`)
             if (this.header) {
               if ('ontouchstart' in window) {
                 this.header.addEventListener('touchstart', (e) => { this.lastTouchY = e.touches[0].screenY })
@@ -186,8 +192,8 @@ export default {
                 this.header.addEventListener('touchmove', this.resizeHeader )
                 this.$refs.essay.addEventListener('touchmove', this.resizeHeader)
               } else {
-                this.header.addEventListener('wheel', this.resizeHeader)
-                this.$refs.essay.addEventListener('wheel', this.resizeHeader)
+                this.header.addEventListener('wheel', this.resizeHeader, {passive: true})
+                this.$refs.essay.addEventListener('wheel', this.resizeHeader, {passive: true})
               }
               this.doLayout()
             }
@@ -201,9 +207,11 @@ export default {
           }
           if (!this.header || !this.footer) setTimeout(this.waitForHeaderFooter, 250)
         },
-        doLayout(init) {
+        doLayout(init) { // eslint-disable-line no-unused-vars
+          /*
           const container = document.getElementById('content')
-          const viewer = this.$refs.viewer
+          // const viewer = this.$refs.viewer
+          const viewer = null
           const essay = this.$refs.essay
           if (this.header && (init || this.header.clientHeight === 0)) {
             this.header.style.height = this.header.maxHeight
@@ -234,6 +242,7 @@ export default {
               // console.log(`doLayout: layout=${this.layout} container=${container ? container.clientHeight : 100} header=${[this.headerEnabled,headerHeight]} footer=${[this.footerEnabled,footerHeight]} content=${contentHeight} viewerIsOpen=${this.viewerIsOpen} viewer=${[viewer.clientWidth,viewer.clientHeight]} essay=${[essay.clientWidth,essay.clientHeight]}`)
             })
           }
+          */
         },
         setHoverItem(itemID) {
           this.hoverItemID = itemID
@@ -286,9 +295,8 @@ export default {
 
   #visual-essay {
     display: grid;
-    align-items: stretch;
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr auto;
+    grid-template-rows: auto 1fr auto auto;
     grid-template-areas: 
       "header"
       "essay"
@@ -306,10 +314,6 @@ export default {
       "footer footer";
     position: absolute;
   }
-  .embedded {
-    height: calc(100vh - 154px) !important;
-    position: unset !important;
-  }
   .header {
     grid-area: header;
   }
@@ -320,12 +324,13 @@ export default {
   .viewer {
     grid-area: viewer;
     justify-self: stretch;
+    display: none;
   }
   .footer {
     grid-area: footer;
   }
 
-  .default .essay {
+  .default, .essay {
     padding: 2em;
   }
 

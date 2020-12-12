@@ -1,5 +1,5 @@
 <template>
-  <div ref="header" id="header" :class="`header ${essayConfig && essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`">
+  <div ref="header" id="header" class="header" :style="`height:${height}; background-image: url(${banner})`">
     <nav>
       <div id="menuToggle">
         <input type="checkbox" />
@@ -157,7 +157,7 @@
         this.closeDrawer()
         this.$emit('edit-markdown', editor)
       },
-      gotoGithub(editor) {
+      gotoGithub() {
         this.closeDrawer()
         this.$emit('goto-github')
       },
@@ -196,7 +196,6 @@
     background-size: cover;
     position: relative;
     margin: 0;
-    background-color: white;
     color: #444;
   }
 
