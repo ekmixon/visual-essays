@@ -15,7 +15,8 @@ WORKDIR /usr/src/app
 
 ADD server server
 ADD index.html .
-ADD static static
+ADD js js
+ADD images images
 ADD components components
 
 ENV PORT 8080

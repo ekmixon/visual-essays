@@ -31,7 +31,7 @@ while BASEDIR != '/' and not os.path.exists(os.path.join(BASEDIR, 'index.html'))
 logger.info(f'SCRIPT_DIR={SCRIPT_DIR} BASEDIR={BASEDIR}')
 
 from flask import Flask, request, send_from_directory, redirect, Response, jsonify, g
-app = Flask(__name__, static_url_path='/static', static_folder=os.path.join(BASEDIR, 'static'))
+app = Flask(__name__, static_url_path='/static', static_folder=BASEDIR)
 
 from gh import query_gh_file, get_gh_file, has_gh_repo_prefix, get_site_config
 from essay import get_essay
@@ -120,7 +120,8 @@ def _is_local(site):
     return site.startswith('localhost') or site.endswith('gitpod.io')
 
 def _is_ve_site(site):
-    _site = site[4:] if site[:4] in ('dev.', 'exp.') else site
+    _site = site.split(':')[0]
+    _site = _site[4:] if _site[:4] in ('dev.', 'exp.') else _site
     return _site == 'visual-essays.app' or _is_local(site)
 
 def qargs():
@@ -153,7 +154,7 @@ def _get_site_info(href):
             'repo':    path_elems[0],
             'baseurl': f'/{path_elems[0]}'
         })
-    elif hostname == 'localhost' or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io'):
+    elif hostname.startswith('localhost') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io'):
         if len(path_elems) >= 2:
             resp = requests.get(f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}')
             if resp.status_code == 200:
@@ -230,12 +231,14 @@ def _get_site_info(href):
 
 def _context(path=None):
     path = _normalize_path(path)
-    site = urlparse(request.base_url).hostname
+    parsed = urlparse(request.base_url)
+    site = parsed.netloc
+    hostname = urlparse(request.base_url).hostname
     logger.info(f'_context: _is_ve_site={_is_ve_site(site)} gh_repo_prefix={has_gh_repo_prefix(path)}')
     if _is_ve_site(site) and has_gh_repo_prefix(path):
         acct, repo = path[1:].split('/')[:2]
     else:
-        acct, repo = KNOWN_SITES.get(site[4:] if site[:4] in ('dev.', 'exp.') else site, KNOWN_SITES['default'])
+        acct, repo = KNOWN_SITES.get(hostname[4:] if hostname[:4] in ('dev.', 'exp.') else hostname, KNOWN_SITES['default'])
     ref = qargs().pop('ref', None)
     if ref is None:
         ref = get_site_config(acct, repo)['ref']
@@ -247,11 +250,11 @@ def essay(path=None):
     global cache
     markdown = content = None
     site, acct, repo, ref, path, qargs = _context(path)
+    logger.info(f'essay: site={site} acct={acct} repo={repo} ref={ref} path={path}')
     raw = qargs.get('raw', 'false') in ('', 'true')
     refresh = qargs.get('refresh', 'false') in ('', 'true')
     cache_key = f'{site}|{acct}|{repo}|{ref}|{path}'
-    # cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' else None
-    cached_essay = cache.get(cache_key) if not refresh else None
+    cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' else None
     if cached_essay:
         markdown, _ , md_sha = get_gh_file(cached_essay['url'])
         path = cached_essay.get('md_path', path)
@@ -320,10 +323,19 @@ _site_info_cache = {}
 @app.route('/site-info/', methods=['GET'])
 @app.route('/site-info', methods=['GET'])
 def siteinfo(path=None):
-    site, acct, repo, ref, path, qargs = _context()
-    href = qargs.get('href')
+    site_info = {}
+    site = urlparse(request.base_url).netloc
+    href = qargs().get('href')
     if href not in _site_info_cache:
-        site_info = _get_site_info(href)
+        if site.startswith('localhost') and CONTENT_ROOT:
+            local_config_path = os.path.join(CONTENT_ROOT, 'config.json')
+            if os.path.exists(local_config_path):
+                site_info = json.load(open(local_config_path, 'r'))
+                for key in ('banner', 'logo', 'favicon'):
+                    if key in site_info and not site_info[key].startswith('http'):
+                        site_info[key] = f'http://{site}/static{"" if site_info[key][0] == "/" else "/"}{site_info[key]}'
+        else:
+            site_info = _get_site_info(href)
         _site_info_cache[href] = site_info
     logger.info(f'site-info: href={href} site_info={_site_info_cache[href]}')
     return _site_info_cache[href], 200, cors_headers
@@ -473,13 +485,13 @@ def main(path=None):
     site, acct, repo, ref, path, qargs = _context(path)
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
-        if site == 'localhost':
-            html = re.sub(r'"/visual-essays/static/', f'"/static/', html)
+        if site.startswith('localhost'):
+            html = re.sub(r'"/visual-essays/', f'"/', html)
         if ENV == 'dev':
             if site.endswith('gitpod.io'):
-                html = re.sub(r'"/static/js/visual-essays.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
+                html = re.sub(r'"/js/visual-essays.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
             else:
-                html = re.sub(r'"/static/js/visual-essays.+"', f'"http://{site}:8088/js/visual-essays.js"', html)
+                html = re.sub(r'"/js/visual-essays.+"', f'"http://localhost:8088/js/visual-essays.js"', html)
         return html, 200
 
     return 'Not found', 404
@@ -584,6 +596,7 @@ if __name__ == '__main__':
             KNOWN_SITES['default'][1] = a
         elif o in ('-c', '--root'):
             CONTENT_ROOT = os.path.abspath(a)
+            app.static_folder = CONTENT_ROOT
         elif o in ('-h', '--help'):
             usage()
             sys.exit()

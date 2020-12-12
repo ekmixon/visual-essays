@@ -29,9 +29,10 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   cp -va app/Dockerfile gcr-build
   cp -va app/server/*.py app/server/gh-token app/server/visual-essay-gcreds.json app/server/*.txt app/server/*.html app/server/sparql app/server/mappings gcr-build/server
   cp index.html gcr-build
-  cat index.html | sed "s/APP_VERSION/$APP_VERSION/" | sed 's/\/visual-essays\/static\//\/static\//' > gcr-build/index.html
+  cat index.html | sed "s/APP_VERSION/$APP_VERSION/" | sed 's/\/visual-essays\//\//' > gcr-build/index.html
   cp -va components gcr-build
-  cp -va static gcr-build
+  cp -va js gcr-build
+  cp -va images gcr-build
 
   cd gcr-build
   gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}

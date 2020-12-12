@@ -46,7 +46,7 @@ DEFAULT_REPO = 've-docs'
 cache = {}
 
 def get_local_markdown(path, root):
-    abs_path = f'{root}{path}'
+    abs_path = f'{root}{path[:-1] if path.endswith("/") else path}'
     logger.info(f'get_local_markdown: path={path} root={root} abs={abs_path} exists={os.path.exists(abs_path)}')
     markdown = md_path = None
     to_check = []
@@ -89,7 +89,7 @@ def _img_to_figure(soup):
 
 def convert_relative_links(soup, site, acct, repo, ref, path, root=None):
     path_elems = path[1:].split('/')
-    if False and site == 'localhost' and root is not None:
+    if site.startswith('localhost') and root is not None:
         abs_baseurl = f'http://{site}/static'
     else:
         abs_baseurl = f'https://raw.githubusercontent.com/{acct}/{repo}/{ref}'
@@ -98,7 +98,7 @@ def convert_relative_links(soup, site, acct, repo, ref, path, root=None):
 
     for tag in ('img', 'var', 'span', 'param'):
         for elem in soup.find_all(tag):
-            for attr in ('banner', 'data-banner', 'src', 'url', 'file', 'manifest', 'data', 'geojson', 'logo'):
+            for attr in ('banner', 'data-banner', 'logo', 'src', 'url', 'file', 'manifest', 'data', 'geojson', 'logo'):
                 if attr in elem.attrs and elem.attrs[attr] and not elem.attrs[attr].startswith('http'):
                     before = elem.attrs[attr]
                     if elem.attrs[attr][0] == '/':

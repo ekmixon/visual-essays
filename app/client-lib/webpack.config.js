@@ -13,7 +13,7 @@ module.exports = (env, argv) => {
       'visual-essays' : './main.js'
     },
     output: {
-      path: path.resolve(__dirname, '../../static/js'),
+      path: path.resolve(__dirname, '../../js'),
       publicPath: '/lib/',
       // filename: argv.mode === 'production' ? `[name]-${BUNDLE_VERSION}.min.js` : `[name].js`
       filename: argv.mode === 'development' ? `[name].js` : `[name].min.js` 
