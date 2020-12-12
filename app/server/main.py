@@ -489,9 +489,9 @@ def main(path=None):
             html = re.sub(r'"/visual-essays/static/', f'"/static/', html)
         if ENV == 'dev':
             if site.endswith('gitpod.io'):
-                html = re.sub(r'"/static/js/visual-essays.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
+                html = re.sub(r'"/js/visual-essays.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
             else:
-                html = re.sub(r'"/static/js/visual-essays.+"', f'"http://localhost:8088/static/js/visual-essays.js"', html)
+                html = re.sub(r'"/js/visual-essays.+"', f'"http://localhost:8088/static/js/visual-essays.js"', html)
         return html, 200
 
     return 'Not found', 404
