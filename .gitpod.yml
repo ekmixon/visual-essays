@@ -3,4 +3,4 @@ ports:
     onOpen: open-preview
 tasks:
   - init: pip install -r app/server/requirements.txt
-    command: ./app/server/main.py -l info
+    command: ./app/bin/run-dev.sh

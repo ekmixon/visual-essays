@@ -490,12 +490,12 @@ def main(path=None):
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
         if site.startswith('localhost') or site.endswith('gitpod.io'):
-            html = re.sub(r'"/visual-essays/static/', f'"/static/', html)
+            html = re.sub(r'"/visual-essays/js/visual-essays', f'"/static/js/visual-essays', html)
         if ENV == 'dev':
             if site.endswith('gitpod.io'):
-                html = re.sub(r'"/visual-essays/js/.+"', f'"{os.environ.get("core_js_host")}/lib/visual-essays.js"', html)
+                html = re.sub(r'"/static/js/visual-essays.+"', f'"https://8088-{os.environ.get("GITPOD_WORKSPACE_URL").replace("https://","")}/js/visual-essays.js"', html)
             else:
-                html = re.sub(r'"/visual-essays/js/.+"', f'"http://localhost:8088/js/visual-essays.js"', html)
+                html = re.sub(r'"/static/js/visual-essays.+"', f'"http://localhost:8088/js/visual-essays.js"', html)
         return html, 200
 
     return 'Not found', 404
