@@ -3,4 +3,4 @@ ports:
     onOpen: open-preview
 tasks:
   - init: cd app/client-lib; yarn
-    command: cd app/client-lib; yarn serve
+    command: yarn serve
