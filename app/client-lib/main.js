@@ -54,6 +54,35 @@ const baseComponentIndex = [
 
 console.log(window.location)
 
+let baseURL = ''
+if (window.location.hostname.indexOf('.github.io') > 0 || window.location.hostname.indexOf('localhost') > 0) {
+  baseURL = 'https://exp.visual-essays.app'
+}
+
+let jwt, qargs
+
+const referrerUrl = document.referrer
+if (referrerUrl) {
+  console.log(`referrer=${referrerUrl}`)
+  const referrer = utils.parseUrl(referrerUrl)
+  console.log(referrer)
+  if (referrer.host === 'github.com') {
+    const referrerPath = referrer.pathname.slice(1).split('/')
+    const ghAcct = referrerPath[0]
+    const ghRepo = referrerPath[1]
+    const ghBranch = referrerPath.length > 2 ? referrerPath[3] : 'main'
+    const ghRoot = referrerPath.length > 3 ? referrerPath[4] === 'docs' ? referrerPath[4] : null : null
+    const pathStart = ghRoot ? 5 : 4
+    const pathEnd = referrerPath[referrerPath.length-1] === 'README.md' || referrerPath[referrerPath.length-1] === 'index.md' ? referrerPath.length-1 : referrerPath.length
+    const ghPath = referrerPath.slice(pathStart, pathEnd).join('/').replace(/\.md$/, '')
+    const redirect = (ghAcct === 'JSTOR-Labs' && ghRepo === 've-docs') 
+      ? `https://docs.visual-essays.app/${ghPath}`
+      : `${window.location.origin}${ghBranch === 'master' || ghBranch === 'main' ? '' : '/' + ghBranch}/${ghAcct}/${ghRepo}/${ghPath}`
+    console.log(`redirect=${redirect}`)
+    window.location = redirect
+  }
+}
+
 qargs = window.location.href.indexOf('?') > 0
   ? utils.parseQueryString(window.location.href.split('?')[1])
   : {}
