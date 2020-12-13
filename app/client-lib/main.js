@@ -188,6 +188,7 @@ const doRemoteRequests = async () => {
   store.dispatch('setSiteInfo', siteInfo)
   store.dispatch('setComponents', components)
   store.dispatch('setJWT', jwt)
+  store.dispatch('appVersion', window.appVersion)
 }
 
 doRemoteRequests().then(_ => vm.$mount('#app')) // eslint-disable-line no-unused-vars

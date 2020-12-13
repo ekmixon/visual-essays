@@ -8,7 +8,8 @@
         :is-authenticated="isAuthenticated"
         :read-only="readOnly"
         :href="href"
-        :appVersion="appVersion"
+        :app-version="appVersion"
+        :content-ref="ref"
         @collapse-header="collapseHeader"
         @menu-item-clicked="menuItemClicked"
         @logout="logout"
@@ -103,7 +104,6 @@ export default {
         essayFname: undefined,
         qargs: {},
         href: undefined,
-        appVersion: 'APP_VERSION',
         externalWindow: undefined
       }),
       computed: {
@@ -123,6 +123,7 @@ export default {
         essayConfig() { return this.$store.getters.essayConfig || {} },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         debug() { return this.$store.getters.debug },
+        appVersion() { return this.$store.getters.appVersion },
         styleClass() { 
           return this.essayConfig && this.essayConfig.style
             ? this.essayConfig.style
