@@ -345,7 +345,7 @@ export default {
         },
         viewMarkdown() {
           
-          this.openWindow(`/markdown-viewer/${this.siteInfo.acct}/${this.siteInfo.repo}/${this.ref}${this.essayBase}${this.essayFname}`)
+          this.openWindow(`/markdown-viewer/${this.siteInfo.acct}/${this.siteInfo.repo}/${this.ref}${this.essayFname}`)
         },
         editMarkdown(editor) {
           this.openWindow(editor == 'custom'
