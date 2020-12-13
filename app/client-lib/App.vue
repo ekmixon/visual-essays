@@ -1,5 +1,5 @@
 <template>
-  <div ref="app" id="visual-essay" :class="`visual-essay ${layout} ${isEmbedded ? 'embedded' : ''}`">
+  <div ref="app" id="visual-essay" :class="`visual-essay ${layout}`">
     <div v-if="headerEnabled" ref="header" class="header">
       <component v-bind:is="headerComponent"
         :height="headerHeight"
@@ -98,7 +98,10 @@ export default {
         jwt() { return this.$store.getters.jwt },
         allItems() { return this.$store.getters.items },
         html() { return this.$store.getters.essayHTML },
-        components() { return Object.values(this.$store.getters.components) },
+        components() {
+          console.log('App.components', Object.values(this.$store.getters.components))
+          return Object.values(this.$store.getters.components) 
+        },
         // viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         isEmbedded() { return !this.$store.getters.showBanner },
         layout() { return this.$store.getters.layout },
@@ -113,20 +116,20 @@ export default {
               ? 'essay-default'
               : ''
         },
-
         contentComponents() { return this.components.filter(compConf => compConf.type === 'content') },
         contentComponent() { 
           const found = this.contentComponents.find(c => c.layouts && c.layouts.indexOf(this.layout) >= 0)
-          return found ? found.component : 'essay'
+          console.log('found', found)
+          return found ? found.component :null
         },
         headerComponents() { return this.components.filter(compConf => compConf.type === 'header') },
         headerComponent() {
           const found = this.headerComponents.find(c => c.layouts && c.layouts.indexOf(this.layout) >= 0)
-          return found ? found.component : 'essayHeader'
+          return found ? found.component : null
         },
         footerComponent() {
           const found = this.components.find(c => c.name === 'siteFooter')
-          return found ? found.component : 'siteFooter'
+          return found ? found.component : null
         },
         entityInfoboxModalComponent() {
           const found = this.components.find(c => c.name === 'entityInfoboxModal')
@@ -148,7 +151,7 @@ export default {
       methods: {
         init() {
           // this.viewerIsOpen = this.layout[0] === 'v'
-          this.viewerIsOpen = false
+          this.viewerIsOpen = true
           console.log(`App: ${this.acct}/${this.repo}/${this.branch}${this.path} layout=${this.layout} viewerIsOpen=${this.viewerIsOpen}`)
           console.log(`init: layout=${this.layout} touchDevice=${'ontouchstart' in window}`)
           window.addEventListener('resize', this.doLayout)
@@ -269,6 +272,10 @@ export default {
           this.doLayout()
         }
       },
+      updated() {
+        this.viewerHeight = this.$refs.app.clientHeight - this.$refs.header.clientHeight - this.$refs.footer.clientHeight
+        this.viewerWidth = this.$refs.essay.clientWidth
+      },
       watch: {
         // viewerHeight() { console.log(`App: height=${this.viewerHeight} width=${this.viewerWidth}`) },
         // viewerWidth() { console.log(`App: height=${this.viewerHeight} width=${this.viewerWidth}`) },
@@ -282,6 +289,18 @@ export default {
             if (title) {
               document.title = title
             }
+          },
+          immediate: true
+        },
+        essayConfig: {
+          handler: function () {
+            console.log('essayConfig', this.essayConfig )
+          },
+          immediate: true
+        },
+        allItems: {
+          handler: function () {
+            console.log('allItems', this.allItems )
           },
           immediate: true
         }
@@ -324,7 +343,6 @@ export default {
   .viewer {
     grid-area: viewer;
     justify-self: stretch;
-    display: none;
   }
   .footer {
     grid-area: footer;

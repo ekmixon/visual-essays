@@ -5,6 +5,7 @@ import 'lodash'
 import httpVueLoader from 'http-vue-loader'
 import * as utils from './utils.js'
 import VueScrollmagic from 'vue-scrollmagic'
+import VModal from 'vue-js-modal'
 
 import D3Network from './components/D3Network.vue'
 import D3PlusNetwork from './components/D3PlusNetwork.vue'
@@ -19,7 +20,6 @@ import OpenSeadragonViewer from './components/OpenSeadragonViewer.vue'
 import KnightlabTimeline from './components/KnightlabTimeline.vue'
 import LeafletTimeDimension from './components/LeafletTimeDimension.vue'
 import PlantSpecimenViewer from './components/PlantSpecimenViewer.vue'
-import SimpleHeader from './components/SimpleHeader.vue'
 import SiteFooter from './components/Footer.vue'
 import StoriiiesViewer from './components/StoriiiesViewer.vue'
 import Tabulator from './components/Tabulator.vue'
@@ -44,7 +44,6 @@ const baseComponentIndex = [
   { name: 'knightlabTimeline', src: '/components/KnightlabTimeline.vue', component: KnightlabTimeline, selectors: ['tag:knightlab-timeline'], icon: 'fa-history', label: 'Knightlab Timeline'},
   { name: 'mapViewer', src: '/components/LeafletTimeDimension.vue', component: LeafletTimeDimension, selectors: ['tag:map'], icon: 'fa-map-marker-alt', label: 'Map'},
   { name: 'plantSpecimenViewer', src: '/components/PlantSpecimenViewer.vue', component: PlantSpecimenViewer, selectors: ['tag:plant-specimen'], icon: 'fa-seedling', label: 'Plant Specimens'},
-  { name: 'simpleHeader', src: '/components/SimpleHeader.vue', component: SimpleHeader, type: 'header', layouts: ['default', 'vertical', 'horizontal']},
   { name: 'siteFooter', src: '/components/Footer.vue', component: SiteFooter},
   { name: 'storiiiesViewer', src: '/components/StoriiiesViewer.vue', component: StoriiiesViewer, selectors: ['tag:storiiies'], icon: 'fa-book', label: 'Storiiies Viewer'},
   { name: 'tabulator', src: '/components/Tabulator.vue', component: Tabulator, selectors: ['tag:tabulator'], icon: 'fa-table', label: 'Tabulator'},
@@ -59,6 +58,7 @@ Vue.use(VueScrollmagic, {
   loglevel: 2,
   refreshInterval: 100
 })
+Vue.use(VModal)
 
 Vue.mixin({
   methods: {
@@ -98,11 +98,16 @@ let vm = new Vue({ // eslint-disable-line no-unused-vars
   })
 
 async function getEssay() {
-  const resp = await fetch(`https://dev.visual-essays.app/essay/jstor-labs/ve-content/docs/sample`)
-  const html = await resp.text()
+  const resp = await fetch(`https://dev.visual-essays.app/essay/jstor-labs/ve-content/docs`)
+  let html = await resp.text()
   const tmp = document.createElement('div')
   tmp.innerHTML = html
-  return tmp.querySelector('#essay').outerHTML
+
+  window.data = []
+  tmp.querySelectorAll('script[data-ve-tags]').forEach(scr => eval(scr.text))
+  const items = utils.prepItems(window.data.filter(item => item.tag !== 'component'))
+  html = tmp.querySelector('#essay').innerHTML
+  return { html, items }
 }
 
 async function getSiteInfo() {
@@ -118,7 +123,7 @@ const doRemoteRequests = async () => {
   ]
   let responses = await Promise.all(remoteRequests)
   let siteInfo = responses[0]
-  let html = responses[1]
+  let essayData = responses[1]
   let componentsIndex = responses[2]
 
   if (!siteInfo.components) siteInfo.components = []
@@ -141,10 +146,16 @@ const doRemoteRequests = async () => {
     e.type='image/x-icon'
     document.getElementsByTagName('head')[0].appendChild(e)
   }
+
+  const essayConfig = essayData.items.find(item => item.tag === 'config') || {}
+
   console.log('siteInfo', siteInfo)
-  store.dispatch('setEssayHTML', html)
+  store.dispatch('setEssayHTML', essayData.html)
+  store.dispatch('setItems', essayData.items)
+  store.dispatch('setEssayConfig', essayConfig)
+  store.dispatch('setLayout', essayConfig.layout || 'horizontal')
   store.dispatch('setSiteInfo', siteInfo)
-  // store.dispatch('setComponents', components)
+  store.dispatch('setComponents', components)
 }
 
 doRemoteRequests().then(_ => vm.$mount('#app')) // eslint-disable-line no-unused-vars

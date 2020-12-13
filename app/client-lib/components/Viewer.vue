@@ -20,7 +20,7 @@
       </button>
       <button>{{viewerLabel}}</button>
     </div>
-    <component
+    <component ref="viewer"
       v-if="viewerIsOpen && activeTab && actions[activeTab]"
       v-bind:is="groups[activeTab].component"
       :acct="acct"
@@ -232,6 +232,7 @@
       },
       height() {
         this.viewerHeight = this.height - (this.$refs.tabs ? this.$refs.tabs.clientHeight : 0)
+        // this.viewerHeight = this.height
       },
       width() { this.viewerWidth = this.width },
       groups: {

@@ -60,8 +60,7 @@ module.exports = {
   name: 'EssayIndex',
   props: {
     html: String,
-        html: String,
-        essayConfig: { type: Object, default: function(){ return {}} }
+    essayConfig: { type: Object, default: function(){ return {}} }
   },
   data: () => ({
       sections: []
@@ -77,7 +76,9 @@ module.exports = {
         const sections = []
         const content = document.createElement('div')
         content.innerHTML = this.html
+        console.log(content)
         Array.from(content.children).forEach(topSection => {
+            console.log(topSection)
             const section = {}
             sections.push(section)
             const children = Array.from(topSection.children)

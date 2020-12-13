@@ -262,9 +262,9 @@ module.exports = {
     },
     activeElement: {
       handler (active, prior) {
-        console.log('Essay.activeElement', active)
-        if (prior) this.removeItemEventHandlers(prior)
-        if (active) this.addItemEventHandlers(active)
+        console.log('Essay.activeElement', active, prior)
+        // if (prior) this.removeItemEventHandlers(prior)
+        // if (active) this.addItemEventHandlers(active)
       },
       immediate: true
     },
