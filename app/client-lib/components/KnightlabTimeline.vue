@@ -7,7 +7,7 @@
       webkitallowfullscreen mozallowfullscreen allowfullscreen 
       frameborder="0">
     </iframe>
-  </div> 
+  </div>  
 </template>
 <script>
 

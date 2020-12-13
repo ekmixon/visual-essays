@@ -205,9 +205,11 @@
         if (current) {
           const currentElem = document.getElementById(current)
           // console.dir(currentElem)
-          currentElem.classList.add('active-elem')
-          this.addInteractionHandlers(current)
-          if (this.layout === 'vertical' && tabsBar) currentElem.appendChild(tabsBar)
+          if (currentElem) {
+            currentElem.classList.add('active-elem')
+            this.addInteractionHandlers(current)
+            if (this.layout === 'vertical' && tabsBar) currentElem.appendChild(tabsBar)
+          }
         }
       }
     },

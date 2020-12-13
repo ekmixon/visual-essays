@@ -36,6 +36,9 @@ module.exports = {
       this.scrollTo(this.hash.replace(/^#/,''))
     }
   },
+  destroyed() {
+    console.log(`${this.$options.name}.destroyed`)
+  },
   methods: {
     init() {
       this.linkTaggedItems()
@@ -211,12 +214,15 @@ module.exports = {
       this.$emit('set-selected-item', e.target.attributes['data-eid'].value)
     },
     addItemEventHandlers(elemId) {
-      // console.log(`addItemEventHandlers: elemId=${elemId}`, document.getElementById(elemId))
-      document.getElementById(elemId).querySelectorAll('.inferred, .tagged').forEach((entity) => {
-        entity.addEventListener('click', this.itemClickHandler)
-        entity.addEventListener('mouseover', this.setHoverItem)
-        entity.addEventListener('mouseout', this.setHoverItem)
-      })
+      const elem = document.getElementById(elemId)
+      console.log(`addItemEventHandlers: elemId=${elemId}`, elem)
+      if (elem) {
+        document.getElementById(elemId).querySelectorAll('.inferred, .tagged').forEach((entity) => {
+          entity.addEventListener('click', this.itemClickHandler)
+          entity.addEventListener('mouseover', this.setHoverItem)
+          entity.addEventListener('mouseout', this.setHoverItem)
+        })
+      }
     },
     removeItemEventHandlers(elemId) {
       // console.log(`removeItemEventHandlers: elemId=${elemId}`)
@@ -262,9 +268,9 @@ module.exports = {
     },
     activeElement: {
       handler (active, prior) {
-        console.log('Essay.activeElement', active, prior)
-        // if (prior) this.removeItemEventHandlers(prior)
-        // if (active) this.addItemEventHandlers(active)
+        console.log('Essay.activeElement', active)
+        if (prior) this.removeItemEventHandlers(prior)
+        if (active) this.addItemEventHandlers(active)
       },
       immediate: true
     },

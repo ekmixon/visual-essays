@@ -50,7 +50,7 @@ export default new Vuex.Store({
     siteTitle: undefined,
     isMobile: false,
     isTouchDevice: false,
-    layout: 'vertical',
+    layout: 'horizontal',
     showBanner: true,
     headerSize: 96,
     headerHeight: 0,
