@@ -156,6 +156,8 @@ export default {
           const groups = groupItems(itemsInElements(elemIdPath(this.activeElement), this.allItems), this.$store.getters.componentSelectors) 
           return groups
         },
+        ref() { return this.qargs && this.qargs.ref ? this.qargs.ref : this.siteInfo.ref},
+        refQueryArg() { return this.ref && this.ref !== this.siteInfo.ref ? `?ref=${this.ref}` : '' }
       },
       mounted() {
         // window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
@@ -254,7 +256,7 @@ export default {
         },
         async loadEssay(path, replace) {
           console.log(`loadEssay=${path} ${replace}`)
-          const resp = await fetch(`https://exp.visual-essays.app/essay${this.essayBase}${path}`)
+          const resp = await fetch(`https://exp.visual-essays.app/essay${this.essayBase}${path}${this.refQueryArg}`)
           let html = await resp.text()
           let browserPath = `${this.essayBase}${path}`
           if (replace) {
