@@ -355,6 +355,7 @@ def siteinfo(path=None):
 def login():
     site, acct, repo, ref, path, qargs = _context()
     redirect_url = qargs.get('redirect', site)
+    logger.info(f'login: OAUTH_ENDPOINT={OAUTH_ENDPOINT} redirect_url={redirect_url}')
     return redirect(f'{OAUTH_ENDPOINT}/auth/login/github?redirect={redirect_url}')
 
 @app.route('/jwt-expiration/<token>')
