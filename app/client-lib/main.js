@@ -28,6 +28,7 @@ import Viewer from './components/Viewer.vue'
 import VisNetwork from './components/VisNetwork.vue'
 
 Vue.config.productionTip = false
+Vue.config.devtools = true
 
 const baseComponentIndex = [
   { name: 'd3Network', src: '/components/D3Network.vue', component: D3Network, selectors: ['tag:d3-network'], icon: 'fa-chart-network', label: 'Networks'},
@@ -189,6 +190,7 @@ const doRemoteRequests = async () => {
   store.dispatch('setComponents', components)
   store.dispatch('setJWT', jwt)
   store.dispatch('appVersion', window.appVersion)
+  console.log(store)
 }
 
 doRemoteRequests().then(_ => vm.$mount('#app')) // eslint-disable-line no-unused-vars

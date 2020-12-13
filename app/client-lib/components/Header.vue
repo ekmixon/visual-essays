@@ -94,7 +94,7 @@
     },
     mounted() {
       console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
-      console.log(`href=${this.href} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
+      console.log(`href=${this.href} appVersion=${this.appVersion} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
     
       // set initial height
       this.$refs.header.style.height = `${this.height}px`
