@@ -27,7 +27,7 @@ import VideoPlayer from './components/VideoPlayer.vue'
 import Viewer from './components/Viewer.vue'
 import VisNetwork from './components/VisNetwork.vue'
 
-Vue.config.productionTip = false
+// Vue.config.productionTip = false
 Vue.config.devtools = true
 
 const baseComponentIndex = [
@@ -189,7 +189,9 @@ const doRemoteRequests = async () => {
   store.dispatch('setSiteInfo', siteInfo)
   store.dispatch('setComponents', components)
   store.dispatch('setJWT', jwt)
-  store.dispatch('appVersion', window.appVersion)
+  document.querySelectorAll('script[data-ve-meta]').forEach(scr => eval(scr.text))
+  console.log('veMeta', window.veMeta)
+  store.dispatch('appVersion', window.veMeta.version)
   console.log(store)
 }
 
