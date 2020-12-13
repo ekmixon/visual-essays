@@ -261,7 +261,7 @@ def essay(path=None):
     refresh = qargs.get('refresh', 'false') in ('', 'true')
     cache_key = f'{site}|{acct}|{repo}|{ref}|{path}'
     cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' else None
-    if cached_essay and cached_essay['url']:
+    if cached_essay and cached_essay.get('url'):
         markdown, _ , md_sha = get_gh_file(cached_essay['url'])
         path = cached_essay.get('md_path', path)
         if cached_essay['sha'] == md_sha:

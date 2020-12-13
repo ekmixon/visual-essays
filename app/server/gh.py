@@ -23,6 +23,7 @@ def gh_token():
     return _gh_token
 
 def get_gh_file(url, token=None):
+    logger.info(f'get_gh_file {url}')
     content = sha = None
     resp = requests.get(url, headers={
         'Authorization': f'Token {token or gh_token()}',
