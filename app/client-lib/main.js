@@ -98,7 +98,7 @@ let vm = new Vue({ // eslint-disable-line no-unused-vars
   })
 
 async function getSiteInfo() {
-  const resp = await fetch(`https://dev.visual-essays.app/site-info?href=${encodeURIComponent(window.location.href)}`)
+  const resp = await fetch(`https://exp.visual-essays.app/site-info?href=${encodeURIComponent(window.location.href)}`)
   return await resp.json()
 }
 

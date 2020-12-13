@@ -98,8 +98,8 @@ export default {
         hoverItemID: null,
         selectedItemID: null,
         viewerIsOpen: false,
-        essayBase: '/jstor-labs/ve-content/docs',
-        essayPath: '/jstor-labs/ve-content/docs/',
+        essayBase: undefined,
+        essayPath: undefined,
         qargs: {}, // TODO get query args from url
         href: undefined, //TODO
         appVersion: 'APP_VERSION'
@@ -124,7 +124,7 @@ export default {
         styleClass() { 
           return this.essayConfig && this.essayConfig.style
             ? this.essayConfig.style
-            : this.layout === 'horizontal' || this.layout === 'vertical'
+            : this.layout === this.layout === 'vertical'
               ? 'essay-default'
               : ''
         },
@@ -159,14 +159,23 @@ export default {
       },
       mounted() {
         // window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
-        window.onpopstate = (e) => { this.essayPath = e.state.file }
+        this.essayBase = this.siteInfo.baseurl
+        this.essayPath = window.location.pathname.length > this.essayBase.length
+          ? window.location.pathname.slice(this.essayBase.length)
+          : '/'
+        if (this.essayPath[this.essayPath.length-1] !== '/') {
+          this.essayPath += '/'
+          history.replaceState({file: `${this.essayBase}${this.essayPath}`}, '', `${this.essayBase}${this.essayPath}`)
+        }
+        this.qargs = this.parseQueryString()
+        console.log(`App: base=${this.essayBase} path=${this.essayPath}`, this.qargs, this.siteInfo, this.essayConfig)
+        window.onpopstate = (e) => { this.setEssay(e.state.file, true) }
         this.init()
       },
       methods: {
         init() {
           this.viewerIsOpen = this.layout[0] === 'v'
-          console.log(`App: ${this.acct}/${this.repo}/${this.branch}${this.path} layout=${this.layout} viewerIsOpen=${this.viewerIsOpen}`)
-          console.log(`init: layout=${this.layout} touchDevice=${'ontouchstart' in window}`)
+          // console.log(`init: layout=${this.layout} touchDevice=${'ontouchstart' in window}`)
           this.waitForHeaderFooter() // header and footer are dynamically loaded external components        
         },
         setActiveElements(activeElements) {
@@ -242,9 +251,9 @@ export default {
         },
         async loadEssay(path, replace) {
           console.log(`loadEssay=${path} ${replace}`)
-          const resp = await fetch(`https://dev.visual-essays.app/essay${path}`)
+          const resp = await fetch(`https://exp.visual-essays.app/essay${this.essayBase}${path}`)
           let html = await resp.text()
-          let browserPath = path
+          let browserPath = `${this.essayBase}${path}`
           if (replace) {
             history.replaceState({file: path || ''}, '', browserPath)
           } else {
@@ -278,12 +287,13 @@ export default {
         },
         convertLinks() {
           this.$refs.essay.querySelectorAll('a').forEach(link => {
-            // console.log(link.href)
+            console.log(link.href)
             if (!link.href || link.href.indexOf(window.location.host) > 0) {
               let target = link.dataset.target
               if (!target) { 
                 const parsedUrl = this.parseUrl(link.href)
-                target = parsedUrl.pathname
+                console.log(parsedUrl)
+                target = parsedUrl.pathname.slice(this.essayBase.length)
               }
               link.addEventListener('click', (e) => {
                 let target = e.target
@@ -302,8 +312,9 @@ export default {
             }
           })
         },
-        menuItemClicked(item) {
-          console.log('menuItemClicked', item)
+        menuItemClicked(path) {
+          console.log('menuItemClicked', path)
+          this.setEssay(path)
         },
         logout() {
           console.log('logout')
@@ -331,6 +342,16 @@ export default {
             elem.classList.add('hidden')
             elem.classList.remove('visible') 
           }
+        },
+        setEssay(path, replace) {
+          this.fadeOut(this.$refs.essay)
+          this.fadeOut(this.$refs.viewer)
+          this.reset()
+          this.$nextTick(() => {
+            this.loadEssay(path, replace)
+            this.fadeIn(this.$refs.essay)
+            this.fadeIn(this.$refs.viewer)
+          })
         }
       },
       updated() {
@@ -340,17 +361,8 @@ export default {
       watch: {
         essayPath: {
           handler: function (path) {
-            console.log(`essayPath=${path}`)
-            if (path) {
-              this.fadeOut(this.$refs.essay)
-              this.fadeOut(this.$refs.viewer)
-              this.reset()
-              this.$nextTick(() => {
-                this.loadEssay(path)
-                this.fadeIn(this.$refs.essay)
-                this.fadeIn(this.$refs.viewer)
-              })
-            }
+            // console.log(`essayPath=${path}`)
+            if (path) this.setEssay(path)
           },
           immediate: true
         },
@@ -402,7 +414,8 @@ export default {
     grid-area: footer;
   }
 
-  #visual-essay.index .essay {
+  #visual-essay.index .essay,
+  #visual-essay.horizontal .essay {
     padding: 2em;
   }
   .visible {

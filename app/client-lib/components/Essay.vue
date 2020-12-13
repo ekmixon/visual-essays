@@ -212,7 +212,7 @@ module.exports = {
     },
     addItemEventHandlers(elemId) {
       const elem = document.getElementById(elemId)
-      console.log(`addItemEventHandlers: elemId=${elemId}`, elem)
+      // console.log(`addItemEventHandlers: elemId=${elemId}`, elem)
       if (elem) {
         document.getElementById(elemId).querySelectorAll('.inferred, .tagged').forEach((entity) => {
           entity.addEventListener('click', this.itemClickHandler)
@@ -294,16 +294,13 @@ module.exports = {
 
 <style>
 
-.essay-default {
+.vertical {
   background-color: #dadada;
-}
-
-.vertical .essay-default {
   padding: 0 0 0 0 !important;
   box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3);
 }
 
-.essay-default p.active-elem {
+.vertical p.active-elem {
   background-color: #ffffff;
   padding-top: 16px;
   padding-bottom: 16px;
@@ -313,12 +310,12 @@ module.exports = {
   cursor: default;
 }
 
-.essay-default p.has-items:hover {
+.vertical p.has-items:hover {
   cursor: pointer !important;
   background-color: #f7f7f7;;
 }
   
-.essay-default p {
+.vertical p {
   padding: 8px 28px 8px 24px;
   line-height: 1.6;
 }
@@ -327,12 +324,12 @@ p {
   /*margin-right: 9px;*/
 }
 
-.essay-default h1,
-.essay-default h2,
-.essay-default h3, 
-.essay-default h4, 
-.essay-default h5,
-.essay-default h6,
+.vertical h1,
+.vertical h2,
+.vertical h3, 
+.vertical h4, 
+.vertical h5,
+.vertical h6,
 .footnote {
   margin-left: 24px;
 }
