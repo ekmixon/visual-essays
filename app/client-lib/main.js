@@ -191,7 +191,7 @@ const doRemoteRequests = async () => {
   store.dispatch('setJWT', jwt)
   document.querySelectorAll('script[data-ve-meta]').forEach(scr => eval(scr.text))
   console.log('veMeta', window.veMeta)
-  store.dispatch('appVersion', window.veMeta.version)
+  store.dispatch('setAppVersion', window.veMeta.version)
   console.log(store)
 }
 
