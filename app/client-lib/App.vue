@@ -162,14 +162,17 @@ export default {
         this.essayBase = this.siteInfo.baseurl
         this.essayPath = window.location.pathname.length > this.essayBase.length
           ? window.location.pathname.slice(this.essayBase.length)
-          : '/'
+          : ''
+        /*
         if (this.essayPath[this.essayPath.length-1] !== '/') {
           this.essayPath += '/'
           history.replaceState({file: `${this.essayBase}${this.essayPath}`}, '', `${this.essayBase}${this.essayPath}`)
         }
+        */
         this.qargs = this.parseQueryString()
         console.log(`App: base=${this.essayBase} path=${this.essayPath}`, this.qargs, this.siteInfo, this.essayConfig)
         window.onpopstate = (e) => { this.setEssay(e.state.file, true) }
+        this.setEssay(this.essayPath)
         this.init()
       },
       methods: {
@@ -262,13 +265,27 @@ export default {
           this.href = window.location.href
           const tmp = document.createElement('div')
           tmp.innerHTML = html
+          const essayElem = tmp.querySelector('#essay')
+          const leaf = essayElem.dataset.name.split('/').pop().replace('.md', '').toLowerCase()
+          const isFolder = leaf === 'index' || leaf === 'readme'
+          console.log(`name=${essayElem.dataset.name} isFolder=${isFolder}`)
+          if (isFolder) {
+            if (path[path.length-1] !== '/') {
+              this.essayPath += '/'
+              history.replaceState({file: `${this.essayBase}${this.essayPath}`}, '', `${this.essayBase}${this.essayPath}`)
+            }
+          } else {
+            if (path[path.length-1] === '/') {
+              this.essayPath = path.slice(0, path.length-1)
+              history.replaceState({file: `${this.essayBase}${this.essayPath}`}, '', `${this.essayBase}${this.essayPath}`)
+            }
+          }
           window.data = []
-          tmp.querySelectorAll('script[data-ve-tags]').forEach(scr => eval(scr.text))
+          essayElem.querySelectorAll('script[data-ve-tags]').forEach(scr => eval(scr.text))
           const items = this.prepItems(window.data.filter(item => item.tag !== 'component'))
-          html = tmp.querySelector('#essay').innerHTML
           
           const essayConfig = items.find(item => item.tag === 'config') || {}
-          this.$store.dispatch('setEssayHTML', html)
+          this.$store.dispatch('setEssayHTML', essayElem.innerHTML)
           this.$store.dispatch('setItems', items)
           this.$store.dispatch('setEssayConfig', essayConfig)
           const layout = essayConfig.layout
@@ -301,8 +318,8 @@ export default {
                   target = target.parentElement
                 }
                 console.log('click', target.dataset.target)
-                this.essayPath = target.dataset.target
-
+                // this.essayPath = target.dataset.target
+                this.setEssay(target.dataset.target)
               })
               link.removeAttribute('href')
               link.setAttribute('data-target', target)
@@ -344,6 +361,7 @@ export default {
           }
         },
         setEssay(path, replace) {
+          this.essayPath = path
           this.fadeOut(this.$refs.essay)
           this.fadeOut(this.$refs.viewer)
           this.reset()
@@ -359,13 +377,15 @@ export default {
         if (this.$refs.essay) this.viewerWidth = this.$refs.essay.clientWidth
       },
       watch: {
+        /*
         essayPath: {
           handler: function (path) {
             // console.log(`essayPath=${path}`)
-            if (path) this.setEssay(path)
+            // if (path) this.setEssay(path)
           },
           immediate: true
         },
+        */
         layout: {
           handler: function (layout) {
             this.viewerIsOpen = layout[0] === 'v'

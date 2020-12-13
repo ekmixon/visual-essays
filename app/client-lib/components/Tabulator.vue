@@ -4,6 +4,8 @@
 
 <script>
 
+/* global Tabulator */
+
 // A wrapper for http://tabulator.info/
 
 const dependencies = [
