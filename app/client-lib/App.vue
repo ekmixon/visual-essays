@@ -165,7 +165,7 @@ export default {
       mounted() {
         // window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
         this.href = window.location.href
-        this.essayBase = this.siteInfo.baseurl
+        this.essayBase = this.siteInfo.baseurl || ''
         this.essayPath = window.location.pathname.length > this.essayBase.length
           ? window.location.pathname.slice(this.essayBase.length)
           : ''

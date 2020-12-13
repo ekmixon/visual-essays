@@ -2,5 +2,5 @@ ports:
   - port: 8080
     onOpen: open-preview
 tasks:
-  - init: cd app/client-lib; yarn
-    command: yarn serve
+  - init: pip install -r app/server/requirements.txt; cd app/client-lib; yarn; cd ../..
+    command: app/bin/run-dev.sh

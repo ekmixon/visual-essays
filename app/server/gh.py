@@ -18,7 +18,6 @@ _gh_token = os.environ.get('gh_token')
 if not _gh_token and os.path.exists(f'{SCRIPT_DIR}/gh-token'):
     with open(f'{SCRIPT_DIR}/gh-token', 'r') as fp:
         _gh_token = fp.read().strip()
-logger.info(f'_gh_token={_gh_token} {SCRIPT_DIR}')
 def gh_token():
     return _gh_token
 
