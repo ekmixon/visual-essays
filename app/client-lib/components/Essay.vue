@@ -36,9 +36,6 @@ module.exports = {
       this.scrollTo(this.hash.replace(/^#/,''))
     }
   },
-  destroyed() {
-    console.log(`${this.$options.name}.destroyed`)
-  },
   methods: {
     init() {
       this.linkTaggedItems()

@@ -71,17 +71,12 @@ module.exports = {
   mounted() {
     console.log(`${this.$options.name}.mounted`)
   },
-  destroyed() {
-      console.log(`${this.$options.name}.destroyed`)
-  },
   methods: {
       parsePageHTML() {
         const sections = []
         const content = document.createElement('div')
         content.innerHTML = this.html
-        console.log(content)
         Array.from(content.children).forEach(topSection => {
-            console.log(topSection)
             const section = {}
             sections.push(section)
             const children = Array.from(topSection.children)

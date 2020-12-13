@@ -4,8 +4,18 @@
       <component v-bind:is="headerComponent"
         :height="headerHeight"
         :essay-config="essayConfig"
-        @toggle-option="toggleOption"
+        :site-config="siteInfo"
+        :is-authenticated="isAuthenticated"
+        :read-only="readOnly"
+        :href="href"
+        :appVersion="appVersion"
         @collapse-header="collapseHeader"
+        @menu-item-clicked="menuItemClicked"
+        @logout="logout"
+        @view-markdown="viewMarkdown"
+        @edit-markdown="editMarkdown"
+        @goto-github="gotoGithub"
+        @open-docs-site="openDocsSite"
       ></component>
     </div>
     <div ref="essay" class="essay hidden">
@@ -39,7 +49,7 @@
         :acct="acct"
         :repo="repo"
         :branch="branch"
-        :path="path"
+        :path="essayPath"
         :hash="hash"
         :jwt="jwt"
         :layout="layout"
@@ -89,7 +99,10 @@ export default {
         selectedItemID: null,
         viewerIsOpen: false,
         essayBase: '/jstor-labs/ve-content/docs',
-        essayPath: '/jstor-labs/ve-content/docs/'
+        essayPath: '/jstor-labs/ve-content/docs/',
+        qargs: {}, // TODO get query args from url
+        href: undefined, //TODO
+        appVersion: 'APP_VERSION'
       }),
       computed: {
         acct() { return this.$store.getters.siteInfo.acct },
@@ -98,6 +111,8 @@ export default {
         // path() { return `${this.$store.getters.mdPath}` },
         hash() { return `${this.$store.getters.hash}` },
         jwt() { return this.$store.getters.jwt },
+        isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
+        readOnly() { return this.qargs.readonly},
         allItems() { return this.$store.getters.items },
         html() { return this.$store.getters.essayHTML },
         components() { return Object.values(this.$store.getters.components) },
@@ -139,7 +154,6 @@ export default {
         activeElement() { return this.activeElements.length > 0 ? this.activeElements[0] : undefined },
         groups() { 
           const groups = groupItems(itemsInElements(elemIdPath(this.activeElement), this.allItems), this.$store.getters.componentSelectors) 
-          console.log('App.compute.groups', groups)
           return groups
         },
       },
@@ -263,8 +277,6 @@ export default {
           this.setActiveElements([])
         },
         convertLinks() {
-          console.log('convertLinks')
-          //this.$refs.essay.querySelectorAll('a').forEach(link => {
           this.$refs.essay.querySelectorAll('a').forEach(link => {
             // console.log(link.href)
             if (!link.href || link.href.indexOf(window.location.host) > 0) {
@@ -290,6 +302,24 @@ export default {
             }
           })
         },
+        menuItemClicked(item) {
+          console.log('menuItemClicked', item)
+        },
+        logout() {
+          console.log('logout')
+        },
+        viewMarkdown() {
+          console.log('viewMarkdown')
+        },
+        editMarkdown(editor) {
+          console.log('editMarkdown', editor)
+        },
+        gotoGithub() {
+          console.log('gotoGithub')
+        },
+        openDocsSite() {
+          console.log('openDocsSite')
+        },
         fadeIn(elem) {
           if (elem) {
             elem.classList.add('visible')
@@ -308,16 +338,6 @@ export default {
         if (this.$refs.essay) this.viewerWidth = this.$refs.essay.clientWidth
       },
       watch: {
-        html: {
-          handler: function () {
-            console.log('html' )
-            if (this.html) {
-              //console.log('nextTick')
-              //this.$nextTick(() => {this.convertLinks()})
-            }
-          },
-          immediate: true
-        },
         essayPath: {
           handler: function (path) {
             console.log(`essayPath=${path}`)
@@ -331,12 +351,6 @@ export default {
                 this.fadeIn(this.$refs.viewer)
               })
             }
-          },
-          immediate: true
-        },
-        allItems: {
-          handler: function (items) {
-            console.log('App.watch.allItems', items)
           },
           immediate: true
         },
@@ -388,7 +402,7 @@ export default {
     grid-area: footer;
   }
 
-  .default, .essay {
+  #visual-essay.index .essay {
     padding: 2em;
   }
   .visible {

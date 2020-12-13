@@ -133,7 +133,7 @@
       },
       nav(item) {
         this.closeDrawer()
-        console.log(`menuItemClicked=${item}`)
+        // console.log(`menuItemClicked=${item}`)
         this.$emit('menu-item-clicked', item)
       },
       logout(e) {
