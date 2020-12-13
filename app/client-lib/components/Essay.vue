@@ -294,10 +294,10 @@ module.exports = {
 
 <style>
 
-.vertical {
+.vertical .essay {
   background-color: #dadada;
   padding: 0 0 0 0 !important;
-  box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3);
+  /* box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3); */
 }
 
 .vertical p.active-elem {

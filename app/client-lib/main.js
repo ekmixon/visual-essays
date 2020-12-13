@@ -52,6 +52,8 @@ const baseComponentIndex = [
   { name: 'visNetwork', src: '/components/VisNetwork.vue', component: VisNetwork, selectors: ['tag:vis-network'], icon: 'fa-chart-network', label: 'Networks'}
 ]
 
+console.log(window.location)
+
 Vue.use(VueScrollmagic, {
   vertical: true,
   globalSceneOptions: {},

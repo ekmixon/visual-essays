@@ -100,9 +100,11 @@ export default {
         viewerIsOpen: false,
         essayBase: undefined,
         essayPath: undefined,
-        qargs: {}, // TODO get query args from url
+        essayFname: undefined,
+        qargs: {},
         href: undefined, //TODO
-        appVersion: 'APP_VERSION'
+        appVersion: 'APP_VERSION',
+        externalWindow: undefined
       }),
       computed: {
         acct() { return this.$store.getters.siteInfo.acct },
@@ -150,7 +152,6 @@ export default {
           const found = this.components.find(c => c.name === 'viewer')
           return found ? found.component : null
         },
-
         activeElement() { return this.activeElements.length > 0 ? this.activeElements[0] : undefined },
         groups() { 
           const groups = groupItems(itemsInElements(elemIdPath(this.activeElement), this.allItems), this.$store.getters.componentSelectors) 
@@ -172,6 +173,7 @@ export default {
         }
         */
         this.qargs = this.parseQueryString()
+        console.log(`refQueryArg=${this.refQueryArg}`)
         console.log(`App: base=${this.essayBase} path=${this.essayPath}`, this.qargs, this.siteInfo, this.essayConfig)
         window.onpopstate = (e) => { this.setEssay(e.state.file, true) }
         this.setEssay(this.essayPath)
@@ -258,7 +260,7 @@ export default {
           console.log(`loadEssay=${path} ${replace}`)
           const resp = await fetch(`https://exp.visual-essays.app/essay${this.essayBase}${path}${this.refQueryArg}`)
           let html = await resp.text()
-          let browserPath = `${this.essayBase}${path}`
+          let browserPath = `${this.essayBase}${path}${this.refQueryArg}`
           if (replace) {
             history.replaceState({file: path || ''}, '', browserPath)
           } else {
@@ -267,23 +269,25 @@ export default {
           this.href = window.location.href
           const tmp = document.createElement('div')
           tmp.innerHTML = html
+          window.data = []
+          tmp.querySelectorAll('script[data-ve-tags]').forEach(scr => eval(scr.text))
           const essayElem = tmp.querySelector('#essay')
+          this.essayFname = `${essayElem.dataset.name}.md`
           const leaf = essayElem.dataset.name.split('/').pop().replace('.md', '').toLowerCase()
           const isFolder = leaf === 'index' || leaf === 'readme'
           console.log(`name=${essayElem.dataset.name} isFolder=${isFolder}`)
           if (isFolder) {
             if (path[path.length-1] !== '/') {
               this.essayPath += '/'
-              history.replaceState({file: `${this.essayBase}${this.essayPath}`}, '', `${this.essayBase}${this.essayPath}`)
+              history.replaceState({file: `${this.essayBase}${this.essayPath}${this.refQueryArg}`}, '', `${this.essayBase}${this.essayPath}${this.refQueryArg}`)
             }
           } else {
             if (path[path.length-1] === '/') {
               this.essayPath = path.slice(0, path.length-1)
-              history.replaceState({file: `${this.essayBase}${this.essayPath}`}, '', `${this.essayBase}${this.essayPath}`)
+              history.replaceState({file: `${this.essayBase}${this.essayPath}${this.refQueryArg}`}, '', `${this.essayBase}${this.essayPath}${this.refQueryArg}`)
             }
           }
-          window.data = []
-          essayElem.querySelectorAll('script[data-ve-tags]').forEach(scr => eval(scr.text))
+
           const items = this.prepItems(window.data.filter(item => item.tag !== 'component'))
           
           const essayConfig = items.find(item => item.tag === 'config') || {}
@@ -339,17 +343,26 @@ export default {
           console.log('logout')
         },
         viewMarkdown() {
-          console.log('viewMarkdown')
+          
+          this.openWindow(`/markdown-viewer/${this.siteInfo.acct}/${this.siteInfo.repo}/${this.ref}${this.essayBase}${this.essayFname}`)
         },
         editMarkdown(editor) {
-          console.log('editMarkdown', editor)
+          this.openWindow(editor == 'custom'
+            ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${this.essayBase}${this.essayFname}`
+            : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${this.essayBase}${this.essayFname}`
+          ) 
         },
         gotoGithub() {
-          console.log('gotoGithub')
+          this.openWindow(`https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/tree/${this.ref}`, null)
         },
         openDocsSite() {
-          console.log('openDocsSite')
+          this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
         },
+        openWindow(url, options) {
+          if (this.externalWindow) { this.externalWindow.close() }
+          if (options === undefined) options = 'toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes'
+          this.externalWindow = window.open(url, '_blank', options)
+        },         
         fadeIn(elem) {
           if (elem) {
             elem.classList.add('visible')
@@ -388,6 +401,12 @@ export default {
           immediate: true
         },
         */
+        essayConfig: {
+          handler: function (essayConfig) {
+            console.log('essayConfig', essayConfig)
+          },
+          immediate: true
+        },
         layout: {
           handler: function (layout) {
             this.viewerIsOpen = layout[0] === 'v'
