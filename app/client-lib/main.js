@@ -53,11 +53,17 @@ const baseComponentIndex = [
   { name: 'visNetwork', src: '/components/VisNetwork.vue', component: VisNetwork, selectors: ['tag:vis-network'], icon: 'fa-chart-network', label: 'Networks'}
 ]
 
-console.log(window.location)
+const loc = window.location
 
-let baseURL = ''
-if (window.location.hostname.indexOf('.github.io') > 0 || window.location.hostname.indexOf('localhost') > 0) {
-  baseURL = 'https://exp.visual-essays.app'
+console.log(loc)
+
+let serviceBaseURL = '/'
+if (loc.hostname.indexOf('.github.io') > 0) {
+  'https://visual-essays.app'
+} else if (loc.hostname.indexOf('localhost') >= 0) {
+  serviceBaseURL = 'http://localhost:8080'
+} else if (loc.hostname.indexOf('.gitpod.io') > 0) {
+  serviceBaseURL = `https://8080-${loc.host.slice(5)}`
 }
 
 let jwt, qargs
@@ -78,14 +84,14 @@ if (referrerUrl) {
     const ghPath = referrerPath.slice(pathStart, pathEnd).join('/').replace(/\.md$/, '')
     const redirect = (ghAcct === 'JSTOR-Labs' && ghRepo === 've-docs') 
       ? `https://docs.visual-essays.app/${ghPath}`
-      : `${window.location.origin}${ghBranch === 'master' || ghBranch === 'main' ? '' : '/' + ghBranch}/${ghAcct}/${ghRepo}/${ghPath}`
+      : `${loc.origin}${ghBranch === 'master' || ghBranch === 'main' ? '' : '/' + ghBranch}/${ghAcct}/${ghRepo}/${ghPath}`
     console.log(`redirect=${redirect}`)
     window.location = redirect
   }
 }
 
-qargs = window.location.href.indexOf('?') > 0
-  ? utils.parseQueryString(window.location.href.split('?')[1])
+qargs = loc.href.indexOf('?') > 0
+  ? utils.parseQueryString(loc.href.split('?')[1])
   : {}
 if (qargs.token) {
   jwt = qargs.token
@@ -140,12 +146,12 @@ let vm = new Vue({ // eslint-disable-line no-unused-vars
   })
 
 async function getSiteInfo() {
-  const resp = await fetch(`https://exp.visual-essays.app/site-info?href=${encodeURIComponent(window.location.href)}`)
+  const resp = await fetch(`${serviceBaseURL}/site-info?href=${encodeURIComponent(loc.href)}`)
   return await resp.json()
 }
 
 const checkJWTExpiration = async(jwt) => {
-  let response = await fetch(`${baseURL}/jwt-expiration/${jwt}`)
+  let response = await fetch(`${serviceBaseURL}/jwt-expiration/${jwt}`)
   const expiration = parseInt(await response.text())
   const isExpired =  Date.now()/1000 >= expiration
   if (isExpired) window.localStorage.removeItem('ghcreds')
@@ -192,6 +198,7 @@ const doRemoteRequests = async () => {
   document.querySelectorAll('script[data-ve-meta]').forEach(scr => eval(scr.text))
   console.log('veMeta', window.veMeta)
   store.dispatch('setAppVersion', window.veMeta.version)
+  store.dispatch('setServiceBaseURL', serviceBaseURL)
   console.log(store)
 }
 

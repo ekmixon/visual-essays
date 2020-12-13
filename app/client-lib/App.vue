@@ -124,6 +124,7 @@ export default {
         siteInfo() { return this.$store.getters.siteInfo || {} },
         debug() { return this.$store.getters.debug },
         appVersion() { return this.$store.getters.appVersion },
+        serviceBaseURL() { return this.$store.getters.serviceBaseURL },
         styleClass() { 
           return this.essayConfig && this.essayConfig.style
             ? this.essayConfig.style
@@ -260,7 +261,7 @@ export default {
         },
         async loadEssay(path, replace) {
           console.log(`loadEssay=${path} ${replace}`)
-          const resp = await fetch(`https://exp.visual-essays.app/essay${this.essayBase}${path}${this.refQueryArg}`)
+          const resp = await fetch(`${this.serviceBaseURL}/essay${this.essayBase}${path}${this.refQueryArg}`)
           let html = await resp.text()
           let browserPath = `${this.essayBase}${path}${this.refQueryArg}`
           if (replace) {
