@@ -54,6 +54,16 @@ const baseComponentIndex = [
 
 console.log(window.location)
 
+qargs = window.location.href.indexOf('?') > 0
+  ? utils.parseQueryString(window.location.href.split('?')[1])
+  : {}
+if (qargs.token) {
+  jwt = qargs.token
+  window.localStorage.setItem('ghcreds', jwt)
+} else {
+  jwt = window.localStorage.getItem('ghcreds')
+}
+
 Vue.use(VueScrollmagic, {
   vertical: true,
   globalSceneOptions: {},
@@ -104,14 +114,27 @@ async function getSiteInfo() {
   return await resp.json()
 }
 
+const checkJWTExpiration = async(jwt) => {
+  let response = await fetch(`${baseURL}/jwt-expiration/${jwt}`)
+  const expiration = parseInt(await response.text())
+  const isExpired =  Date.now()/1000 >= expiration
+  if (isExpired) window.localStorage.removeItem('ghcreds')
+  return isExpired
+}
+
 const doRemoteRequests = async () => {
   const remoteRequests = [
     getSiteInfo(),
     Promise.resolve(baseComponentIndex)
   ]
+  if (jwt !== null) remoteRequests.push(checkJWTExpiration(jwt))
   let responses = await Promise.all(remoteRequests)
   let siteInfo = responses[0]
   let componentsIndex = responses[1]
+  if (jwt !== null) {
+    const jwtIsExpired = responses[responses.length-1]
+    if (jwtIsExpired) jwt = null
+  }
 
   if (!siteInfo.components) siteInfo.components = []
 
@@ -135,6 +158,7 @@ const doRemoteRequests = async () => {
   }
   store.dispatch('setSiteInfo', siteInfo)
   store.dispatch('setComponents', components)
+  store.dispatch('setJWT', jwt)
 }
 
 doRemoteRequests().then(_ => vm.$mount('#app')) // eslint-disable-line no-unused-vars
