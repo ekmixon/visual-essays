@@ -97,20 +97,6 @@ let vm = new Vue({ // eslint-disable-line no-unused-vars
     render: h => h(App)
   })
 
-/*
-async function getEssay() {
-  const resp = await fetch(`https://dev.visual-essays.app/essay/jstor-labs/ve-content/docs`)
-  let html = await resp.text()
-  const tmp = document.createElement('div')
-  tmp.innerHTML = html
-  window.data = []
-  tmp.querySelectorAll('script[data-ve-tags]').forEach(scr => eval(scr.text))
-  const items = utils.prepItems(window.data.filter(item => item.tag !== 'component'))
-  html = tmp.querySelector('#essay').innerHTML
-  return { html, items }
-}
-*/
-
 async function getSiteInfo() {
   const resp = await fetch(`https://dev.visual-essays.app/site-info?href=${encodeURIComponent(window.location.href)}`)
   return await resp.json()
@@ -119,12 +105,10 @@ async function getSiteInfo() {
 const doRemoteRequests = async () => {
   const remoteRequests = [
     getSiteInfo(),
-    //getEssay(),
     Promise.resolve(baseComponentIndex)
   ]
   let responses = await Promise.all(remoteRequests)
   let siteInfo = responses[0]
-  // let essayData = responses[1]
   let componentsIndex = responses[1]
 
   if (!siteInfo.components) siteInfo.components = []
@@ -147,7 +131,6 @@ const doRemoteRequests = async () => {
     e.type='image/x-icon'
     document.getElementsByTagName('head')[0].appendChild(e)
   }
-  console.log('siteInfo', siteInfo)
   store.dispatch('setSiteInfo', siteInfo)
   store.dispatch('setComponents', components)
 }

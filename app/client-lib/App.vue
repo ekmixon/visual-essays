@@ -92,10 +92,10 @@ export default {
         essayPath: '/jstor-labs/ve-content/docs/'
       }),
       computed: {
-        acct() { return this.$store.getters.acct },
-        repo() { return this.$store.getters.repo },
-        branch() { return this.$store.getters.branch },
-        path() { return `${this.$store.getters.mdPath}` },
+        acct() { return this.$store.getters.siteInfo.acct },
+        repo() { return this.$store.getters.siteInfo.repo },
+        branch() { return this.$store.getters.siteInfo.branch },
+        // path() { return `${this.$store.getters.mdPath}` },
         hash() { return `${this.$store.getters.hash}` },
         jwt() { return this.$store.getters.jwt },
         allItems() { return this.$store.getters.items },
