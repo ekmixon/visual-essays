@@ -63,7 +63,7 @@ let href = loc.href
 
 if (loc.hostname.indexOf('.github.io') > 0) {
   serviceBase = 'https://exp.visual-essays.app'
-  contentBase = loc.origin
+  contentBase = serviceBase
   href = `${loc.origin}/${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
   serviceBase = loc.origin
