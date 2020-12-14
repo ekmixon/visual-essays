@@ -312,8 +312,10 @@ _site_info_cache = {}
 def siteinfo(path=None):
     site_info = {}
     site = urlparse(request.base_url).netloc
-    href = qargs().get('href')
-    if href not in _site_info_cache:
+    qargs = qargs()
+    href = qargs.get('href')
+    refresh = qargs.get('refresh', 'false') in ('', 'true')
+    if refresh or href not in _site_info_cache:
         if site.startswith('localhost') and CONTENT_ROOT:
             local_config_path = os.path.join(CONTENT_ROOT, 'config.json')
             if os.path.exists(local_config_path):
