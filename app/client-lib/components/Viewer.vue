@@ -107,9 +107,6 @@
         }
         if (target.dataset.tab) this.activeTab = target.dataset.tab
       },
-      init() {
-        this.addSpacer()
-      },
       closeViewer() {
         this.$emit('set-viewer-is-open', false)
       },
@@ -118,13 +115,6 @@
       },
       setSelectedItem(itemID) {
         this.$emit('set-selected-item', itemID)
-      },
-      addSpacer() {
-        // Adds a spacer element that expands and contracts to match the size of the visualizer so
-        // that content at the end of the article is still reachable by scrolling
-        this.spacer = document.createElement('div')
-        this.spacer.id = 'essay-spacer'
-        this.spacer.style.height = `${this.viewportHeight*.8}px`
       },
       createTabsBar() {
         this.tabsBar = document.createElement('div')
@@ -195,7 +185,7 @@
         this.actions = actions
       },
       activeElementChange(current, prior) {
-        // console.log(`activeElementChange: ${current} ${this.activeElement}`)
+        console.log(`activeElementChange: ${current} ${this.activeElement}`)
         current = current || this.activeElement
         const tabsBar = document.querySelector('#tabs-bar')
         // (`activeElementChange: current=${current} prior=${prior} tabsBar=${tabsBar !== null}`)

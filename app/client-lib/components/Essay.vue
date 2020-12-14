@@ -30,7 +30,6 @@ module.exports = {
   computed: {},
   mounted() {
     console.log(`${this.$options.name}.mounted`)
-    this.addSpacer()
     this.$nextTick(() => this.init())
     if (this.hash) {
       this.scrollTo(this.hash.replace(/^#/,''))
@@ -78,7 +77,7 @@ module.exports = {
       // that content at the end of the article is still reachable by scrolling
       this.spacer = document.createElement('div')
       this.spacer.id = 'essay-spacer'
-      this.spacer.style.height = `${this.height*.8}px`
+      this.spacer.style.height = `${this.$refs.essay.clientHeight - 150 }px`
       document.getElementById('essay').appendChild(this.spacer)
     },
     setActiveElements(elemId) {

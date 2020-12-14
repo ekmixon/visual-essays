@@ -305,28 +305,6 @@ def markdown_viewer(path=None):
     logger.info(f'markdown-viewer: path={path}')
     return (open(os.path.join(SCRIPT_DIR, 'markdown-viewer.html'), 'r').read(), 200, cors_headers)
 
-'''
-@app.route('/config.json', methods=['GET'])
-def local_config():
-    logger.info(f'local_config: ENV={ENV} CONTENT_ROOT={CONTENT_ROOT}')
-    if ENV == 'dev' and CONTENT_ROOT:
-        config_path = os.path.join(CONTENT_ROOT, 'config.json')
-        if os.path.exists(config_path):
-            return json.load(open(config_path, 'r')), 200
-    return 'Not found', 404
-
-@app.route('/config/<path:path>', methods=['GET'])
-@app.route('/config/', methods=['GET'])
-@app.route('/config', methods=['GET'])
-def config(path=None):
-    site, acct, repo, ref, path, qargs = _context(path)
-    logger.info(f'config: site={site} acct={acct} repo={repo} ref={ref} path={path}')
-    raw, _, _ = query_gh_file( acct, repo, ref, '/config.json')
-    _config = json.loads(raw) if raw is not None else {} 
-    _config.update({'acct': acct, 'repo': repo, 'ref': ref})
-    return _config, 200, cors_headers
-'''
-
 _site_info_cache = {}
 @app.route('/site-info/', methods=['GET'])
 @app.route('/site-info', methods=['GET'])
@@ -496,6 +474,7 @@ def main(path=None):
         html = fp.read()
         if site.startswith('localhost') or site.endswith('gitpod.io'):
             html = re.sub(r'"/visual-essays/js/visual-essays', f'"/static/js/visual-essays', html)
+            html = re.sub(r'"/visual-essays/app/client-lib/public/css/', f'"/static/app/client-lib/public/css/', html)
         if ENV == 'dev':
             if site.endswith('gitpod.io'):
                 html = re.sub(r'"/static/js/visual-essays.+"', f'"https://8088-{os.environ.get("GITPOD_WORKSPACE_URL").replace("https://","")}/js/visual-essays.js"', html)

@@ -54,26 +54,22 @@ const baseComponentIndex = [
 ]
 
 const loc = window.location
-
 console.log(loc)
 
-let serviceBase = loc.origin
-let href = loc.href
+let service = 'https://exp.visual-essays.app'
+let site = loc.href
 
 if (loc.hostname.indexOf('.github.io') > 0) {
-  serviceBase = 'https://exp.visual-essays.app'
-  href = `${loc.origin}/${loc.pathname.split('/')[1]}`
+  site = `${loc.origin}/${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
-  serviceBase = 'http://localhost:8080'
-  href = `${serviceBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  service = 'http://localhost:8080'
+  site = `${service}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
-  serviceBase = `https://8080-${loc.host.slice(5)}`
-  href = `${serviceBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  service = `https://8080-${loc.host.slice(5)}`
+  site = `${service}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 }
 
-console.log(`serviceBase=${serviceBase} href=${href}`)
-
-let jwt, qargs
+console.log(`service=${service} site=${site}`)
 
 const referrerUrl = document.referrer
 if (referrerUrl) {
@@ -97,9 +93,9 @@ if (referrerUrl) {
   }
 }
 
-qargs = loc.href.indexOf('?') > 0
-  ? utils.parseQueryString(loc.href.split('?')[1])
-  : {}
+let jwt
+
+let qargs = loc.href.indexOf('?') > 0 ? utils.parseQueryString(loc.href.split('?')[1]) : {}
 if (qargs.token) {
   jwt = qargs.token
   window.localStorage.setItem('ghcreds', jwt)
@@ -153,12 +149,12 @@ let vm = new Vue({ // eslint-disable-line no-unused-vars
   })
 
 async function getSiteInfo() {
-  const resp = await fetch(`${serviceBase}/site-info?href=${encodeURIComponent(href)}`)
+  const resp = await fetch(`${service}/site-info?href=${encodeURIComponent(site)}`)
   return await resp.json()
 }
 
 const checkJWTExpiration = async(jwt) => {
-  let response = await fetch(`${serviceBase}/jwt-expiration/${jwt}`)
+  let response = await fetch(`${service}/jwt-expiration/${jwt}`)
   const expiration = parseInt(await response.text())
   const isExpired =  Date.now()/1000 >= expiration
   if (isExpired) window.localStorage.removeItem('ghcreds')
@@ -179,6 +175,7 @@ const doRemoteRequests = async () => {
     if (jwtIsExpired) jwt = null
   }
 
+  siteInfo.service = service
   if (!siteInfo.components) siteInfo.components = []
 
   const components = {}
@@ -199,15 +196,14 @@ const doRemoteRequests = async () => {
     e.type='image/x-icon'
     document.getElementsByTagName('head')[0].appendChild(e)
   }
+  console.log('siteInfo', siteInfo)
   store.dispatch('setSiteInfo', siteInfo)
   store.dispatch('setComponents', components)
   store.dispatch('setJWT', jwt)
   document.querySelectorAll('script[data-ve-meta]').forEach(scr => eval(scr.text))
   console.log('veMeta', window.veMeta)
-  store.dispatch('setAppVersion', window.veMeta.version)
-  store.dispatch('setServiceBase', serviceBase)
-  // store.dispatch('setContentBase', serviceBase)
-  console.log(store)
+  store.dispatch('setAppVersion', window.veMeta ? window.veMeta.version : undefined)
+  store.dispatch('setServiceBase', service)
 }
 
 doRemoteRequests().then(_ => vm.$mount('#app')) // eslint-disable-line no-unused-vars

@@ -86,8 +86,8 @@ export default {
         headerEnabled: true,
         footerEnabled: true,
         footerHeight: 0,
-        viewerHeight: 0,
-        viewerWidth: 0,
+        viewerHeight: 500,
+        viewerWidth: 500,
         essayHeight: 0,
         essayWidth: 0,
         headerHeight: 400,
@@ -118,7 +118,6 @@ export default {
         allItems() { return this.$store.getters.items },
         html() { return this.$store.getters.essayHTML },
         components() { return Object.values(this.$store.getters.components) },
-        // viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         layout() { return this.$store.getters.layout },
         essayConfig() { return this.$store.getters.essayConfig || {} },
         siteInfo() { return this.$store.getters.siteInfo || {} },
@@ -163,31 +162,121 @@ export default {
         refQueryArg() { return this.ref && this.ref !== this.siteInfo.ref ? `?ref=${this.ref}` : '' }
       },
       mounted() {
-        // window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
         this.href = window.location.href
-        this.essayBase = this.siteInfo.baseurl || ''
-        this.essayPath = window.location.pathname.length > this.essayBase.length
-          ? window.location.pathname.slice(this.essayBase.length)
-          : ''
-        /*
-        if (this.essayPath[this.essayPath.length-1] !== '/') {
-          this.essayPath += '/'
-          history.replaceState({file: `${this.essayBase}${this.essayPath}`}, '', `${this.essayBase}${this.essayPath}`)
-        }
-        */
         this.qargs = this.parseQueryString()
+
+      let path = window.location.pathname.length > this.siteInfo.baseurl.length
+          ? window.location.pathname.slice(this.siteInfo.baseurl)
+          : ''
         console.log(`refQueryArg=${this.refQueryArg}`)
-        console.log(`App: base=${this.essayBase} path=${this.essayPath}`, this.qargs, this.siteInfo, this.essayConfig)
+        console.log(`App: baseurl=${this.siteInfo.baseurl} path=${path}`, this.qargs, this.siteInfo, this.essayConfig)
         window.onpopstate = (e) => { this.setEssay(e.state.file, true) }
-        this.setEssay(this.essayPath)
-        this.init()
+        this.waitForHeaderFooter() // header and footer are dynamically loaded external components        
+        this.setEssay(path)
       },
       methods: {
-        init() {
-          this.viewerIsOpen = this.layout[0] === 'v'
-          // console.log(`init: layout=${this.layout} touchDevice=${'ontouchstart' in window}`)
-          this.waitForHeaderFooter() // header and footer are dynamically loaded external components        
+        async loadEssay(path, replace) {
+
+          // Load essay HTML, use local cached version if available
+          let essayUrl = `${this.siteInfo.service}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}${this.refQueryArg}`
+          console.log(`loadEssay: path=${path} url=${essayUrl}`)
+          let html = await this.cachedEssay(essayUrl)
+
+          // Create element from HTML source
+          const tmp = document.createElement('div')
+          tmp.innerHTML = html
+
+          // Find source name and add/remove trailing slash from path as needed
+          //  Trailing slash reflects non-leaf path
+          const essayElem = tmp.querySelector('#essay')
+          this.essayFname = essayElem.dataset.name
+          let fname = this.essayFname.split('/').pop().toLowerCase()
+          let isLeaf = fname.indexOf('.md') > 0 || fname === 'readme' || fname === 'index'
+          if (!isLeaf && path[path.length-1] !== '/') path += '/'
+          if (isLeaf && path[path.length-1] === '/') path = path.slice(0, path.length-1)
+          
+          // Update browser URL
+          console.log(`browser url: baseurl=${this.siteInfo.baseurl} path=${path} refArg=${this.refQueryArg}`)
+          let browserPath = `${this.siteInfo.baseurl}${path}${this.refQueryArg}`
+          if (replace) {
+            history.replaceState({file: path || ''}, '', browserPath)
+          } else {
+            history.pushState({file: path || ''}, '', browserPath)
+          }
+          this.essayPath = path
+          this.href = window.location.href
+
+          // Parse item data from HTML
+          window.data = []
+          tmp.querySelectorAll('script[data-ve-tags]').forEach(scr => eval(scr.text))
+          const items = this.prepItems(window.data.filter(item => item.tag !== 'component'))
+
+          // Update store with new essay data
+          const essayConfig = items.find(item => item.tag === 'config') || {}
+          this.$store.dispatch('setEssayHTML', essayElem.innerHTML)
+          this.$store.dispatch('setItems', items)
+          this.$store.dispatch('setEssayConfig', essayConfig)
+          const layout = essayConfig.layout
+            ? essayConfig.layout[0] === 'v'
+              ? 'vertical'
+              : essayConfig.layout
+            : 'horizontal'
+          this.$store.dispatch('setLayout', layout)
+          this.$nextTick(() => {this.convertLinks()})
         },
+
+        cachedEssay(url) {
+          if (!window.essayCache) {
+            window.essayCache = {}
+          }
+          console.log(`cached=${window.essayCache[url] !== undefined}`)
+          if (!window.essayCache[url]) {
+            window.essayCache[url] = fetch(url).then(resp => resp.text())
+          }
+          return window.essayCache[url]
+        },
+
+        reset() {
+          this.$store.dispatch('setEssayHTML', null)
+          this.$store.dispatch('setItems', [])
+          this.$store.dispatch('setEssayConfig', null)
+          this.setActiveElements([])
+        },
+
+        convertLinks() {
+          this.$refs.essay.querySelectorAll('a').forEach(link => {
+
+            if (!link.href || link.href.indexOf(window.location.host) > 0) {
+              
+              // If internal link
+              let target = link.dataset.target
+              if (!target) { 
+                const parsedUrl = this.parseUrl(link.href)
+                target = parsedUrl.pathname
+              }
+              console.log(link.href, target)
+              link.removeAttribute('href')
+              link.setAttribute('data-target', target)
+
+              // Add click handler for internal links
+              link.addEventListener('click', (e) => {
+                let target = e.target
+                while(!target.dataset.target && target.parentElement) {
+                  target = target.parentElement
+                }
+                let path = target.dataset.target
+                console.log('click', path)
+                this.setEssay(path)
+              })
+            } else {
+              
+              // If external link, add external link icon to text and force opening in new tab
+              link.innerHTML += '<sup><i class="fal fa-external-link-alt" style="margin-left:4px;font-size:0.8em;color:blue;"></i></sup>'
+              link.setAttribute('target', '_blank')
+            }
+          })
+        },
+
         setActiveElements(activeElements) {
           this.activeElements = activeElements
           this.itemsInActiveElements = itemsInElements(activeElements, this.allItems)
@@ -214,8 +303,7 @@ export default {
         },
         waitForHeaderFooter() {
           if (!this.header) {
-            // this.header = document.querySelector(`#header.${this.layout === 'index' ? 'index' : 'essay'}`)
-            this.header = document.querySelector(`#header`)
+            this.header = document.getElementById('header')
             if (this.header && this.$refs.essay) {
               if ('ontouchstart' in window) {
                 this.header.addEventListener('touchstart', (e) => { this.lastTouchY = e.touches[0].screenY })
@@ -259,112 +347,21 @@ export default {
           this.header.style.height = `${this.headerMinHeight}px`
           this.headerHeight = this.headerMinHeight
         },
-        cachedEssay(url) {
-          if (!window.essayCache) {
-            window.essayCache = {}
-          }
-          console.log(`cached=${window.essayCache[url] !== undefined}`)
-          if (!window.essayCache[url]) {
-            window.essayCache[url] = fetch(url).then(resp => resp.text())
-          }
-          return window.essayCache[url]
-        },
-        async loadEssay(path, replace) {
-          console.log(`loadEssay=${path} ${replace}`)
-          let essayUrl = `${this.serviceBase}/essay${this.essayBase}${path}${this.refQueryArg}`
-          let html = await this.cachedEssay(essayUrl)
-          let browserBasePath = this.siteInfo.ghpSite ? `/${this.siteInfo.repo}` : this.essayBase
-          console.log(`browserBasePath=${browserBasePath} path=${path}`)
-          let browserPath = `${browserBasePath}${path}${this.refQueryArg}`
-          if (replace) {
-            history.replaceState({file: path || ''}, '', browserPath)
-          } else {
-            history.pushState({file: path || ''}, '', browserPath)
-          }
-          this.href = window.location.href
-          const tmp = document.createElement('div')
-          tmp.innerHTML = html
-          window.data = []
-          tmp.querySelectorAll('script[data-ve-tags]').forEach(scr => eval(scr.text))
-          const essayElem = tmp.querySelector('#essay')
-          this.essayFname = `${essayElem.dataset.name}.md`
-          const leaf = essayElem.dataset.name.split('/').pop().replace('.md', '').toLowerCase()
-          const isFolder = leaf === 'index' || leaf === 'readme'
-          console.log(`name=${essayElem.dataset.name} isFolder=${isFolder}`)
-          if (isFolder) {
-            if (path[path.length-1] !== '/') {
-              this.essayPath += '/'
-              history.replaceState({file: `${this.essayBase}${this.essayPath}${this.refQueryArg}`}, '', `${browserBasePath}${this.essayPath}${this.refQueryArg}`)
-            }
-          } else {
-            if (path[path.length-1] === '/') {
-              this.essayPath = path.slice(0, path.length-1)
-              history.replaceState({file: `${this.essayBase}${this.essayPath}${this.refQueryArg}`}, '', `${browserBasePath}${this.essayPath}${this.refQueryArg}`)
-            }
-          }
-
-          const items = this.prepItems(window.data.filter(item => item.tag !== 'component'))
-          
-          const essayConfig = items.find(item => item.tag === 'config') || {}
-          this.$store.dispatch('setEssayHTML', essayElem.innerHTML)
-          this.$store.dispatch('setItems', items)
-          this.$store.dispatch('setEssayConfig', essayConfig)
-          const layout = essayConfig.layout
-            ? essayConfig.layout[0] === 'v'
-              ? 'vertical'
-              : essayConfig.layout
-            : 'horizontal'
-          this.$store.dispatch('setLayout', layout)
-          this.$nextTick(() => {this.convertLinks()})
-        },
-        reset() {
-          this.$store.dispatch('setEssayHTML', null)
-          this.$store.dispatch('setItems', [])
-          this.$store.dispatch('setEssayConfig', null)
-          this.setActiveElements([])
-        },
-        convertLinks() {
-          this.$refs.essay.querySelectorAll('a').forEach(link => {
-            console.log(link.href)
-            if (!link.href || link.href.indexOf(window.location.host) > 0) {
-              let target = link.dataset.target
-              if (!target) { 
-                const parsedUrl = this.parseUrl(link.href)
-                console.log(parsedUrl)
-                target = parsedUrl.pathname.slice(this.essayBase.length)
-              }
-              link.addEventListener('click', (e) => {
-                let target = e.target
-                while(!target.dataset.target && target.parentElement) {
-                  target = target.parentElement
-                }
-                console.log('click', target.dataset.target)
-                // this.essayPath = target.dataset.target
-                this.setEssay(target.dataset.target)
-              })
-              link.removeAttribute('href')
-              link.setAttribute('data-target', target)
-            } else {
-              link.innerHTML += '<sup><i class="fal fa-external-link-alt" style="margin-left:4px;font-size:0.8em;color:blue;"></i></sup>'
-              link.setAttribute('target', '_blank')
-            }
-          })
-        },
         menuItemClicked(path) {
           console.log('menuItemClicked', path)
           this.setEssay(path)
         },
         logout() {
-          console.log('logout')
+          window.localStorage.removeItem('ghcreds')
+          this.$store.dispatch('setJWT', null)
         },
         viewMarkdown() {
-          
           this.openWindow(`/markdown-viewer/${this.siteInfo.acct}/${this.siteInfo.repo}/${this.ref}${this.essayFname}`)
         },
         editMarkdown(editor) {
           this.openWindow(editor == 'custom'
-            ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${this.essayBase}${this.essayFname}`
-            : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${this.essayBase}${this.essayFname}`
+            ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${this.siteinfo.baseurl}${this.essayFname}`
+            : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${this.siteinfo.baseurl}${this.essayFname}`
           ) 
         },
         gotoGithub() {
@@ -403,25 +400,11 @@ export default {
         }
       },
       updated() {
+        console.log(`updated: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header.clientHeight} footer=${this.$refs.footer.clientHeight}`)
         this.viewerHeight = this.$refs.app.clientHeight - this.$refs.header.clientHeight - this.$refs.footer.clientHeight
-        if (this.$refs.essay) this.viewerWidth = this.$refs.essay.clientWidth
+        this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
       },
       watch: {
-        /*
-        essayPath: {
-          handler: function (path) {
-            // console.log(`essayPath=${path}`)
-            // if (path) this.setEssay(path)
-          },
-          immediate: true
-        },
-        */
-        essayConfig: {
-          handler: function (essayConfig) {
-            console.log('essayConfig', essayConfig)
-          },
-          immediate: true
-        },
         layout: {
           handler: function (layout) {
             this.viewerIsOpen = layout[0] === 'v'
