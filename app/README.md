@@ -1,5 +1,7 @@
 # Visual Essays application
 
+The `Visual Essays application` includes a browser client and a number of back-end services.  The browser cliient is packaged as a javascrip bundle that is loaded by a simple HTML page.  The client uses a number of services exposed as HTTP endpoints.  In production the services are hosted in a cloud-based environment (currently using Google Cloud Run).  In development the server can be run locally.
+   
 ## Server
 
 ### Running the server
