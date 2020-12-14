@@ -281,7 +281,6 @@ export default {
           const leaf = essayElem.dataset.name.split('/').pop().replace('.md', '').toLowerCase()
           const isFolder = leaf === 'index' || leaf === 'readme'
           console.log(`name=${essayElem.dataset.name} isFolder=${isFolder}`)
-          let browserBasePath = this.siteInfo.ghpSite ? `/${this.siteInfo.acct}` : this.essayBase
           if (isFolder) {
             if (path[path.length-1] !== '/') {
               this.essayPath += '/'
