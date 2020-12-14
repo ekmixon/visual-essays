@@ -607,7 +607,7 @@ def get_essay(markdown, site, acct, repo, ref, path, root, raw, token, **kwargs)
     if root and _is_local(site):
         markdown, md_path = get_local_markdown(path=f'/{"/".join(path.split("/")[3:])}', root=root)
     if markdown is None:
-        markdown, md_path, url, sha = get_gh_markdown(acct, repo, ref, path, token)
+        markdown, md_path, url, sha = get_gh_markdown(acct, repo, ref, f'/{"/".join(path.split("/")[3:])}', token)
     if markdown:
         if raw:
             content = markdown

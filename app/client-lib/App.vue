@@ -166,8 +166,8 @@ export default {
         this.qargs = this.parseQueryString()
 
         let path = this.siteInfo.baseurl && window.location.pathname.length > this.siteInfo.baseurl.length
-          ? window.location.pathname.slice(this.siteInfo.baseurl)
-          : ''
+          ? window.location.pathname.slice(this.siteInfo.baseurl.length)
+          : '/'
         console.log(`refQueryArg=${this.refQueryArg}`)
         console.log(`App: baseurl=${this.siteInfo.baseurl} path=${path}`, this.qargs, this.siteInfo, this.essayConfig)
         window.onpopstate = (e) => { this.setEssay(e.state.file, true) }
@@ -185,17 +185,11 @@ export default {
           // Create element from HTML source
           const tmp = document.createElement('div')
           tmp.innerHTML = html
-
-          // Find source name and add/remove trailing slash from path as needed
-          //  Trailing slash reflects non-leaf path
           const essayElem = tmp.querySelector('#essay')
           this.essayFname = essayElem.dataset.name
-          let fname = this.essayFname.split('/').pop().toLowerCase()
-          let isLeaf = fname.indexOf('.md') > 0 || fname === 'readme' || fname === 'index'
-          if (!isLeaf && path[path.length-1] !== '/') path += '/'
-          if (isLeaf && path[path.length-1] === '/') path = path.slice(0, path.length-1)
-          
+
           // Update browser URL
+          if (path[path.length-1] !== '/') path += '/'
           console.log(`browser url: baseurl=${this.siteInfo.baseurl} path=${path} refArg=${this.refQueryArg}`)
           let browserPath = `${this.siteInfo.baseurl}${path}${this.refQueryArg}`
           if (replace) {
@@ -254,7 +248,7 @@ export default {
                 const parsedUrl = this.parseUrl(link.href)
                 target = parsedUrl.pathname
               }
-              console.log(link.href, target)
+              // console.log(link.href, target)
               link.removeAttribute('href')
               link.setAttribute('data-target', target)
 
@@ -388,6 +382,7 @@ export default {
           }
         },
         setEssay(path, replace) {
+          console.log(`setEssay: path=${path}`)
           this.essayPath = path
           this.fadeOut(this.$refs.essay)
           this.fadeOut(this.$refs.viewer)
@@ -400,7 +395,7 @@ export default {
         }
       },
       updated() {
-        console.log(`updated: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header.clientHeight} footer=${this.$refs.footer.clientHeight}`)
+        // console.log(`updated: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header.clientHeight} footer=${this.$refs.footer.clientHeight}`)
         this.viewerHeight = this.$refs.app.clientHeight - this.$refs.header.clientHeight - this.$refs.footer.clientHeight
         this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
       },
