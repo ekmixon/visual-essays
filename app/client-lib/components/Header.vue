@@ -1,5 +1,5 @@
 <template>
-  <div ref="header" id="header" :class="`header ${essayConfig && essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`">
+  <div ref="header" id="header" class="header" :style="`height:${height}; background-image: url(${banner})`">
     <nav>
       <div id="menuToggle">
         <input type="checkbox" />
@@ -22,7 +22,7 @@
             <a v-if="isAuthenticated" @click="logout">
               <i :class="`fas fa-user`"></i>Logout
             </a>
-            <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
+            <a v-else :href="`https://exp.visual-essays.app/login?redirect=${loginRedirect}`">
               <i :class="`fas fa-user`"></i>Login
             </a>
           </li>
@@ -94,7 +94,7 @@
     },
     mounted() {
       console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
-      console.log(`href=${this.href} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
+      console.log(`href=${this.href} appVersion=${this.appVersion} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
     
       // set initial height
       this.$refs.header.style.height = `${this.height}px`
@@ -133,7 +133,7 @@
       },
       nav(item) {
         this.closeDrawer()
-        console.log(`menuItemClicked=${item}`)
+        // console.log(`menuItemClicked=${item}`)
         this.$emit('menu-item-clicked', item)
       },
       logout(e) {
@@ -157,7 +157,7 @@
         this.closeDrawer()
         this.$emit('edit-markdown', editor)
       },
-      gotoGithub(editor) {
+      gotoGithub() {
         this.closeDrawer()
         this.$emit('goto-github')
       },
@@ -196,7 +196,6 @@
     background-size: cover;
     position: relative;
     margin: 0;
-    background-color: white;
     color: #444;
   }
 

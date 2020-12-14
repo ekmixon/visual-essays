@@ -16,6 +16,7 @@ WORKDIR /usr/src/app
 ADD server server
 ADD index.html .
 ADD js js
+ADD css css
 ADD images images
 ADD components components
 

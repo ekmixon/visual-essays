@@ -1,11 +1,15 @@
 import Vue from 'vue'
 import App from './App.vue'
 import store from './store.js'
-import 'lodash'
-import httpVueLoader from 'http-vue-loader'
-import * as utils from './utils.js'
 import VueScrollmagic from 'vue-scrollmagic'
+import httpVueLoader from 'http-vue-loader'
 import VModal from 'vue-js-modal'
+import * as utils from './utils.js'
+import VueAnalytics from 'vue-analytics'
+// import MobileDetect from 'mobile-detect'
+import 'lodash'
+import VueYoutube from 'vue-youtube'
+// import 'leaflet-polylinedecorator'
 
 import D3Network from './components/D3Network.vue'
 import D3PlusNetwork from './components/D3PlusNetwork.vue'
@@ -26,9 +30,6 @@ import Tabulator from './components/Tabulator.vue'
 import VideoPlayer from './components/VideoPlayer.vue'
 import Viewer from './components/Viewer.vue'
 import VisNetwork from './components/VisNetwork.vue'
-
-// Vue.config.productionTip = false
-Vue.config.devtools = true
 
 const baseComponentIndex = [
   { name: 'd3Network', src: '/components/D3Network.vue', component: D3Network, selectors: ['tag:d3-network'], icon: 'fa-chart-network', label: 'Networks'},
@@ -53,23 +54,17 @@ const baseComponentIndex = [
   { name: 'visNetwork', src: '/components/VisNetwork.vue', component: VisNetwork, selectors: ['tag:vis-network'], icon: 'fa-chart-network', label: 'Networks'}
 ]
 
-const loc = window.location
-
-console.log(loc)
-
-let serviceBaseURL = '/'
-let siteURL = loc.href
-
-if (loc.hostname.indexOf('.github.io') > 0) {
-  'https://visual-essays.app'
-} else if (loc.hostname.indexOf('localhost') >= 0) {
-  serviceBaseURL = 'http://localhost:8080'
-} else if (loc.hostname.indexOf('.gitpod.io') > 0) {
-  serviceBaseURL = `https://8080-${loc.host.slice(5)}`
+console.log(window.location)
+let baseURL = ''
+let staticBase = ''
+if (window.location.hostname.indexOf('.github.io') > 0) {
+  baseURL = 'https://exp.visual-essays.app'
+  staticBase = `/${window.location.pathname.split('/')[1]}`
 }
-if (serviceBaseURL !== '/') siteURL = `${serviceBaseURL}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+console.log(`baseURL=${baseURL} staticBase=${staticBase}`)
 
-let jwt, qargs
+const hash = window.location.hash || location.hash
+let vm, siteInfo, jwt, qargs
 
 const referrerUrl = document.referrer
 if (referrerUrl) {
@@ -87,14 +82,18 @@ if (referrerUrl) {
     const ghPath = referrerPath.slice(pathStart, pathEnd).join('/').replace(/\.md$/, '')
     const redirect = (ghAcct === 'JSTOR-Labs' && ghRepo === 've-docs') 
       ? `https://docs.visual-essays.app/${ghPath}`
-      : `${loc.origin}${ghBranch === 'master' || ghBranch === 'main' ? '' : '/' + ghBranch}/${ghAcct}/${ghRepo}/${ghPath}`
+      : `${window.location.origin}${ghBranch === 'master' || ghBranch === 'main' ? '' : '/' + ghBranch}/${ghAcct}/${ghRepo}/${ghPath}`
     console.log(`redirect=${redirect}`)
     window.location = redirect
   }
 }
 
-qargs = loc.href.indexOf('?') > 0
-  ? utils.parseQueryString(loc.href.split('?')[1])
+// const md = new MobileDetect(window.navigator.userAgent)
+// const isMobile = md.phone() !== null
+// const isTouchDevice = md.phone() !== null || md.tablet() !== null
+
+qargs = window.location.href.indexOf('?') > 0
+  ? utils.parseQueryString(window.location.href.split('?')[1])
   : {}
 if (qargs.token) {
   jwt = qargs.token
@@ -102,6 +101,86 @@ if (qargs.token) {
 } else {
   jwt = window.localStorage.getItem('ghcreds')
 }
+
+const checkJWTExpiration = async(jwt) => {
+  let response = await fetch(`${baseURL}/jwt-expiration/${jwt}`)
+  const expiration = parseInt(await response.text())
+  const isExpired =  Date.now()/1000 >= expiration
+  if (isExpired) window.localStorage.removeItem('ghcreds')
+  return isExpired
+}
+
+async function getSiteInfo() {
+  const resp = await fetch(`${baseURL}/site-info?href=${encodeURIComponent(window.location.href)}`)
+  return await resp.json()
+}
+
+/*
+const getBaseComponentsIndex = async() => {
+  let response = await fetch(`${staticBase}/components/index.json`)
+  let baseComponents = []
+  const baseComponentsList = await response.json()
+  baseComponentsList.forEach(comp => {
+    if (comp.src.indexOf('http') !== 0) comp.src = `${staticBase}${comp.src}`
+    baseComponents.push(comp)
+  })
+  return baseComponents
+}
+*/
+
+const doRemoteRequests = async () => {
+  const remoteRequests = [
+    getSiteInfo(), 
+    //getBaseComponentsIndex()
+    Promise.resolve(baseComponentIndex)
+  ]
+  if (jwt !== null) remoteRequests.push(checkJWTExpiration(jwt))
+
+  let responses = await Promise.all(remoteRequests)
+  siteInfo = responses[0]
+  let componentsIndex = responses[1]
+  if (jwt !== null) {
+    const jwtIsExpired = responses[responses.length-1]
+    if (jwtIsExpired) jwt = null
+  }
+
+  if (!siteInfo.components) siteInfo.components = []
+
+  Vue.use(VueAnalytics, {
+    id: siteInfo.gaTrackingID
+  })
+
+  const components = {}
+  const componentsList = [...siteInfo.components, ...componentsIndex]
+  componentsList.forEach(component => {
+    if (!components[component.name]) {
+      if (!component.component) {
+        component.component = httpVueLoader(component.src)
+      }
+      Vue.component(component.name, component.component)
+      components[component.name] = component
+    }
+  })
+  if (siteInfo.favicon) {
+    let e = document.createElement('link')
+    e.href = siteInfo.favicon
+    e.rel = 'icon'
+    e.type='image/x-icon'
+    document.getElementsByTagName('head')[0].appendChild(e)
+  }
+  window.components = components
+}
+
+doRemoteRequests()
+.then(_ => { // eslint-disable-line no-unused-vars
+  setInterval(() => waitForContent(), 250)
+})
+
+Vue.config.productionTip = false
+Vue.config.devtools = true
+
+Vue.use(httpVueLoader)
+Vue.use(VueYoutube)
 
 Vue.use(VueScrollmagic, {
   vertical: true,
@@ -142,67 +221,87 @@ Vue.mixin({
   }
 })
 
-let vm = new Vue({ // eslint-disable-line no-unused-vars
+function initApp() {
+  console.log('visual-essays.init')
+
+  window.data = []
+  document.querySelectorAll('script[data-ve-tags]').forEach((scr) => {
+    eval(scr.text)
+  })
+
+  const components = { ...window.components }
+  // Essay components
+  window.data.filter(item => item.tag === 'component').forEach(customComponent => {
+    customComponent.name = customComponent.name || customComponent.label
+    if (customComponent.selectors) {
+      customComponent.selectors = customComponent.selectors.split('|')
+    }
+    if (!customComponent.component) {
+      customComponent.component = httpVueLoader(customComponent.src)
+    }
+    Vue.component(customComponent.name, customComponent.component)
+    components[customComponent.name] = customComponent
+  })
+  console.log('components', components)
+
+  vm = new Vue({
     template: '<App/>',
     store,
     render: h => h(App)
   })
 
-async function getSiteInfo() {
-  const resp = await fetch(`${serviceBaseURL}/site-info?href=${encodeURIComponent(siteURL)}`)
-  return await resp.json()
-}
+  vm.$store.dispatch('setAcct', siteInfo.acct)
+  vm.$store.dispatch('setRepo', siteInfo.repo)
+  vm.$store.dispatch('setMdPath', window.location.pathname)
+  vm.$store.dispatch('setMdPath', window._essay)
+  vm.$store.dispatch('setBranch', siteInfo.editBranch)
 
-const checkJWTExpiration = async(jwt) => {
-  let response = await fetch(`${serviceBaseURL}/jwt-expiration/${jwt}`)
-  const expiration = parseInt(await response.text())
-  const isExpired =  Date.now()/1000 >= expiration
-  if (isExpired) window.localStorage.removeItem('ghcreds')
-  return isExpired
-}
+  vm.$store.dispatch('setJWT', jwt)
+  vm.$store.dispatch('setHash', hash)
 
-const doRemoteRequests = async () => {
-  const remoteRequests = [
-    getSiteInfo(),
-    Promise.resolve(baseComponentIndex)
-  ]
-  if (jwt !== null) remoteRequests.push(checkJWTExpiration(jwt))
-  let responses = await Promise.all(remoteRequests)
-  let siteInfo = responses[0]
-  let componentsIndex = responses[1]
-  if (jwt !== null) {
-    const jwtIsExpired = responses[responses.length-1]
-    if (jwtIsExpired) jwt = null
+  vm.$store.dispatch('setItems', utils.prepItems(window.data.filter(item => item.tag !== 'component')))
+  vm.$store.dispatch('setComponents', components)
+  vm.$store.dispatch('setEssayHTML', document.getElementById('essay').innerHTML)
+  vm.$store.dispatch('setSiteTitle', siteInfo.siteTitle)
+
+  const essayConfig = vm.$store.getters.items.find(item => item.tag === 'config') || {}
+  let layout = qargs.layout || essayConfig.layout || 'default'
+  if (layout) layout = layout.replace(/^hc$/,'horizontal').replace(/^vtl$/,'vertical')
+  vm.$store.dispatch('setLayout', layout)
+  vm.$store.dispatch('setShowBanner', window.app === undefined && !(qargs.nobanner === 'true' || qargs.nobanner === ''))
+  vm.$store.dispatch('setDebug', qargs.debug === 'true' || qargs.debug === '')
+
+  console.log(vm.$store)
+
+  if (window.app) {
+    window.app.siteInfo = siteInfo
+    console.log('window.app.siteInfo', window.app.siteInfo)
+    window.app.jwt = jwt
+    // window.app.qargs = qargs
+    window.app.essayConfig = essayConfig
+    // window.app.$store = vm.$store
   }
+  vm.$store.dispatch('setEssayConfig', essayConfig)
 
-  if (!siteInfo.components) siteInfo.components = []
+  vm.$mount('#essay')
+  if (window.app) {
+    window.app.isLoaded = true
+    window.vm = vm
+  }
+}
 
-  const components = {}
-  const componentsList = [...siteInfo.components, ...componentsIndex]
-  componentsList.forEach(component => {
-    if (!components[component.name]) {
-      if (!component.component) {
-        component.component = httpVueLoader(component.src)
-      }
-      Vue.component(component.name, component.component)
-      components[component.name] = component
+let current = undefined
+const waitForContent = () => {
+  // console.log(`waitForContent: current=${current} window._essay=${window._essay}`)
+  const essayElem = document.getElementById('essay') // article
+  if (!window._essay && essayElem && essayElem.innerText.length > 0) {
+    window._essay = essayElem.dataset.name
+  }
+  if (current != window._essay) {
+    current = window._essay
+    if (vm) {
+      vm = vm.$destroy()
     }
-  })
-  if (siteInfo.favicon) {
-    let e = document.createElement('link')
-    e.href = siteInfo.favicon
-    e.rel = 'icon'
-    e.type='image/x-icon'
-    document.getElementsByTagName('head')[0].appendChild(e)
+    initApp()
   }
-  store.dispatch('setSiteInfo', siteInfo)
-  store.dispatch('setComponents', components)
-  store.dispatch('setJWT', jwt)
-  document.querySelectorAll('script[data-ve-meta]').forEach(scr => eval(scr.text))
-  console.log('veMeta', window.veMeta)
-  store.dispatch('setAppVersion', window.veMeta.version)
-  store.dispatch('setServiceBaseURL', serviceBaseURL)
-  console.log(store)
 }
-
-doRemoteRequests().then(_ => vm.$mount('#app')) // eslint-disable-line no-unused-vars

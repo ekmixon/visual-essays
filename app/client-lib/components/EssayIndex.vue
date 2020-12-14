@@ -60,8 +60,7 @@ module.exports = {
   name: 'EssayIndex',
   props: {
     html: String,
-        html: String,
-        essayConfig: { type: Object, default: function(){ return {}} }
+    essayConfig: { type: Object, default: function(){ return {}} }
   },
   data: () => ({
       sections: []

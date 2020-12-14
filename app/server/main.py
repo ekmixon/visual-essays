@@ -260,8 +260,8 @@ def essay(path=None):
     raw = qargs.get('raw', 'false') in ('', 'true')
     refresh = qargs.get('refresh', 'false') in ('', 'true')
     cache_key = f'{site}|{acct}|{repo}|{ref}|{path}'
-    cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' else None
-    if cached_essay and cached_essay.get('url'):
+    cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' and not CONTENT_ROOT else None
+    if cached_essay and cached_essay['url']:
         markdown, _ , md_sha = get_gh_file(cached_essay['url'])
         path = cached_essay.get('md_path', path)
         if cached_essay['sha'] == md_sha:
@@ -355,6 +355,7 @@ def siteinfo(path=None):
 def login():
     site, acct, repo, ref, path, qargs = _context()
     redirect_url = qargs.get('redirect', site)
+    logger.info(f'login: OAUTH_ENDPOINT={OAUTH_ENDPOINT} redirect_url={redirect_url}')
     return redirect(f'{OAUTH_ENDPOINT}/auth/login/github?redirect={redirect_url}')
 
 @app.route('/jwt-expiration/<token>')

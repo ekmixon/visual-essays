@@ -5,297 +5,36 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="/visual-essays/app/client-lib/public/css/main.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <script src="https://cdn.jsdelivr.net/npm/http-vue-loader@1.4.2/src/httpVueLoader.min.js"></script>
-  <style>
-    [v-cloak] { display: none; }
-    #app {
-      display: grid;
-      align-items: stretch;
-      grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr auto;
-      grid-template-areas: 
-        "header"
-        "content"
-        "footer";
-      height: 100vh;
-      width: 100vw;
-      position: absolute;
-    }
-    .header {
-      grid-area: header;
-    }
-    .content {
-      grid-area: content;
-      overflow-y: auto;
-      height: 100%;
-    }
-    .footer {
-      grid-area: footer;
-    }
-    .visible {
-      visibility: visible;
-      opacity: 1;
-      transition: opacity 0.5s linear;
-    }
-    .hidden {
-      visibility: hidden;
-      opacity: 0;
-      /* transition: opacity 0.5s linear; */
-      /* transition: visibility 0s 1s, opacity 1s linear; */
-    }
-  </style>   
-
-    <!-- Used for deep linking of Single Page Apps when hosted with GitHub Pages -->
-    <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
-      // https://github.com/rafrex/spa-github-pages
-      // Copyright (c) 2016 Rafael Pedicini, licensed under the MIT License
-      (function(l) {
-        if (l.search) {
-          let q = {}
-          l.search.slice(1).split('&').forEach(function(v) {
-            let a = v.split('=')
-            q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&')
-          })
-          if (q.p !== undefined) {
-            window.history.replaceState(null, null, l.pathname.slice(0, -1) + (q.p || '') + (q.q ? ('?' + q.q) : '') + l.hash)
-          }
-        }
-      }(window.location))
-    </script>
-    <!-- End Single Page Apps for GitHub Pages -->
-
 </head>
 <body>
+
+  <!-- Used for deep linking of Single Page Apps when hosted with GitHub Pages -->
+  <script type="text/javascript">
+    // Single Page Apps for GitHub Pages
+    // https://github.com/rafrex/spa-github-pages
+    // Copyright (c) 2016 Rafael Pedicini, licensed under the MIT License
+    (function(l) {
+      if (l.search) {
+        let q = {}
+        l.search.slice(1).split('&').forEach(function(v) {
+          let a = v.split('=')
+          q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&')
+        })
+        if (q.p !== undefined) {
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + (q.p || '') + (q.q ? ('?' + q.q) : '') + l.hash)
+        }
+      }
+    }(window.location))
+  </script>
+  <!-- End Single Page Apps for GitHub Pages -->
+
   <div id="app">
-    
-    <div class="header">
-      <component v-if="essayConfig" :is="essayConfig.layout === 'index' ? 'indexHeader' : 'essayHeader'"
-        :height="400"
-        :essay-config="essayConfig"
-        :site-config="siteInfo"
-        :is-authenticated="isAuthenticated"
-        :read-only="readOnly"
-        :href="href"
-        :app-version="appVersion"
-        :content-ref="ref"
-        @menu-item-clicked="menuItemClicked"
-        @logout="logout"
-        @view-markdown="viewMarkdown"
-        @edit-markdown="editMarkdown"
-        @goto-github="gotoGithub"
-        @open-docs-site="openDocsSite"
-      ></component>
-    </div>
-
-    <div id="content" v-html="html" class="content hidden"></div>
-
-    <div class="footer">
-      <component is="siteFooter" :site-config="siteInfo"></component>
-    </div>
-  
-  </div>
-
   <script src="/visual-essays/js/visual-essays.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://kit.fontawesome.com/19541ddce8.js" crossorigin="anonymous"></script>
-
-<script>
-
-new Promise(function(resolve, reject) {
-  function waitForComponents() {
-    if (window.components) {
-      resolve(window.components)
-    } else {
-      setTimeout(waitForComponents, 250)
-    }
-  }
-  waitForComponents()
-})
-.then(components => {
-      window.app = new Vue({
-        el: '#app',
-        components: {
-          'indexHeader': httpVueLoader(components.indexHeader && components.indexHeader.src),
-          'essayHeader': httpVueLoader(components.essayHeader && components.essayHeader.src),
-          'siteFooter': httpVueLoader(components.siteFooter && components.siteFooter.src)        
-        },
-        data: () => ({
-          html: undefined,
-          isLoaded: false,
-          essayConfig: null,
-          essayCache: {},
-          appVersion: 'APP_VERSION',
-          current: undefined,
-          externalWindow: undefined,
-          jwt: null,
-          qargs: {},
-          href: undefined,
-          siteInfo: {},
-          ghpSite: false,
-          ghpAcct: undefined
-        }),
-        computed: {
-          isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
-          readOnly() { return this.qargs.readonly },
-          ref() { return this.qargs && this.qargs.ref ? this.qargs.ref : this.siteInfo.ref},
-          refQueryArg() { return this.ref && this.ref !== this.siteInfo.ref ? `?ref=${this.ref}` : '' }
-        },
-        mounted() {
-          if (window.location.host.indexOf('.github.io') > 0) {
-            this.ghpSite = true
-            this.ghpAcct = window.location.host.split('.')[0]
-          }
-          console.log(`ghpSite=${this.ghpSite} ghpAcct=${this.ghpAcct}`)
-          this.ghpSite = window.location.host.indexOf('.github.io') > 0
-          console.log('siteInfo', this.siteInfo)
-          window.onpopstate = (e) => { this.loadEssay(e.state.file, true) }
-          this.loadEssay(window.location.pathname)          
-        },
-        methods: {
-          logout() {
-            this.jwt = undefined
-            window.localStorage.removeItem('ghcreds')
-          },
-          menuItemClicked(path) {
-            path = `${this.siteInfo.baseurl}${path}`
-            if (path !== this.current) this.loadEssay(path)
-          },
-          async fetchRetry (url, retries=3, backoff=300, lastError=null) {
-            const retryCodes = [408, 500, 502, 503, 504, 522, 524]
-            const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
-            if (retries === 0 ) throw new Error(lastError)
-            try {
-              const resp = await fetch(url)
-              if (retryCodes.includes(resp.status)) throw new Error(resp)
-              return resp
-            } catch (e) {
-              await delay(backoff)
-              return this.fetchRetry(url, retries-1, backoff * 2, lastError)
-            }
-          },
-          cachingFetch(path) {
-            let url = `${this.ghpSite ? 'https://exp.visual-essays.app' : ''}/essay${this.ghpSite ? '/'+this.ghpAcct : ''}${path}`
-            console.log(`ghpSite=${this.ghpSite} fetch=${url}`)
-            if (!this.essayCache[url]) {
-              this.essayCache[url] = this.fetchRetry(url).then(resp => resp.ok ? resp.text() : null)
-            }
-            return this.essayCache[url]
-          },
-          loadEssay(path, replace, retries) {
-            path = `${path}${replace ? '' : this.refQueryArg}`
-            this.cachingFetch(path)
-            .then(html => {
-              browserPath = path.replace(/\.md$/, '')
-              if (replace) {
-                history.replaceState({file: path || ''}, '', browserPath)
-              } else {
-                history.pushState({file: path || ''}, '', browserPath)
-              }
-              this.href = window.location.href
-              this.html = html
-              this.current = path
-              document.getElementById('content').classList.remove('visible')
-              document.getElementById('content').classList.add('hidden')
-              this.$nextTick(() => {
-                const essayElem = document.getElementById('essay')
-                if (essayElem) window._essay = essayElem.dataset.name
-                const essayFname = essayElem ? essayElem.dataset.name.split('/').pop() : null
-                if (essayFname === 'README' || essayFname === 'index') {
-                    if (window.location.pathname.length === 0 || window.location.pathname[window.location.pathname.length-1] !== '/') {
-                      let browserPath = `${window.location.pathname}/${this.refQueryArg}`
-                      window.history.replaceState({file: path || ''}, '', browserPath)
-                    }
-                }
-              })
-            })
-          },
-          viewMarkdown() {
-            this.openWindow(`/markdown-viewer/${this.siteInfo.acct}/${this.siteInfo.repo}/${this.ref}${window._essay}.md`)
-          },
-          editMarkdown(editor) {
-            this.openWindow(editor == 'custom'
-              ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${window._essay}.md`
-              : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${window._essay}.md`
-            ) 
-          },
-          gotoGithub() {
-            this.openWindow(`https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/tree/${this.ref}`, null)
-          },
-          openDocsSite(editor) {
-            this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
-          },
-          openWindow(url, options) {
-            if (this.externalWindow) { this.externalWindow.close() }
-            if (options === undefined) options = 'toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes'
-            this.externalWindow = window.open(url, '_blank', options)
-          },
-          convertLinks() {
-            // convert links
-            const essayElem = document.getElementById('essay')
-            if (essayElem) {
-              essayElem.querySelectorAll('a').forEach(link => {
-                // console.log(link.href)
-                if (!link.href || link.href.indexOf(window.location.host) > 0 || link.href.indexOf('/help#') > 0 ) {
-                  let target = link.dataset.target
-                  if (!target) { 
-                    const parsedUrl = parseUrl(link.href)
-                    if (parsedUrl.hash === '' ) {
-                      //const pathElems = parsedUrl.pathname.split('/').filter(pathElem => pathElem !== '')
-                      if (this.siteInfo.baseurl && parsedUrl.pathname.indexOf(this.siteInfo.baseurl) !== 0) {
-                        target = `${this.siteInfo.baseurl}${parsedUrl.pathname}`
-                      } else {
-                        target = parsedUrl.pathname
-                      }
-                    } else {
-                      target = parsedUrl.hash.split('?')[0]
-                    }
-                  }
-                  link.addEventListener('click', (e) => {
-                    if (target[0] === '#') {
-                      document.querySelector(target).scrollIntoView({block:'center'})
-                    } else {
-                      this.loadEssay(target)
-                    }
-                  })
-                  link.removeAttribute('href')
-                  link.setAttribute('data-target', target)
-                } else {
-                  link.innerHTML += '<sup><i class="fal fa-external-link-alt" style="margin-left:4px;font-size:0.8em;color:blue;"></i></sup>'
-                  link.setAttribute('target', '_blank')
-                }
-              })
-            }
-          },
-          waitForEssayReady() {
-            const essayElem = document.getElementById('essay')
-            if (essayElem) {
-              this.convertLinks()
-              document.getElementById('content').classList.add('visible')
-              document.getElementById('content').classList.remove('hidden')
-            } else {
-              setTimeout(this.waitForEssayReady, 10)
-            }
-          }
-        },
-        watch: {
-          siteInfo() {
-            console.log('siteInfo', this.siteInfo)
-          },
-          isLoaded() {    
-            if (this.isLoaded) {
-              this.isLoaded = false
-              this.$nextTick(() => this.waitForEssayReady())
-            }
-          }
-        }
-      })
-    })
-    function parseUrl (href) {
-      const match = href.match(/^(https?)\:\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/)
-      return match && {protocol: match[1], host: match[2], hostname: match[3], origin: `${match[1]}://${match[2]}`, port: match[4], pathname: match[5], search: match[6], hash: match[7]}
-    }
-  </script>
+  <script type="application/javascript" data-ve-meta> window.veMeta = {version: 'APP_VERSION'}; </script>
 </body>
 </html>
