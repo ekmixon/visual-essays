@@ -3,7 +3,7 @@
 if output="$(git status --porcelain)" && [ -z "$output" ]; then
 
   GCR_SERVICE=${1:-visual-essays-exp}
-  REF=${2:-main}
+  REF=${2:-develop}
 
   git checkout $REF
 
@@ -40,7 +40,7 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
   gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
 
-  git checkout main
+  git checkout develop
 
 else
   echo "There are Uncommitted changes. Please commit and try again"
