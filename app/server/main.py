@@ -152,7 +152,7 @@ def _get_site_info(href):
             'ghpSite': True,
             'acct':    hostname[:-10],
             'repo':    path_elems[0],
-            'baseurl': f'/{path_elems[0]}'
+            'baseurl': f'/{path_elems[0]}/{path_elems[1]}'
         })
     elif hostname.startswith('localhost') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io'):
         if len(path_elems) >= 2:
