@@ -1,5 +1,14 @@
 #!/bin/bash
 
-nohup app/server/main.py -l info -c . &
-cd app/client-lib
-yarn serve
+CWD=`pwd`
+
+cd $CWD/app/client-lib
+yarn serve &
+P1=$!
+
+$CWD/app/server/main.py -l info -c /workspace/visual-essays
+P2=$!
+
+wait $P1 $P2
+
+cd $CWD
