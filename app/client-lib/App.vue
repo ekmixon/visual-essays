@@ -264,7 +264,8 @@ export default {
           console.log(`loadEssay=${path} ${replace}`)
           const resp = await fetch(`${this.contentBase}/essay${this.essayBase}${path}${this.refQueryArg}`)
           let html = await resp.text()
-          let browserBasePath = this.siteInfo.ghpSite ? `/${this.siteInfo.acct}` : this.essayBase
+          let browserBasePath = this.siteInfo.ghpSite ? `/${this.siteInfo.repo}` : this.essayBase
+          console.log(`browserBasePath=${browserBasePath} path=${path}`)
           let browserPath = `${browserBasePath}${path}${this.refQueryArg}`
           if (replace) {
             history.replaceState({file: path || ''}, '', browserPath)
