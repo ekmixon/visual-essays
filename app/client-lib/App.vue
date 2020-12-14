@@ -229,8 +229,8 @@ export default {
           if (!window.essayCache) {
             window.essayCache = {}
           }
-          console.log(`cached=${window.essayCache[url] !== undefined}`)
-          if (!window.essayCache[url]) {
+          console.log(`cached=${this.siteInfo.mode !== 'dev' && window.essayCache[url] !== undefined}`)
+          if (this.siteInfo.mode === 'dev' || !window.essayCache[url]) {
             window.essayCache[url] = fetch(url).then(resp => resp.text())
           }
           return window.essayCache[url]

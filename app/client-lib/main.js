@@ -58,18 +58,21 @@ console.log(loc)
 
 let service = 'https://exp.visual-essays.app'
 let site = loc.href
+let mode = 'prod'
 
 if (loc.hostname.indexOf('.github.io') > 0) {
   site = `${loc.origin}/${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
   service = 'http://localhost:8080'
   site = `${service}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  mode = 'dev'
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
   service = `https://8080-${loc.host.slice(5)}`
   site = `${service}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  mode = 'dev'
 }
 
-console.log(`service=${service} site=${site}`)
+console.log(`service=${service} site=${site} mode=${mode}`)
 
 const referrerUrl = document.referrer
 if (referrerUrl) {
@@ -176,6 +179,7 @@ const doRemoteRequests = async () => {
   }
 
   siteInfo.service = service
+  siteInfo.mode = mode
   if (!siteInfo.components) siteInfo.components = []
 
   const components = {}
