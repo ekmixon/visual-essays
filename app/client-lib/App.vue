@@ -125,7 +125,6 @@ export default {
         debug() { return this.$store.getters.debug },
         appVersion() { return this.$store.getters.appVersion },
         serviceBase() { return this.$store.getters.serviceBase },
-        contentBase() { return this.$store.getters.contentBase },
         styleClass() { 
           return this.essayConfig && this.essayConfig.style
             ? this.essayConfig.style
@@ -272,7 +271,7 @@ export default {
         },
         async loadEssay(path, replace) {
           console.log(`loadEssay=${path} ${replace}`)
-          let essayUrl = `${this.contentBase}/essay${this.essayBase}${path}${this.refQueryArg}`
+          let essayUrl = `${this.serviceBase}/essay${this.essayBase}${path}${this.refQueryArg}`
           let html = await this.cachedEssay(essayUrl)
           let browserBasePath = this.siteInfo.ghpSite ? `/${this.siteInfo.repo}` : this.essayBase
           console.log(`browserBasePath=${browserBasePath} path=${path}`)

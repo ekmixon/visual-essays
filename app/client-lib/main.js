@@ -57,25 +57,21 @@ const loc = window.location
 
 console.log(loc)
 
-let serviceBase = '/'
-let contentBase = '/'
+let serviceBase = loc.origin
 let href = loc.href
 
 if (loc.hostname.indexOf('.github.io') > 0) {
   serviceBase = 'https://exp.visual-essays.app'
-  contentBase = serviceBase
   href = `${loc.origin}/${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
   serviceBase = 'http://localhost:8080'
-  contentBase = serviceBase
-  href = `${contentBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  href = `${serviceBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
   serviceBase = `https://8080-${loc.host.slice(5)}`
-  contentBase = serviceBase
-  href = `${contentBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  href = `${serviceBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 }
 
-console.log(`serviceBase=${serviceBase} contentBase=${contentBase} href=${href}`)
+console.log(`serviceBase=${serviceBase} href=${href}`)
 
 let jwt, qargs
 
@@ -210,7 +206,7 @@ const doRemoteRequests = async () => {
   console.log('veMeta', window.veMeta)
   store.dispatch('setAppVersion', window.veMeta.version)
   store.dispatch('setServiceBase', serviceBase)
-  store.dispatch('setContentBase', contentBase)
+  // store.dispatch('setContentBase', serviceBase)
   console.log(store)
 }
 
