@@ -165,7 +165,7 @@ export default {
         this.href = window.location.href
         this.qargs = this.parseQueryString()
 
-      let path = window.location.pathname.length > this.siteInfo.baseurl.length
+        let path = this.siteInfo.baseurl && window.location.pathname.length > this.siteInfo.baseurl.length
           ? window.location.pathname.slice(this.siteInfo.baseurl)
           : ''
         console.log(`refQueryArg=${this.refQueryArg}`)
