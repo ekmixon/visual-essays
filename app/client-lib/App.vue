@@ -264,7 +264,8 @@ export default {
           console.log(`loadEssay=${path} ${replace}`)
           const resp = await fetch(`${this.contentBase}/essay${this.essayBase}${path}${this.refQueryArg}`)
           let html = await resp.text()
-          let browserPath = `${this.essayBase}${path}${this.refQueryArg}`
+          let browserBasePath = this.siteInfo.ghpSite ? `/${this.siteInfo.acct}` : this.essayBase
+          let browserPath = `${browserBasePath}${path}${this.refQueryArg}`
           if (replace) {
             history.replaceState({file: path || ''}, '', browserPath)
           } else {
@@ -280,15 +281,16 @@ export default {
           const leaf = essayElem.dataset.name.split('/').pop().replace('.md', '').toLowerCase()
           const isFolder = leaf === 'index' || leaf === 'readme'
           console.log(`name=${essayElem.dataset.name} isFolder=${isFolder}`)
+          let browserBasePath = this.siteInfo.ghpSite ? `/${this.siteInfo.acct}` : this.essayBase
           if (isFolder) {
             if (path[path.length-1] !== '/') {
               this.essayPath += '/'
-              history.replaceState({file: `${this.essayBase}${this.essayPath}${this.refQueryArg}`}, '', `${this.essayBase}${this.essayPath}${this.refQueryArg}`)
+              history.replaceState({file: `${this.essayBase}${this.essayPath}${this.refQueryArg}`}, '', `${browserBasePath}${this.essayPath}${this.refQueryArg}`)
             }
           } else {
             if (path[path.length-1] === '/') {
               this.essayPath = path.slice(0, path.length-1)
-              history.replaceState({file: `${this.essayBase}${this.essayPath}${this.refQueryArg}`}, '', `${this.essayBase}${this.essayPath}${this.refQueryArg}`)
+              history.replaceState({file: `${this.essayBase}${this.essayPath}${this.refQueryArg}`}, '', `${browserBasePath}${this.essayPath}${this.refQueryArg}`)
             }
           }
 
