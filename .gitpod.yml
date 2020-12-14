@@ -2,5 +2,5 @@ ports:
   - port: 8088
     onOpen: open-preview
 tasks:
-  - init: pip install -r app/server/requirements.txt; cd app/client-lib; yarn
-    command: /workspace/visual-essays/app/bin/run-dev.sh
+  - init: pip install -r app/server/requirements.txt; cd app/client-lib; yarn; cd /workspace/visual-essays
+    command: app/bin/run-dev.sh

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 CWD=`pwd`
+echo $CWD
 
 cd $CWD/app/client-lib
 yarn serve &
