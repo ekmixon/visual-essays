@@ -122,7 +122,7 @@ export default new Vuex.Store({
     setSiteInfo (state, siteInfo) { state.siteInfo = siteInfo },
     setAppVersion (state, appVersion) { state.appVersion = appVersion },
     setServiceBase (state, serviceBase) { state.serviceBase = serviceBase },
-    setContenteBase (state, contentBase) { state.contentBase = contentBase },
+    setContentBase (state, contentBase) { state.contentBase = contentBase },
     setSiteTitle (state, siteTitle) { state.siteTitle = siteTitle },
     setIsMobile (state, isMobile) { state.isMobile = isMobile },
     setIsTouchDevice (state, isTouchDevice) { state.isTouchDevice = isTouchDevice },
