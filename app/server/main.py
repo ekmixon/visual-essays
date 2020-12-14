@@ -148,11 +148,13 @@ def _get_site_info(href):
     }
     siteConfigUrl = None
     if hostname.endswith('.github.io'):
+        acct = hostname[:-10]
+        repo = {path_elems[0]
         site_info.update({
             'ghpSite': True,
-            'acct':    hostname[:-10],
-            'repo':    path_elems[0],
-            'baseurl': f'/{path_elems[0]}/{path_elems[1]}'
+            'acct':    acct,
+            'repo':    repo],
+            'baseurl': f'/{acct}/{repo}'
         })
     elif hostname.startswith('localhost') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io'):
         if len(path_elems) >= 2:
