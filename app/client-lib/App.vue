@@ -260,10 +260,20 @@ export default {
           this.header.style.height = `${this.headerMinHeight}px`
           this.headerHeight = this.headerMinHeight
         },
+        cachedEssay(url) {
+          if (!window.essayCache) {
+            window.essayCache = {}
+          }
+          console.log(`cached=${window.essayCache[url] !== undefined}`)
+          if (!window.essayCache[url]) {
+            window.essayCache[url] = fetch(url).then(resp => resp.text())
+          }
+          return window.essayCache[url]
+        },
         async loadEssay(path, replace) {
           console.log(`loadEssay=${path} ${replace}`)
-          const resp = await fetch(`${this.contentBase}/essay${this.essayBase}${path}${this.refQueryArg}`)
-          let html = await resp.text()
+          let essayUrl = `${this.contentBase}/essay${this.essayBase}${path}${this.refQueryArg}`
+          let html = await this.cachedEssay(essayUrl)
           let browserBasePath = this.siteInfo.ghpSite ? `/${this.siteInfo.repo}` : this.essayBase
           console.log(`browserBasePath=${browserBasePath} path=${path}`)
           let browserPath = `${browserBasePath}${path}${this.refQueryArg}`

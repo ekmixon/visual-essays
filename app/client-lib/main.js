@@ -66,12 +66,12 @@ if (loc.hostname.indexOf('.github.io') > 0) {
   contentBase = serviceBase
   href = `${loc.origin}/${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
-  serviceBase = loc.origin
-  contentBase = 'http://localhost:8080'
+  serviceBase = 'http://localhost:8080'
+  contentBase = serviceBase
   href = `${contentBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
   serviceBase = `https://8080-${loc.host.slice(5)}`
-  contentBase = serviceBaseURL
+  contentBase = serviceBase
   href = `${contentBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 }
 
@@ -162,7 +162,7 @@ async function getSiteInfo() {
 }
 
 const checkJWTExpiration = async(jwt) => {
-  let response = await fetch(`${serviceBaseURL}/jwt-expiration/${jwt}`)
+  let response = await fetch(`${serviceBase}/jwt-expiration/${jwt}`)
   const expiration = parseInt(await response.text())
   const isExpired =  Date.now()/1000 >= expiration
   if (isExpired) window.localStorage.removeItem('ghcreds')
