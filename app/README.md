@@ -13,11 +13,29 @@ source venv/bin/activate
 pip install -r app/server/requirements.txt
 ```
 
-To run the server:
+To basic command for running the server is:
 
 ```bash
-app/server/main.py -l info
+app/server/main.py
 ```
+
+The server accepts various option which can be seen using the `-h` option:
+```bash
+app/server/main.py -h
+```
+
+The most commonly used options include:
+ - `-l` Set logging level. (`debug`, `info`, `warning`, `error`).  The default level is `warning`
+ - `-d` Run server in development mode.  In development mode the app uses a locally served javascript bundle (on port `8088`, bu default).  Otherwise, a pre-built javascript bundle (found in the top-level `js` directory) is used.  
+ - `-c` Use local content.
+
+### Credentials
+
+The visual essays server depends on external services that require credentials for use.  This includes Github and Google Cloud.  The Google Cloud services are optional when running the server for development purposes but are needed for deployment.  A Github token is needed if the development server needs to use the Github API, which is likely.
+
+A Github token can be obtained from the `Settings / Developer settings` (https://github.com/settings/tokens) page accessed from the account menu located at the top right of the Github page.  The token can be stored in `gh-token` file in the `app/server` directory, or in an environment variable named `gh_token`.  Maintaining the token as an environment variable is recommended.  The project `.gitignore` file should inhibit committing/pushing the token to a remote repo but storing it as environment variable is recommended.
+
+If [Gitpod](https://gitpod.io) is used for cloud-based development the token can be added to the environment in the account [setting](https://gitpod.io/settings/) page.  Use the variable key `gh_token`. 
 
 ## Client
 
