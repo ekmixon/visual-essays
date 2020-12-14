@@ -5,7 +5,7 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   GCR_SERVICE=${1:-visual-essays-exp}
   REF=${2:-main}
 
-  # git checkout $REF
+  git checkout $REF
 
   CDS=`git log -1 | grep '^Date' | awk '{print $3" "$4" " $6}'`
   COMMIT_DATE=`date -j -f "%b %d %Y" "$CDS" +%Y%m%d`
@@ -40,7 +40,7 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
   gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
 
-  # git checkout main
+  git checkout main
 
 else
   echo "There are Uncommitted changes. Please commit and try again"
