@@ -57,21 +57,25 @@ const loc = window.location
 
 console.log(loc)
 
-let serviceBaseURL = '/'
-let siteURL = loc.href
+let serviceBase = '/'
+let contentBase = '/'
+let href = loc.href
 
 if (loc.hostname.indexOf('.github.io') > 0) {
-  serviceBaseURL = 'https://exp.visual-essays.app'
-  siteURL = `${loc.origin}/${loc.pathname.split('/')[1]}`
+  serviceBase = 'https://exp.visual-essays.app'
+  contentBase = loc.origin
+  href = `${loc.origin}/${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
-  serviceBaseURL = 'http://localhost:8080'
-  siteURL = `${serviceBaseURL}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  serviceBase = loc.origin
+  contentBase = 'http://localhost:8080'
+  href = `${contentBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
-  serviceBaseURL = `https://8080-${loc.host.slice(5)}`
-  siteURL = `${serviceBaseURL}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  serviceBase = `https://8080-${loc.host.slice(5)}`
+  contentBase = serviceBaseURL
+  href = `${contentBase}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 }
 
-console.log(`serviceBaseURL=${serviceBaseURL} siteURL=${siteURL}`)
+console.log(`serviceBase=${serviceBase} contentBase=${contentBase} href=${href}`)
 
 let jwt, qargs
 
@@ -153,7 +157,7 @@ let vm = new Vue({ // eslint-disable-line no-unused-vars
   })
 
 async function getSiteInfo() {
-  const resp = await fetch(`${serviceBaseURL}/site-info?href=${encodeURIComponent(siteURL)}`)
+  const resp = await fetch(`${serviceBase}/site-info?href=${encodeURIComponent(href)}`)
   return await resp.json()
 }
 
@@ -205,7 +209,8 @@ const doRemoteRequests = async () => {
   document.querySelectorAll('script[data-ve-meta]').forEach(scr => eval(scr.text))
   console.log('veMeta', window.veMeta)
   store.dispatch('setAppVersion', window.veMeta.version)
-  store.dispatch('setServiceBaseURL', serviceBaseURL)
+  store.dispatch('setServiceBase', serviceBase)
+  store.dispatch('setContentBase', contentBase)
   console.log(store)
 }
 
