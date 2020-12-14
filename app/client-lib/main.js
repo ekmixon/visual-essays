@@ -61,13 +61,15 @@ let serviceBaseURL = '/'
 let siteURL = loc.href
 
 if (loc.hostname.indexOf('.github.io') > 0) {
-  'https://visual-essays.app'
+  serviceBaseURL = 'https://exp.visual-essays.app'
 } else if (loc.hostname.indexOf('localhost') >= 0) {
   serviceBaseURL = 'http://localhost:8080'
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
   serviceBaseURL = `https://8080-${loc.host.slice(5)}`
 }
 if (serviceBaseURL !== '/') siteURL = `${serviceBaseURL}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+
+console.log(`serviceBaseURL=${serviceBaseURL} siteURL=${siteURL}`)
 
 let jwt, qargs
 
