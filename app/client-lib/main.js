@@ -58,6 +58,8 @@ const loc = window.location
 console.log(loc)
 
 let serviceBaseURL = '/'
+let siteURL = loc.href
+
 if (loc.hostname.indexOf('.github.io') > 0) {
   'https://visual-essays.app'
 } else if (loc.hostname.indexOf('localhost') >= 0) {
@@ -65,6 +67,7 @@ if (loc.hostname.indexOf('.github.io') > 0) {
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
   serviceBaseURL = `https://8080-${loc.host.slice(5)}`
 }
+if (serviceBaseURL !== '/') siteURL = `${serviceBaseURL}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 
 let jwt, qargs
 
@@ -146,7 +149,7 @@ let vm = new Vue({ // eslint-disable-line no-unused-vars
   })
 
 async function getSiteInfo() {
-  const resp = await fetch(`${serviceBaseURL}/site-info?href=${encodeURIComponent(loc.href)}`)
+  const resp = await fetch(`${serviceBaseURL}/site-info?href=${encodeURIComponent(siteURL)}`)
   return await resp.json()
 }
 
