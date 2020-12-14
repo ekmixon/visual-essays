@@ -62,12 +62,14 @@ let siteURL = loc.href
 
 if (loc.hostname.indexOf('.github.io') > 0) {
   serviceBaseURL = 'https://exp.visual-essays.app'
+  siteURL = `${loc.origin}${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
   serviceBaseURL = 'http://localhost:8080'
+  siteURL = `${serviceBaseURL}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
   serviceBaseURL = `https://8080-${loc.host.slice(5)}`
+  siteURL = `${serviceBaseURL}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 }
-if (serviceBaseURL !== '/') siteURL = `${serviceBaseURL}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
 
 console.log(`serviceBaseURL=${serviceBaseURL} siteURL=${siteURL}`)
 
