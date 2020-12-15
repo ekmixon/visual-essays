@@ -58,7 +58,8 @@ KNOWN_SITES = {
     'default': ['jstor-labs', 'visual-essays'],
     'plant-humanities.app': ['jstor-labs', 'plant-humanities'],
     'kent-maps.online': ['kent-map', 'kent'],
-    've.rsnyder.info': ['rsnyder', 've']
+    've.rsnyder.info': ['rsnyder', 've'],
+    'docs.visual-essays.app': ['jstor-labs', 've-docs']
 }
 
 cors_headers = {
