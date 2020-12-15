@@ -15,7 +15,7 @@
               <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
             </li>
           </template>
-          <li @click="openDocsSite">
+          <li v-if="siteConfig.repo !== 've-docs'" @click="openDocsSite">
             <i :class="`fas fa-question`"></i>Documentation
           </li>
           <li v-if="!readOnly">
@@ -31,11 +31,13 @@
             <i class="fas fa-file-code"></i>View page markdown
           </li>
           <li v-if="isAuthenticated && !readOnly" @click="editMarkdown('default')">
-            <i class="fas fa-edit"></i>Edit page (Github)
+            <i class="fas fa-edit"></i>Edit page
           </li>
+          <!--
           <li v-if="isAuthenticated && !readOnly" @click="editMarkdown('custom')">
             <i class="fas fa-edit"></i>Edit page (Custom)
           </li>
+          -->
           <li v-if="isAuthenticated && !readOnly" @click="gotoGithub">
             <i class="fab fa-github"></i>Github repository
           </li>

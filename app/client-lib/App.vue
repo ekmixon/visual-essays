@@ -355,7 +355,7 @@ export default {
         editMarkdown(editor) {
           this.openWindow(editor == 'custom'
             ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${this.siteinfo.baseurl}${this.essayFname}`
-            : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${this.siteinfo.baseurl}${this.essayFname}`
+            : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${this.siteinfo.baseurl}${this.essayFname}.md`
           ) 
         },
         gotoGithub() {
@@ -365,6 +365,7 @@ export default {
           this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
         },
         openWindow(url, options) {
+          console.log('openWindow', url)
           if (this.externalWindow) { this.externalWindow.close() }
           if (options === undefined) options = 'toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes'
           this.externalWindow = window.open(url, '_blank', options)
