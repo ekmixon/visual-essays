@@ -1,6 +1,6 @@
 <template>
   <div ref="app" id="visual-essay" :class="`visual-essay ${layout}`">
-    <div v-if="headerEnabled" ref="header" class="header">
+    <div v-if="headerEnabled && essayConfig !== undefined" ref="header" class="header">
       <component v-bind:is="headerComponent"
         :height="headerHeight"
         :essay-config="essayConfig"
@@ -119,7 +119,7 @@ export default {
         html() { return this.$store.getters.essayHTML },
         components() { return Object.values(this.$store.getters.components) },
         layout() { return this.$store.getters.layout },
-        essayConfig() { return this.$store.getters.essayConfig || {} },
+        essayConfig() { return this.$store.getters.essayConfig },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         debug() { return this.$store.getters.debug },
         appVersion() { return this.$store.getters.appVersion },
@@ -233,7 +233,7 @@ export default {
         reset() {
           this.$store.dispatch('setEssayHTML', null)
           this.$store.dispatch('setItems', [])
-          this.$store.dispatch('setEssayConfig', null)
+          // this.$store.dispatch('setEssayConfig', null)
           this.setActiveElements([])
         },
 
@@ -396,7 +396,7 @@ export default {
       },
       updated() {
         // console.log(`updated: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header.clientHeight} footer=${this.$refs.footer.clientHeight}`)
-        this.viewerHeight = this.$refs.app.clientHeight - this.$refs.header.clientHeight - this.$refs.footer.clientHeight
+        this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
         this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
       },
       watch: {
