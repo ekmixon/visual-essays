@@ -121,6 +121,7 @@ export default {
         layout() { return this.$store.getters.layout },
         essayConfig() { return this.$store.getters.essayConfig },
         siteInfo() { return this.$store.getters.siteInfo || {} },
+        baseurl() { return this.siteInfo.baseurl || '' },
         debug() { return this.$store.getters.debug },
         appVersion() { return this.$store.getters.appVersion },
         serviceBase() { return this.$store.getters.serviceBase },
@@ -165,11 +166,11 @@ export default {
         this.href = window.location.href
         this.qargs = this.parseQueryString()
 
-        let path = this.siteInfo.baseurl && window.location.pathname.length > this.siteInfo.baseurl.length
-          ? window.location.pathname.slice(this.siteInfo.baseurl.length)
+        let path = this.baseurl && window.location.pathname.length > this.baseurl.length
+          ? window.location.pathname.slice(this.baseurl.length)
           : '/'
         console.log(`refQueryArg=${this.refQueryArg}`)
-        console.log(`App: baseurl=${this.siteInfo.baseurl} path=${path}`, this.qargs, this.siteInfo, this.essayConfig)
+        console.log(`App: baseurl=${this.baseurl} path=${path}`, this.qargs, this.siteInfo, this.essayConfig)
         window.onpopstate = (e) => { this.setEssay(e.state.file, true) }
         this.waitForHeaderFooter() // header and footer are dynamically loaded external components        
         this.setEssay(path)
@@ -190,8 +191,8 @@ export default {
 
           // Update browser URL
           if (path[path.length-1] !== '/') path += '/'
-          console.log(`browser url: baseurl=${this.siteInfo.baseurl} path=${path} refArg=${this.refQueryArg}`)
-          let browserPath = `${this.siteInfo.baseurl}${path}${this.refQueryArg}`
+          console.log(`browser url: baseurl=${this.baseurl} path=${path} refArg=${this.refQueryArg}`)
+          let browserPath = `${this.baseurl}${path}${this.refQueryArg}`
           if (replace) {
             history.replaceState({file: path || ''}, '', browserPath)
           } else {
@@ -354,7 +355,7 @@ export default {
         },
         editMarkdown(editor) {
           this.openWindow(editor == 'custom'
-            ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${this.siteInfo.baseurl}${this.essayFname}`
+            ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${this.baseurl}${this.essayFname}`
             : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${this.essayFname}.md`
           ) 
         },
