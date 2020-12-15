@@ -731,11 +731,12 @@ module.exports = {
     }
 
     .map-interaction {
-        border-bottom: 2px solid #A9AC00;
+        border-bottom: 2px solid #219653;
         cursor: pointer;
         z-index: 10;
     }
     .map-interaction:hover {
-        background: #EBECBB !important;
+      background: #a8e2bb !important;
+      transition: all 0.2s ease-in;
     }
 </style>
