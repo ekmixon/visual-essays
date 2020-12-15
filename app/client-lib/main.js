@@ -17,6 +17,7 @@ import Header from './components/Header.vue'
 import EssayIndex from './components/EssayIndex.vue'
 import IIIFSideBySide from './components/IIIFSideBySide.vue'
 import OpenSeadragonViewer from './components/OpenSeadragonViewer.vue'
+import PlantsIndexHeader from './components/PlantsIndexHeader.vue'
 import KnightlabTimeline from './components/KnightlabTimeline.vue'
 import LeafletTimeDimension from './components/LeafletTimeDimension.vue'
 import PlantSpecimenViewer from './components/PlantSpecimenViewer.vue'
@@ -45,6 +46,7 @@ const baseComponentIndex = [
   { name: 'knightlabTimeline', src: '/components/KnightlabTimeline.vue', component: KnightlabTimeline, selectors: ['tag:knightlab-timeline'], icon: 'fa-history', label: 'Knightlab Timeline'},
   { name: 'mapViewer', src: '/components/LeafletTimeDimension.vue', component: LeafletTimeDimension, selectors: ['tag:map'], icon: 'fa-map-marker-alt', label: 'Map'},
   { name: 'plantSpecimenViewer', src: '/components/PlantSpecimenViewer.vue', component: PlantSpecimenViewer, selectors: ['tag:plant-specimen'], icon: 'fa-seedling', label: 'Plant Specimens'},
+  { name: 'plantsIndexHeader', src: '/components/PlantsIndexHeader.vue', component: PlantsIndexHeader, type: 'header', layouts: ['plants-index']},
   { name: 'siteFooter', src: '/components/Footer.vue', component: SiteFooter},
   { name: 'storiiiesViewer', src: '/components/StoriiiesViewer.vue', component: StoriiiesViewer, selectors: ['tag:storiiies'], icon: 'fa-book', label: 'Storiiies Viewer'},
   { name: 'tabulator', src: '/components/Tabulator.vue', component: Tabulator, selectors: ['tag:tabulator'], icon: 'fa-table', label: 'Tabulator'},

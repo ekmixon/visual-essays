@@ -165,10 +165,11 @@ export default {
         refQueryArg() { return this.ref && this.ref !== this.siteInfo.ref ? `?ref=${this.ref}` : '' }
       },
       mounted() {
+        console.log(window.location)
         this.href = window.location.href
         this.qargs = this.parseQueryString()
 
-        let path = this.baseurl && window.location.pathname.length > this.baseurl.length
+        let path = window.location.pathname.length > this.baseurl.length
           ? window.location.pathname.slice(this.baseurl.length)
           : '/'
         console.log(`refQueryArg=${this.refQueryArg}`)
