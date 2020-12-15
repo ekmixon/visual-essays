@@ -200,6 +200,7 @@ const doRemoteRequests = async () => {
     e.type='image/x-icon'
     document.getElementsByTagName('head')[0].appendChild(e)
   }
+  console.log('components', components)
   console.log('siteInfo', siteInfo)
   store.dispatch('setSiteInfo', siteInfo)
   store.dispatch('setComponents', components)
