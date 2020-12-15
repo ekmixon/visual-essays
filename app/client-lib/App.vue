@@ -355,7 +355,7 @@ export default {
         editMarkdown(editor) {
           this.openWindow(editor == 'custom'
             ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${this.siteInfo.baseurl}${this.essayFname}`
-            : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${this.siteInfo.baseurl}${this.essayFname}.md`
+            : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${this.essayFname}.md`
           ) 
         },
         gotoGithub() {
