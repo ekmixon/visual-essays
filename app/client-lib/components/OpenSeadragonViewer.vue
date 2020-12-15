@@ -141,7 +141,7 @@ module.exports = {
         return this.currentItem.target
       } else {
         const imageSourceHash = this.currentItem ? this.sha256(this.currentItem['@id']).slice(0,8) : ''
-        return `${this.acct}/${this.repo}/${this.branch}${this.path}/${imageSourceHash}`
+        return `${this.acct}/${this.repo}/${this.branch}${this.path === '/' ? '' : this.path}/${imageSourceHash}`
       }
     },
     annotations() { const annos = this.currentItem ? this.currentItem.annotations || [] : []; return annos; },

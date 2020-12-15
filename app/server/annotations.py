@@ -33,7 +33,8 @@ def _github_api_urls(target):
     acct, repo, branch = path[:3]
     image_hash = path[-1]
     essay_elems = path[3:-1]
-    essay_root = '/' if len(essay_elems) == 1 else f'/{"/".join(essay_elems[:-1])}/'
+    path_elems = essay_elems[:-1]
+    essay_root = '/' if len(path_elems) == 0 else f'/{"/".join(path_elems)}/'
     logger.info(f'acct={acct} repo={repo} branch={branch} essay_root={essay_root} image_hash={image_hash}')
     content_url = f'https://api.github.com/repos/{acct}/{repo}/contents{essay_root}{image_hash}.json?ref={branch}'
     logger.info(content_url)
