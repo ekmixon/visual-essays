@@ -36,7 +36,7 @@
     display: block;
   }
 
-  h1, h2, h3, h4, h5, h6, figure { content: ""; display: table; clear: both; }
+  h1, h2, h3, h4, h5, h6, figure { content: ""; display: table !important;; clear: both; }
   br { clear: both; }
 
   ::-moz-selection {
@@ -219,7 +219,7 @@
 
   section:after {
     content: "";
-    display: table;
+    display: table !important;
     clear: both;
   }
 
@@ -238,6 +238,19 @@
     height: 150px;
     object-fit: cover;
     */
+    width: 100px;
+  }
+
+  .thumb-100w {
+    width: 100px;
+  }
+
+  .thumb-200w {
+    width: 200px;
+  }
+
+  .thumb-300w {
+    width: 300px;
   }
 
   .thumbcaption {
