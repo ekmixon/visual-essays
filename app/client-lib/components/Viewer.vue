@@ -38,6 +38,7 @@
       :hover-item="hoverItem"
       :selected-item="selectedItem"
       :jwt="jwt"
+      :service-base="serviceBase"
       @set-hover-item="setHoverItem"
       @set-selected-item="setSelectedItem"
     />
@@ -63,7 +64,8 @@
       jwt: String,
       activeElements: { type: Array, default: () => ([]) },
       itemsInActiveElements: { type: Array, default: () => ([]) },
-      groups: { type: Object, default: () => ({}) }
+      groups: { type: Object, default: () => ({}) },
+      serviceBase: String
     },
     data: () => ({
       selectedTab: undefined,

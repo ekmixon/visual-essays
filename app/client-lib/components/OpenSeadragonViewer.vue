@@ -59,9 +59,6 @@
 <script>
 /* global _, OpenSeadragon, sjcl */
 
-// const annosEndpoint = '/annotations/'
-const annosEndpoint = 'https://visual-essays.app/annotations/'
-
 const dependencies = [
   'https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js',
   'https://recogito.github.io/js/openseadragon-annotorious.min.js',
@@ -96,7 +93,8 @@ module.exports = {
     width: Number,
     height: Number,
     selected: String,
-    jwt: String
+    jwt: String,
+    serviceBase: String
   },
   data: () => ({
     prefixUrl,
@@ -162,6 +160,8 @@ module.exports = {
     attribution() { return this.currentItem ? this.currentItem.attribution || this.metadata.attribution : null },
     date() { return this.currentItem ? this.currentItem.date || this.metadata.date : null },
     license() { return this.currentItem ? this.currentItem.license || this.metadata.license : null },
+    annosEndpoint() { return `${this.serviceBase}/annotations/`},
+    annosTool() { return `${this.serviceBase}/annotator`},
     source() {
       if (this.metadata.info && this.metadata.info.indexOf('http') === 0) {
         return `Source: <a href="${this.metadata.info}" target="_blank">${this.metadata.info}</a>`
@@ -363,7 +363,7 @@ module.exports = {
       this.currentItem.annotations.map(anno => this.annotator.addAnnotation(anno))
     },
     loadAnnotations() {
-      const url = `${annosEndpoint}?target=${encodeURIComponent(this.target)}`
+      const url = `${this.annosEndpoint}?target=${encodeURIComponent(this.target)}`
       console.log('loadAnnotations', this.target, url)
       return fetch(url)
         .then(resp => resp.json())
@@ -385,7 +385,7 @@ module.exports = {
       // console.log('createAnnotation', anno)
       anno.seq = this.currentItem.annotations ? this.currentItem.annotations.length : 0
       anno.target.id = this.target
-      fetch(`${annosEndpoint}`, {
+      fetch(`${this.annosEndpoint}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.jwt}`,
@@ -403,7 +403,7 @@ module.exports = {
     updateAnnotation(anno) {
       // console.log('updateAnnotation', anno)
       const _id = anno.id.split('/').pop()
-      fetch(`${annosEndpoint}${this.target}/${_id}`, {
+      fetch(`${this.annosEndpoint}${this.target}/${_id}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${this.jwt}`,
@@ -426,7 +426,7 @@ module.exports = {
     },
     deleteAnnotation(anno) {
       const _id = anno.id.split('/').pop()
-      fetch(`${annosEndpoint}${this.target}/${_id}`, {
+      fetch(`${this.annosEndpoint}${this.target}/${_id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${this.jwt}`}
       })
@@ -441,7 +441,8 @@ module.exports = {
     },
     openAnnotationsEditor() {
       // console.log('openAnnotationsEditor', this.currentItem)
-      const url = `/annotator?manifest=${encodeURIComponent(this.currentItem['manifest'])}&target=${encodeURIComponent(this.target)}&jwt=${this.jwt}`
+      const url = `${this.annosTool}?manifest=${encodeURIComponent(this.currentItem['manifest'])}&target=${encodeURIComponent(this.target)}&jwt=${this.jwt}`
+      console.log('open annosEditor', url)
       if (this.annosEditor) { this.annosEditor.close() }
       this.annosEditor = window.open(url, '_blank', `toolbar=yes,location=yes,left=0,top=0,width=1400,height=1200,scrollbars=yes,status=yes`)
     },

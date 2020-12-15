@@ -33,6 +33,7 @@
         :active-elements="activeElements"
         :all-items="allItems"
         :items-in-active-elements="itemsInActiveElements"
+        :service-base=serviceBase
         :debug="debug"
         @set-viewer-is-open="viewerIsOpen = $event"
         @set-active-elements="setActiveElements"
@@ -58,6 +59,7 @@
         :active-elements="activeElements"
         :items-in-active-elements="itemsInActiveElements"
         :groups="groups"
+        :service-base=serviceBase
         @set-viewer-is-open="viewerIsOpen = $event"
         @set-hover-item="setHoverItem"
         @set-selected-item="setSelectedItem"
@@ -109,7 +111,7 @@ export default {
       computed: {
         acct() { return this.$store.getters.siteInfo.acct },
         repo() { return this.$store.getters.siteInfo.repo },
-        branch() { return this.$store.getters.siteInfo.branch },
+        branch() { return this.$store.getters.siteInfo.ref },
         // path() { return `${this.$store.getters.mdPath}` },
         hash() { return `${this.$store.getters.hash}` },
         jwt() { return this.$store.getters.jwt },
@@ -122,9 +124,9 @@ export default {
         essayConfig() { return this.$store.getters.essayConfig },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         baseurl() { return this.siteInfo.baseurl || '' },
+        serviceBase() { return this.siteInfo.service || '/' },
         debug() { return this.$store.getters.debug },
         appVersion() { return this.$store.getters.appVersion },
-        serviceBase() { return this.$store.getters.serviceBase },
         styleClass() { 
           return this.essayConfig && this.essayConfig.style
             ? this.essayConfig.style
@@ -179,7 +181,7 @@ export default {
         async loadEssay(path, replace) {
 
           // Load essay HTML, use local cached version if available
-          let essayUrl = `${this.siteInfo.service}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}${this.refQueryArg}`
+          let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}${this.refQueryArg}`
           console.log(`loadEssay: path=${path} url=${essayUrl}`)
           let html = await this.cachedEssay(essayUrl)
 
