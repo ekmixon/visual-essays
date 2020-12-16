@@ -1,0 +1,16 @@
+/* CSS for documentation site */
+
+a {
+    color: #219653 !important;
+    text-decoration: underline !important;
+}
+
+a:focus {
+    outline: thin dotted;
+}
+a:active,
+a:hover {
+    outline: 0;
+    cursor: pointer;
+    color: #166337 !important;
+}
