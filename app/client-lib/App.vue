@@ -144,9 +144,11 @@ export default {
         },
         headerComponents() { return this.components.filter(compConf => compConf.type === 'header') },
         headerComponent() {
-          const found = this.headerComponents.find(c => {
-            return (this.essayConfig && this.essayConfig.header && c.header && c.header.indexOf(this.essayConfig.header) >= 0) ||
-                   (c.layouts && c.layouts.indexOf(this.layout) >= 0)
+          let found = this.headerComponents.find(c => {
+            return this.essayConfig
+              ? (this.essayConfig.header && c.header && c.header.indexOf(this.essayConfig.header) >= 0) ||
+                (!this.essayConfig.header && c.layouts && c.layouts.indexOf(this.layout) >= 0)
+              : null
           })
           return found ? found.component : null
         },
@@ -428,6 +430,10 @@ export default {
         },
         header() {
           if (this.html && this.hash && this.header) this.$nextTick(() => {this.anchor = this.hash; this.hash = undefined})
+        },
+        headerComponent() {
+          this.header = null
+          this.$nextTick(() => this.waitForHeaderFooter())
         }
       }
 }
