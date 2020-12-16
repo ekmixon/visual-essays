@@ -89,8 +89,8 @@ def get_default_branch(acct, repo):
     return repo_info['default_branch'] if repo_info else None
 
 _configs = {}
-def get_site_config(acct, repo):
-    if not f'{acct}/{repo}' in _configs:
+def get_site_config(acct, repo, refresh=False):
+    if refresh or not f'{acct}/{repo}' in _configs:
         content, _, _ = get_gh_file(f'https://api.github.com/repos/{acct}/{repo}/contents/config.json')
         config = json.loads(content) if content else {}
         config.update({ 'acct': acct, 'repo': repo, 'ref': config.get('ref') })

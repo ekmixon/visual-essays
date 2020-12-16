@@ -248,10 +248,12 @@ def _context(path=None):
         acct, repo = path[1:].split('/')[:2]
     else:
         acct, repo = KNOWN_SITES.get(hostname[4:] if hostname[:4] in ('dev.', 'exp.') else hostname, KNOWN_SITES['default'])
-    ref = qargs().pop('ref', None)
+    query_args = qargs()
+    ref = query_args.pop('ref', None)
+    refresh = query_args.get('refresh', 'false') in ('', 'true')
     if ref is None:
-        ref = get_site_config(acct, repo)['ref']
-    return site, acct, repo, ref, path, qargs()
+        ref = get_site_config(acct, repo, refresh=refresh).get('ref')
+    return site, acct, repo, ref, path, query_args
 
 @app.route('/essay/<path:path>', methods=['GET'])
 @app.route('/essay/', methods=['GET'])
