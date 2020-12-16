@@ -219,7 +219,7 @@ def _get_site_info(href):
                     if not comp['src'].startswith('http'):
                         comp['src'] = f'{resource_baseurl}{"" if comp["src"][0] == "/" else "/"}{comp["src"]}'
                     site_info['components'].append(comp)
-            elif key in ('banner', 'favicon', 'logo') and not value.startswith('http'):
+            elif key in ('banner', 'favicon', 'logo', 'css') and not value.startswith('http'):
                 if site_info['ghpSite'] and site_info['private']:
                     value = f'https://{site_info["acct"]}.github.io/{site_info["repo"]}{"" if value[0] == "/" else "/"}{value}'
                 else:
@@ -322,7 +322,7 @@ def siteinfo(path=None):
             local_config_path = os.path.join(CONTENT_ROOT, 'config.json')
             if os.path.exists(local_config_path):
                 site_info = json.load(open(local_config_path, 'r'))
-                for key in ('banner', 'logo', 'favicon'):
+                for key in ('banner', 'logo', 'favicon', 'css'):
                     if key in site_info and not site_info[key].startswith('http'):
                         site_info[key] = f'http://{site}/static{"" if site_info[key][0] == "/" else "/"}{site_info[key]}'
         else:

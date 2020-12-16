@@ -195,11 +195,18 @@ const doRemoteRequests = async () => {
       components[component.name] = component
     }
   })
+
   if (siteInfo.favicon) {
     let e = document.createElement('link')
     e.href = siteInfo.favicon
     e.rel = 'icon'
     e.type='image/x-icon'
+    document.getElementsByTagName('head')[0].appendChild(e)
+  }
+  if (siteInfo.css) {
+    let e = document.createElement('link')
+    e.href = siteInfo.css
+    e.rel = 'stylesheet'
     document.getElementsByTagName('head')[0].appendChild(e)
   }
   console.log('components', components)
