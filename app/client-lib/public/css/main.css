@@ -182,6 +182,7 @@
     color: #444;
     padding-bottom: 1px;
     */
+    color: #219653 !important;
     text-decoration: none;
     -webkit-transition: .25s;
         -moz-transition: .25s;
@@ -191,7 +192,7 @@
   }
   p a:hover,
   p a:focus {
-    color: #193d85;
+    color: #166337;
   }
   p a:active {
     position: relative;
