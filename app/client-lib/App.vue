@@ -145,8 +145,8 @@ export default {
         headerComponents() { return this.components.filter(compConf => compConf.type === 'header') },
         headerComponent() {
           const found = this.headerComponents.find(c => {
-            (this.essayConfig && this.essayConfig.header && c.header && c.header.indexOf(this.essayConfig.header) >= 0) ||
-            (c.layouts && c.layouts.indexOf(this.layout) >= 0)
+            return (this.essayConfig && this.essayConfig.header && c.header && c.header.indexOf(this.essayConfig.header) >= 0) ||
+                   (c.layouts && c.layouts.indexOf(this.layout) >= 0)
           })
           return found ? found.component : null
         },

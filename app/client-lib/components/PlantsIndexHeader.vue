@@ -9,21 +9,45 @@
         <span></span>
         <span></span>
         <ul id="menu">
-          <li v-for="item in siteConfig.nav" :key="item.path" @click="nav(item.path)">
-            <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
+          <li @click="nav('/')">
+            <i :class="`fas fa-home`"></i>Home
+          </li>
+          <template v-for="item in siteConfig.nav">
+            <li :key="item.path" @click="nav(item.path)">
+              <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
+            </li>
+          </template>
+          <li v-if="siteConfig.repo !== 've-docs'" @click="openDocsSite">
+            <i :class="`fas fa-question`"></i>Documentation
           </li>
           <li>
-            <a v-if="isAuthenticated" @click="logout"><i class="fas fa-user"></i>Logout</a>
-            <a v-else :href="`/login?redirect=${href ? href.replace(/\/$/,'') : ''}`">
-              <i class="fas fa-user"></i>Login
+            <a v-if="isAuthenticated" @click="logout">
+              <i :class="`fas fa-user`"></i>Logout
+            </a>
+            <a v-else :href="`https://dev.visual-essays.app/login?redirect=${loginRedirect}`">
+              <i :class="`fas fa-user`"></i>Login
             </a>
           </li>
           <hr>
-          <li style="margin-top:50px;" @click="viewMarkdown">
+          <li style="margin-top:10px;" @click="viewMarkdown">
             <i class="fas fa-file-code"></i>View page markdown
           </li>
-          <li v-if="isAuthenticated" @click="editMarkdown('stackedit')">
+          <li v-if="isAuthenticated" @click="editMarkdown('default')">
             <i class="fas fa-edit"></i>Edit page
+          </li>
+          <!--
+          <li v-if="isAuthenticated" @click="editMarkdown('custom')">
+            <i class="fas fa-edit"></i>Edit page (Custom)
+          </li>
+          -->
+          <li v-if="isAuthenticated" @click="gotoGithub">
+            <i class="fab fa-github"></i>Github repository
+          </li>
+          <li style="margin-top:10px; padding:0;">
+            <div class="app-version">App: {{appVersion}}</div>
+          </li>
+          <li style="padding:0;">
+            <div class="app-version">Content: {{contentRef}}</div>
           </li>
         </ul>
     </div>
@@ -52,7 +76,7 @@
       progress: { type: Number, default: 0 },
       height: Number,
       appVersion: { type: String },
-      libVersion: { type: String },
+      contentRef: { type: String },
       isAuthenticated: { type: Boolean, default: false },
       href: String
     },    
@@ -135,6 +159,14 @@
       editMarkdown(editor) {
         this.closeDrawer()
         this.$emit('edit-markdown', editor)
+      },
+      gotoGithub() {
+        this.closeDrawer()
+        this.$emit('goto-github')
+      },
+      openDocsSite() {
+        this.closeDrawer()
+        this.$emit('open-docs-site')
       },
       openInfoboxModal() {
         this.closeDrawer()
@@ -255,6 +287,67 @@
     padding: 0 0 6px 0;
   }
 
+  .header .title-bar {
+    display: none;
+  }
+
+  #do-labs {
+      background-color: black;
+      font-size: .8rem;
+      padding: 14px;
+      color: white;
+      text-align: center;
+      
+  }
+
+  #search {
+      width: 40px;
+      height: 32px;
+      padding: 25px;
+      background-color: #8E8E8E;
+      position: absolute;
+  }
+
+  #logo {
+      width: 40px;
+      height: 32px;
+      padding: 25px;
+      background-color: #219653;
+      position: absolute;
+      top: 43px;
+      left: 90px;
+  }
+
+
+  #brand {
+    display: inline-block;
+    position:absolute;
+    top: 110px;
+    left: 90px;
+    padding: 20px;
+    
+  }
+
+  .brand-name {
+    font-family: 'Playfair Display', Serif;
+    font-size: 3rem;
+    color: white;
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: 0;
+  }
+
+  .tagline {
+      font-size: 1.3rem;
+      color: white;
+      font-family: Roboto, Sans-serif;
+      font-weight: 300;
+  }
+
+  .app-version {
+    font-size: 0.9rem;
+  }
+
   #menuToggle a {
     text-decoration: none;
     color: #000;
@@ -283,9 +376,9 @@
   */
   #menuToggle span {
     display: block;
-    width: 35px;
-    height: 2px;
-    margin-bottom: 8px;
+    width: 30px;
+    height: 4px;
+    margin-bottom: 4px;
     position: relative;
     background-color: white;
     border-radius: 3px;
@@ -347,9 +440,10 @@
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   }
 
+
   #menu li {
     display: flex;
-    padding: 20px 0;
+    padding: 0.5em 0;
     font-size: 1.2em;
   }
 
@@ -361,7 +455,7 @@
   #menu li svg {
     min-width: 1.5em;
     margin-right: 10px;
-    margin-top: 3px;
+    margin-top: 8px;
     /* font-weight: bold; */
     font-size: 1em;
   }
@@ -384,62 +478,5 @@
     -webkit-user-select: none;
     user-select: none;
   }
-
-  .header .title-bar {
-    display: none;
-  }
-
-  #do-labs {
-      background-color: black;
-      font-size: .8rem;
-      padding: 14px;
-      color: white;
-      text-align: center;
-      
-  }
-
-  #search {
-      width: 40px;
-      height: 32px;
-      padding: 25px;
-      background-color: #8E8E8E;
-      position: absolute;
-  }
-
-  #logo {
-      width: 40px;
-      height: 32px;
-      padding: 25px;
-      background-color: #219653;
-      position: absolute;
-      top: 43px;
-      left: 90px;
-  }
-
-
-  #brand {
-    display: inline-block;
-    position:absolute;
-    top: 110px;
-    left: 90px;
-    padding: 20px;
-    
-  }
-
-  .brand-name {
-    font-family: 'Playfair Display', Serif;
-    font-size: 3rem;
-    color: white;
-    font-weight: bold;
-    line-height: 1;
-    margin-bottom: 0;
-  }
-
-  .tagline {
-      font-size: 1.3rem;
-      color: white;
-      font-family: Roboto, Sans-serif;
-      font-weight: 300;
-  }
-
+  
 </style>
