@@ -43,6 +43,10 @@ module.exports = {
 </script>
 
 <style scoped>
+  .modal {
+    z-index:1001;
+  }
+
   .close-button {
     position: absolute;
     top: 8px;

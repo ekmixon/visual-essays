@@ -268,7 +268,7 @@ export default {
             } else {
               
               // If external link, add external link icon to text and force opening in new tab
-              link.innerHTML += '<sup><i class="fal fa-external-link-alt" style="margin-left:4px;font-size:0.8em;color:blue;"></i></sup>'
+              link.innerHTML += '<sup><i class="fa fa-external-link-square-alt" style="margin-left:3px;margin-right:2px;font-size:0.7em;color:#219653;"></i></sup>'
               link.setAttribute('target', '_blank')
             }
           })
@@ -426,7 +426,7 @@ export default {
       "viewer"
       "footer";
     height: 100vh;
-    width: 100vw;
+    width: 100%;
   }
   #visual-essay.vertical {
     grid-template-columns: 1fr 1fr;

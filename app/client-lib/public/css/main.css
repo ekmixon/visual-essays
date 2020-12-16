@@ -36,7 +36,7 @@
     display: block;
   }
 
-  h1, h2, h3, h4, h5, h6, figure { content: ""; display: table; clear: both; }
+  h1, h2, h3, h4, h5, h6, figure { content: ""; display: table !important;; clear: both; }
   br { clear: both; }
 
   ::-moz-selection {
@@ -50,7 +50,7 @@
     text-shadow: none;
   }
   a {
-    color: #2156d2;
+    color: #219653 !important;
   }
   a:focus {
     outline: thin dotted;
@@ -59,7 +59,7 @@
   a:hover {
     outline: 0;
     cursor: pointer;
-    color: #193d85;
+    color: #166337 !important;
   }
   strong {
     font-weight: bold;
@@ -182,6 +182,7 @@
     color: #444;
     padding-bottom: 1px;
     */
+    color: #219653 !important;
     text-decoration: none;
     -webkit-transition: .25s;
         -moz-transition: .25s;
@@ -191,7 +192,7 @@
   }
   p a:hover,
   p a:focus {
-    color: #193d85;
+    color: #166337;
   }
   p a:active {
     position: relative;
@@ -219,7 +220,7 @@
 
   section:after {
     content: "";
-    display: table;
+    display: table !important;
     clear: both;
   }
 
@@ -238,6 +239,19 @@
     height: 150px;
     object-fit: cover;
     */
+    width: 100px;
+  }
+
+  .thumb-100w {
+    width: 100px;
+  }
+
+  .thumb-200w {
+    width: 200px;
+  }
+
+  .thumb-300w {
+    width: 300px;
   }
 
   .thumbcaption {

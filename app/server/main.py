@@ -142,8 +142,8 @@ def _get_site_info(href):
         'ghpSite': False,
         'private': False,
         'baseurl': '',
-        'acct': KNOWN_SITES['default'][0],
-        'repo': KNOWN_SITES['default'][1],
+        'acct': None,
+        'repo': None,
         'ref': None,
         'defaultBranch': None,
         'editBranch': None
@@ -159,6 +159,7 @@ def _get_site_info(href):
             'baseurl': f'/{acct}/{repo}'
         })
     elif hostname.startswith('localhost') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io'):
+        logger.info('here')
         if len(path_elems) >= 2:
             resp = requests.get(f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}')
             if resp.status_code == 200:
@@ -170,6 +171,8 @@ def _get_site_info(href):
                     'ref': site_info['ref'] if site_info['ref'] else repo_info['default_branch'],
                     'baseurl': f'/{path_elems[0]}/{path_elems[1]}'
                 })
+        else:
+            site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
     else:
         _site = hostname[4:] if hostname[:4] in ('dev.', 'exp.') else hostname
         if _site in KNOWN_SITES:
@@ -177,6 +180,7 @@ def _get_site_info(href):
             site_info['acct'] = acct
             site_info['repo'] = repo
         else:
+            site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
             siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
 
     if repo_info is None:
@@ -200,12 +204,7 @@ def _get_site_info(href):
     logger.info(f'{siteConfigUrl} {resp.status_code}')
     if resp.status_code == 200:
         site_config = resp.json()
-        site_info.update({
-            'acct': site_config.get('acct', site_info['acct']),
-            'repo': site_config.get('repo', site_info['repo']),
-            'ref':  site_info['ref'] if site_info['ref'] else site_config.get('ref')
-        })
-        
+        site_info['ref'] = site_info['ref'] if site_info['ref'] else site_config.get('ref')        
         if CONTENT_ROOT:
             resource_baseurl = f'{parsed.scheme}://{parsed.netloc}/static'
         else:

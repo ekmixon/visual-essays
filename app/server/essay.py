@@ -612,6 +612,8 @@ def get_essay(markdown, site, acct, repo, ref, path, root, raw, token, **kwargs)
         if raw:
             content = markdown
         else:
+            if md_path[0] != '/':
+                md_path = f'/{md_path}'
             html = markdown_to_html5(markdown, site, acct, repo, ref, md_path, root)
             content = parse(html, md_path or path, acct, repo)
     return content, url, sha, md_path
