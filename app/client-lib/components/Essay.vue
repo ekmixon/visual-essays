@@ -11,6 +11,7 @@ module.exports = {
     layout: String,
     height: Number,
     width: Number,
+    anchor: String,
     styleClass: String,
     debug: Boolean,
     viewerIsOpen: Boolean,
@@ -31,9 +32,6 @@ module.exports = {
   mounted() {
     console.log(`${this.$options.name}.mounted`)
     this.$nextTick(() => this.init())
-    if (this.hash) {
-      this.scrollTo(this.hash.replace(/^#/,''))
-    }
   },
   methods: {
     init() {
@@ -152,9 +150,10 @@ module.exports = {
       const elem = document.getElementById(elemid)
       if (elem) {
         this.$emit('collapse-header')
-        let scrollTo = elem.offsetTop - 114
+        let scrollTo = elem.offsetTop - 115
         let scrollable = document.getElementById('scrollableContent')
         if (!scrollable) scrollable = window
+        console.log(scrollable, `scrollTo=${scrollTo}`)
         scrollable.scrollTo(0, scrollTo)
         // window.scrollTo(0, elem.offsetTop)
       }
@@ -233,6 +232,9 @@ module.exports = {
     }
   },
   watch: {
+    anchor(anchor) {
+      if (anchor) this.scrollTo(anchor)
+    },
     layout: {
       handler () {
         // console.log(`layout=${this.layout}`)

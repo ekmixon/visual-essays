@@ -19,12 +19,13 @@
         @open-docs-site="openDocsSite"
       ></component>
     </div>
-    <div ref="essay" class="essay hidden">
+    <div ref="essay" id="scrollableContent" class="essay hidden">
       <component v-if="html" v-bind:is="contentComponent"
         :html="html"
         :layout="layout"
         :width="essayWidth"
         :height="essayHeight"
+        :anchor="anchor"
         :essay-config="essayConfig"
         :style-class="styleClass"
         :hover-item="hoverItemID"
@@ -106,6 +107,8 @@ export default {
         essayFname: undefined,
         qargs: {},
         href: undefined,
+        hash: undefined,
+        anchor: undefined,
         externalWindow: undefined
       }),
       computed: {
@@ -113,7 +116,7 @@ export default {
         repo() { return this.$store.getters.siteInfo.repo },
         branch() { return this.$store.getters.siteInfo.ref },
         // path() { return `${this.$store.getters.mdPath}` },
-        hash() { return `${this.$store.getters.hash}` },
+        // hash() { return `${this.$store.getters.hash}` },
         jwt() { return this.$store.getters.jwt },
         isAuthenticated() { return this.jwt !== null && this.jwt !== undefined },
         readOnly() { return this.qargs.readonly},
@@ -166,6 +169,10 @@ export default {
       },
       mounted() {
         console.log(window.location)
+        console.log(window.location.href)
+        if (window.location.href.indexOf('#') > 0) {
+          this.hash = window.location.href.split('#').pop()
+        }
         this.href = window.location.href
         this.qargs = this.parseQueryString()
 
@@ -342,8 +349,10 @@ export default {
           this.$store.dispatch('setViewerIsOpen', isOpen)
         },
         collapseHeader() {
-          this.header.style.height = `${this.headerMinHeight}px`
-          this.headerHeight = this.headerMinHeight
+          if (this.header) {
+            this.header.style.height = `${this.headerMinHeight}px`
+            this.headerHeight = this.headerMinHeight
+          }
         },
         menuItemClicked(path) {
           console.log('menuItemClicked', path)
@@ -410,6 +419,12 @@ export default {
             this.viewerIsOpen = layout[0] === 'v'
           },
           immediate: true
+        },
+        html() {
+          if (this.html && this.hash && this.header) this.$nextTick(() => {this.anchor = this.hash; this.hash = undefined})
+        },
+        header() {
+          if (this.html && this.hash && this.header) this.$nextTick(() => {this.anchor = this.hash; this.hash = undefined})
         }
       }
 }
