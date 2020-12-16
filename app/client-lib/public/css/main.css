@@ -50,7 +50,7 @@
     text-shadow: none;
   }
   a {
-    color: #219653 !important;
+    color: #2156d2 !important;
   }
   a:focus {
     outline: thin dotted;
@@ -59,7 +59,7 @@
   a:hover {
     outline: 0;
     cursor: pointer;
-    color: #166337 !important;
+    color: #193d85 !important;
   }
   strong {
     font-weight: bold;
