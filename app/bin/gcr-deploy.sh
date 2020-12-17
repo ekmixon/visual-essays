@@ -5,6 +5,7 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   GCR_SERVICE=${1:-visual-essays-exp}
   REF=${2:-develop}
 
+  echo $REF
   git checkout $REF
 
   CDS=`git log -1 | grep '^Date' | awk '{print $3" "$4" " $6}'`
