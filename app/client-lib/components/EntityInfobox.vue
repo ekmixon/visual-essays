@@ -130,5 +130,7 @@ module.exports = {
 
   .entity-link {
     font-size: 1.1rem;
+    color: black !important;
+    text-decoration: underline !important;
   }
 </style>

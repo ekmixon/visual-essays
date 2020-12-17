@@ -18,5 +18,6 @@
     { "name": "entityInfobox", "src": "/components/EntityInfobox.vue"},
     { "name": "iiifSideBySide", "src": "/components/IIIFSideBySide.vue", "selectors": ["tag:iiif-compare"], "icon": "fa-file-image", "label": "Image compare"},
     { "name": "knightlabTimeline", "src": "/components/KnightlabTimeline.vue", "selectors": ["tag:knightlab-timeline"], "icon": "fa-history", "label": "Knightlab Timeline"},
-    { "name": "tabulator", "src": "/components/Tabulator.vue", "selectors": ["tag:tabulator"], "icon": "fa-table", "label": "Tabulator"}
+    { "name": "tabulator", "src": "/components/Tabulator.vue", "selectors": ["tag:tabulator"], "icon": "fa-table", "label": "Tabulator"},
+    { "name": "graphicViewer", "src": "/components/GraphicViewer.vue", "selectors": ["tag:graphic"], "icon": "fa-table", "label": "Graphic Viewer"}  
 ]

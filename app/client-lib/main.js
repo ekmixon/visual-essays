@@ -7,6 +7,7 @@ import * as utils from './utils.js'
 import VueScrollmagic from 'vue-scrollmagic'
 import VModal from 'vue-js-modal'
 
+
 import D3Network from './components/D3Network.vue'
 import D3PlusNetwork from './components/D3PlusNetwork.vue'
 import D3PlusRingNetwork from './components/D3PlusRingNetwork.vue'
@@ -15,6 +16,7 @@ import EntityInfoboxModal from './components/EntityInfoboxModal.vue'
 import Essay from './components/Essay.vue'
 import Header from './components/Header.vue'
 import EssayIndex from './components/EssayIndex.vue'
+import GraphicViewer from './components/GraphicViewer.vue'
 import IIIFSideBySide from './components/IIIFSideBySide.vue'
 import OpenSeadragonViewer from './components/OpenSeadragonViewer.vue'
 import PlantsIndexHeader from './components/PlantsIndexHeader.vue'
@@ -52,7 +54,9 @@ const baseComponentIndex = [
   { name: 'tabulator', src: '/components/Tabulator.vue', component: Tabulator, selectors: ['tag:tabulator'], icon: 'fa-table', label: 'Tabulator'},
   { name: 'videoPlayer', src: '/components/VideoPlayer.vue', component: VideoPlayer, selectors: ['tag:video'], icon: 'fa-video', label: 'Videos'},
   { name: 'viewer', src: '/components/Viewer.vue', component: Viewer },
-  { name: 'visNetwork', src: '/components/VisNetwork.vue', component: VisNetwork, selectors: ['tag:vis-network'], icon: 'fa-chart-network', label: 'Networks'}
+  { name: 'visNetwork', src: '/components/VisNetwork.vue', component: VisNetwork, selectors: ['tag:vis-network'], icon: 'fa-chart-network', label: 'Networks'},
+  { name: 'graphicViewer', src: '/components/GraphicViewer.vue', component: GraphicViewer, selectors: ['tag:graphic'], icon: 'fa-table', label: 'Graphic Viewer'}  
+
 ]
 
 const loc = window.location
