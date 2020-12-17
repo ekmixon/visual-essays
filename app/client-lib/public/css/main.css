@@ -193,7 +193,7 @@
   }
   p a:hover,
   p a:focus {
-    color: #166337;
+    /* color: #166337; */
   }
   p a:active {
     position: relative;
