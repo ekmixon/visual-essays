@@ -297,7 +297,7 @@ export default {
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 5
           } else {
-            delta = e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY
+            delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           }
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
           if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
@@ -307,7 +307,7 @@ export default {
             if (scrollDir === 'expand' && newHeaderHeight > this.headerMaxHeight) newHeaderHeight = this.headerMaxHeight
             this.header.style.height = `${newHeaderHeight}px`
             this.headerHeight = newHeaderHeight
-            //e.preventDefault()
+            e.preventDefault()
             e.stopPropagation()
           }
         },
@@ -321,8 +321,8 @@ export default {
                 this.header.addEventListener('touchmove', this.resizeHeader )
                 this.$refs.essay.addEventListener('touchmove', this.resizeHeader)
               } else {
-                this.header.addEventListener('wheel', this.resizeHeader, {passive: true})
-                this.$refs.essay.addEventListener('wheel', this.resizeHeader, {passive: true})
+                this.header.addEventListener('wheel', this.resizeHeader, {passive: false})
+                this.$refs.essay.addEventListener('wheel', this.resizeHeader, {passive: false})
               }
             }
           }
