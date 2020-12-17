@@ -60,9 +60,7 @@ const baseComponentIndex = [
 ]
 
 const loc = window.location
-const referrerUrl = document.referrer
 console.log(loc)
-console.log(`referrer=${referrerUrl}`)
 
 let service = 'https://dev.visual-essays.app'
 let site = loc.href
@@ -82,7 +80,9 @@ if (loc.hostname.indexOf('.github.io') > 0) {
 
 console.log(`service=${service} site=${site} mode=${mode}`)
 
+const referrerUrl = document.referrer
 if (referrerUrl) {
+  console.log(`referrer=${referrerUrl}`)
   const referrer = utils.parseUrl(referrerUrl)
   console.log(referrer)
   if (referrer.host === 'github.com') {
@@ -99,7 +99,7 @@ if (referrerUrl) {
       ? `https://docs.visual-essays.app/${ghPath}`
       : `${loc.origin}/${ghAcct}/${ghRepo}/${ghPath}${ghBranch === 'master' || ghBranch === 'main' ? '' : '?ref=' + ghBranch}`
     console.log(`redirect=${redirect}`)
-    // window.location = redirect
+    window.location = redirect
   }
 }
 
