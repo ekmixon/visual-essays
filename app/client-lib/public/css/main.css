@@ -50,7 +50,7 @@
     text-shadow: none;
   }
   a {
-    color: #219653 !important;
+    /* color: #219653 !important; */
   }
   a:focus {
     outline: thin dotted;
@@ -182,8 +182,8 @@
     border-bottom: 2px solid #6af;
     color: #444;
     padding-bottom: 1px;
-    */
     color: #219653 !important;
+    */
     text-decoration: none;
     -webkit-transition: .25s;
         -moz-transition: .25s;
