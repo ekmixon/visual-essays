@@ -90,15 +90,16 @@ if (referrerUrl) {
     const ghAcct = referrerPath[0]
     const ghRepo = referrerPath[1]
     const ghBranch = referrerPath.length > 2 ? referrerPath[3] : 'main'
-    const ghRoot = referrerPath.length > 3 ? referrerPath[4] === 'docs' ? referrerPath[4] : null : null
-    const pathStart = ghRoot ? 5 : 4
+    //const ghRoot = referrerPath.length > 3 ? referrerPath[4] === 'docs' ? referrerPath[4] : null : null
+    //const pathStart = ghRoot ? 5 : 4
+    const pathStart = 4
     const pathEnd = referrerPath[referrerPath.length-1] === 'README.md' || referrerPath[referrerPath.length-1] === 'index.md' ? referrerPath.length-1 : referrerPath.length
     const ghPath = referrerPath.slice(pathStart, pathEnd).join('/').replace(/\.md$/, '')
     const redirect = (ghAcct === 'JSTOR-Labs' && ghRepo === 've-docs') 
       ? `https://docs.visual-essays.app/${ghPath}`
-      : `${loc.origin}${ghBranch === 'master' || ghBranch === 'main' ? '' : '/' + ghBranch}/${ghAcct}/${ghRepo}/${ghPath}`
+      : `${loc.origin}/${ghAcct}/${ghRepo}/${ghPath}${ghBranch === 'master' || ghBranch === 'main' ? '' : '?ref=' + ghBranch}`
     console.log(`redirect=${redirect}`)
-    window.location = redirect
+    // window.location = redirect
   }
 }
 
