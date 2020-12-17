@@ -173,8 +173,8 @@ module.exports = {
     }
 
     a {
-        color: #000;
-        text-decoration: none;
+        color: #000 !important;
+        text-decoration: none !important;
     }
 
     .section {

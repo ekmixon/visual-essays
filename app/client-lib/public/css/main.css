@@ -178,13 +178,11 @@
   }
   p a:link,
   p a:visited {
-    /*
-    border-bottom: 2px solid #6af;
+    /* border-bottom: 2px solid #6af; */
     color: #444;
     padding-bottom: 1px;
     color: #219653 !important;
-    */
-    text-decoration: none;
+    text-decoration: underline !important;
     -webkit-transition: .25s;
         -moz-transition: .25s;
         -ms-transition: .25s;
