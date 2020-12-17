@@ -852,7 +852,7 @@ module.exports = {
       display: grid;
       width: 100%;
       grid-template-rows: 20px 1fr auto auto auto;
-      grid-template-columns: 1fr 160px;
+      grid-template-columns: 1fr 60px;
       font-family: Roboto, sans-serif;
       font-size: 1.0rem;
       line-height: 1.4rem;
