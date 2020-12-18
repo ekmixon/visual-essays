@@ -161,7 +161,6 @@ def _get_site_info(href):
             'baseurl': f'/{acct}/{repo}'
         })
     elif hostname.startswith('localhost') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io'):
-        logger.info('here')
         if len(path_elems) >= 2:
             resp = requests.get(f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}')
             if resp.status_code == 200:
@@ -184,7 +183,6 @@ def _get_site_info(href):
         else:
             site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
             siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
-
     if repo_info is None:
         url = f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}'
         resp = requests.get(url)
@@ -215,8 +213,7 @@ def _get_site_info(href):
             else:
                 resource_baseurl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}'
         for key, value in site_config.items():
-            if key in site_info:
-                continue
+            #if key in site_info: continue
             if key == 'components':
                 site_info['components'] = []
                 for comp in value:
