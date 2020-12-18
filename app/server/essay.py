@@ -112,7 +112,7 @@ def markdown_to_html5(markdown, site, acct, repo, ref, path, root):
     html = markdown_parser.markdown(
         markdown,
         output_format='html5', 
-        extensions=['footnotes', 'pymdownx.superfences', 'pymdownx.details', 'def_list', 'attr_list'],
+        extensions=['footnotes', 'tables', 'pymdownx.superfences', 'pymdownx.details', 'def_list', 'attr_list'],
         extension_configs = {
             'footnotes': {
                 'SEPARATOR': '-'
