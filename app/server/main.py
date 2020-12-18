@@ -135,8 +135,9 @@ def _normalize_path(path):
 def _get_site_info(href):
     parsed = urlparse(href)
     hostname = parsed.hostname
+    _qargs = dict([(k, v[0]) for k,v in parse_qs(parsed.query).items()])
     path_elems = [elem for elem in parsed.path.split('/') if elem]
-    logger.info(f'hostname={hostname} path_elems={path_elems}')
+    logger.info(f'hostname={hostname} path_elems={path_elems} qargs={_qargs}')
     repo_info = None
     site_info = {
         'ghpSite': False,
@@ -144,7 +145,7 @@ def _get_site_info(href):
         'baseurl': '',
         'acct': None,
         'repo': None,
-        'ref': None,
+        'ref': _qargs.get('ref'),
         'defaultBranch': None,
         'editBranch': None
     }
@@ -213,6 +214,8 @@ def _get_site_info(href):
             else:
                 resource_baseurl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}'
         for key, value in site_config.items():
+            if key in site_info:
+                continue
             if key == 'components':
                 site_info['components'] = []
                 for comp in value:
