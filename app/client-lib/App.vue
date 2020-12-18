@@ -194,7 +194,7 @@ export default {
         async loadEssay(path, replace) {
 
           // Load essay HTML, use local cached version if available
-          let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}${this.refQueryArg}`
+          let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}?ref=${this.ref}`
           console.log(`loadEssay: path=${path} url=${essayUrl}`)
           let html = await this.cachedEssay(essayUrl)
 
