@@ -160,7 +160,7 @@ def _get_site_info(href):
             'repo':    repo,
             'baseurl': f'/{acct}/{repo}'
         })
-    elif hostname.startswith('localhost') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io'):
+    elif hostname != 'docs.visual-essays.app' and (hostname.startswith('localhost') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io')):
         if len(path_elems) >= 2:
             resp = requests.get(f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}')
             if resp.status_code == 200:
@@ -176,6 +176,7 @@ def _get_site_info(href):
             site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
     else:
         _site = hostname[4:] if hostname[:4] in ('dev.', 'exp.') else hostname
+        logger.info(f'{_site} {_site in KNOWN_SITES}')
         if _site in KNOWN_SITES:
             acct, repo = KNOWN_SITES[_site]
             site_info['acct'] = acct
