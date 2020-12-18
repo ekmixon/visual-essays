@@ -538,7 +538,7 @@ def thumbnail():
                 im.save(imgByteArr, format=im_format, quality=quality)
                 img_b64 = base64.b64encode(imgByteArr.getvalue())
                 img = {'b64': str(img_b64, 'utf-8'), 'content_type': Image.MIME[im_format]}
-                cache.set(key, img)
+                # cache.set(key, img)
         decoded = base64.b64decode(bytes(img['b64'], 'utf-8'))
         accept_encoding = request.headers.get('Accept-Encoding', '')
         response = Response(status=200)
