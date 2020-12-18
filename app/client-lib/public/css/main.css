@@ -70,8 +70,12 @@
   }
   code,
   pre {
+    padding: 4px 8px;
+    background-color: #1d2c64;
+    color: #ffd400;
     font-family: monospace, serif;
-    font-size: 1em;
+    font-size: 1rem;
+    border-radius: 4px;
   }
   pre {
     white-space: pre;
