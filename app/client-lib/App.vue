@@ -262,9 +262,10 @@ export default {
               let target = link.dataset.target
               if (!target) { 
                 const parsedUrl = this.parseUrl(link.href)
-                target = parsedUrl.pathname
+                console.log(parsedUrl)
+                target = parsedUrl.hash === '' ? parsedUrl.pathname : parsedUrl.hash.split('?')[0]
               }
-              // console.log(link.href, target)
+              console.log(link.href, target)
               link.removeAttribute('href')
               link.setAttribute('data-target', target)
 
@@ -276,7 +277,11 @@ export default {
                 }
                 let path = target.dataset.target
                 console.log('click', path)
-                this.setEssay(path)
+                if (path[0] === '#') {
+                  document.querySelector(path).scrollIntoView({block:'start'})
+                } else {
+                  this.setEssay(path)
+                }
               })
             } else {
               

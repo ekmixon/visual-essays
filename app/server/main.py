@@ -460,13 +460,13 @@ def specimens(path):
             gpid = '/'.join(path_elems)
         qargs['preload'] = qargs.pop('preload', 'false').lower() in ('true', '')
         refresh = qargs.pop('refresh', 'false').lower() in ('true', '')
-        specimens = cache.get(path) if not refresh else None
-        if specimens is None:
-            specimens = get_specimens(taxon_name=taxon_name, gpid=gpid, wdid=wdid, **qargs)
-            if specimens['specimens']:
-                cache[path] = specimens
+        _specimens = cache.get(path) if not refresh else {}
+        if not _specimens:
+            _specimens = get_specimens(taxon_name=taxon_name, gpid=gpid, wdid=wdid, **qargs)
+            if _specimens['specimens']:
+                cache[path] = _specimens
         else:
-            specimens['from_cache'] = True
+            _specimens['from_cache'] = True
         if content_type == 'text/html':
             return (open(os.path.join(BASEDIR, 'src', 'json-viewer.html'), 'r').read().replace("'{{DATA}}'", json.dumps(specimens)), 200, cors_headers)
         else:
@@ -556,6 +556,15 @@ def thumbnail():
             response.data = decoded
         logger.info(f'size={len(decoded)}')
         return response
+
+def _is_entity_id(s, ns_required=True):
+    if not s or not isinstance(s, str): return False
+    eid = s.split(':')
+    if len(eid) == 1 and ns_required:
+        return False
+    if len(eid) > 2:
+        return False
+    return len(eid[-1]) > 1 and eid[-1][0] in ('Q', 'P') and eid[-1][1:].isdecimal()
 
 def usage():
     print('%s [hl:da:r:c:]' % sys.argv[0])

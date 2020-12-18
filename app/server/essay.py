@@ -183,6 +183,10 @@ def _is_empty(elem):
     child_images = [c for c in elem.children if c.name == 'img']
     if child_images:
         return False
+    anchors = [c for c in elem.children if c.name == 'a' and 'name' in c.attrs and 'href' not in c.attrs]
+    if anchors:
+        if elem.previous_sibling.previous_sibling and elem.previous_sibling.previous_sibling.name[0].upper() == 'H':
+            elem.previous_sibling.previous_sibling.attrs['id'] = anchors[0].attrs['name']
     elem_contents = [t for t in elem.contents if t and (isinstance(t, str) and t.strip()) or t.name not in ('br',) and t.string and t.string.strip()]
     return len(elem_contents) == 0
 
@@ -262,7 +266,7 @@ def _update_entities_from_knowledgegraph(markup, refresh=False):
                     
 def _find_ve_markup(soup):
     ve_markup = {}
-    cur_image = None
+    cur_image = {}
     # custom markup is defined in a var or span elements.  Custom properties are defined with element data-* attribute
     for vem_elem in [vem_elem for vem_tag in ('var', 'span', 'param') for vem_elem in soup.find_all(vem_tag)]:
         attrs = dict([k.replace('data-',''),v] for k,v in vem_elem.attrs.items() if k not in ['class']) if vem_elem.attrs else {}
@@ -516,9 +520,6 @@ def _add_entity_classes(soup, markup):
             entity.attrs['class'] = sorted(set([cls for cls in entity.attrs['class'] if cls != 'entity'] + [markup[entity.attrs['data-eid']]['category']]))
 
 def _remove_empty_paragraphs(soup):
-    for link in soup.findAll(lambda tag: tag.name in ('a',)):
-        if 'plant-humanities.app' in link.attrs['href'] and 'gdid' in link.attrs['href']:
-            link.extract()
     for para_elem in soup.findAll(lambda tag: tag.name in ('p',)):
         if _is_empty(para_elem):
             para_elem.extract()
@@ -666,4 +667,4 @@ if __name__ == '__main__':
             assert False, "unhandled option"
 
     path = args[0] if len(args) == 1 else '/'
-    print(get_essay(path, BASEDIR, site, site_config, token))
+    # print(get_essay(path, BASEDIR, site, site_config, token))
