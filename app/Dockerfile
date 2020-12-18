@@ -9,7 +9,7 @@ RUN set -e; \
     rm -rf /var/tmp/* /tmp/* /var/lib/apt/lists/*
 
 RUN set -e; \
-    pip install sqlitedict flask requests uwsgi Markdown pygments pymdown-extensions markdown markdown-captions bs4 html5 python-slugify python-dateutil rdflib rdflib-jsonld PyLD PyJWT pyyaml Pillow cryptography expiringdict google-cloud google-auth google-cloud-storage 
+    pip install sqlitedict flask requests uwsgi Markdown pygments pymdown-extensions markdown bs4 html5 python-slugify python-dateutil rdflib rdflib-jsonld PyLD PyJWT pyyaml Pillow cryptography expiringdict google-cloud google-auth google-cloud-storage 
 
 WORKDIR /usr/src/app
 
