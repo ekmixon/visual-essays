@@ -15,6 +15,7 @@ import base64
 import gzip
 import jwt
 import traceback
+import math
 
 from functools import wraps
 from PIL import Image
@@ -145,7 +146,7 @@ def _get_site_info(href):
         'baseurl': '',
         'acct': None,
         'repo': None,
-        'ref': _qargs.get('ref'),
+        'ref': None,
         'defaultBranch': None,
         'editBranch': None
     }
@@ -238,7 +239,7 @@ def _get_site_info(href):
             commit_info = resp.json()
             site_info['editBranch'] = commit_info[0]['name']
     else:
-        site_info['editBranch'] = site_info['ref']
+        site_info['editBranch'] = _qargs.get('ref', site_info['ref'])
     return site_info
 
 def _context(path=None):

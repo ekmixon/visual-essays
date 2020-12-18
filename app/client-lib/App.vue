@@ -184,8 +184,8 @@ export default {
         let path = window.location.pathname.length > this.baseurl.length
           ? window.location.pathname.slice(this.baseurl.length)
           : '/'
-        console.log(`refQueryArg=${this.refQueryArg}`)
         console.log(`App: baseurl=${this.baseurl} path=${path}`, this.qargs, this.siteInfo, this.essayConfig)
+        console.log(`ref=${this.ref} refQueryArg=${this.refQueryArg}`)
         window.onpopstate = (e) => { this.setEssay(e.state.file, true) }
         this.waitForHeaderFooter() // header and footer are dynamically loaded external components        
         this.setEssay(path)
