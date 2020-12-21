@@ -263,7 +263,7 @@ class KnowledgeGraph(object):
                     for reference in stmt['references']:
                         value['references'].append({})
                         for ref_prop, ref_stmts in reference['snaks'].items():
-                            ref_label = self.prop_mappings[ns][ref_prop]['label']
+                            ref_label = self.prop_mappings[ns].get(ref_prop,{}).get('label',ref_prop)
                             value['references'][-1][ref_label] = []
                             for ref_stmt in ref_stmts:
                                 value['references'][-1][ref_label].append(self._stmt_value(ref_stmt, ns))
@@ -300,7 +300,7 @@ class KnowledgeGraph(object):
 
     def _properties(self, g):
         '''Get property mappings for graph to map property entity IDs to labels'''
-        cached_props_path = f'mappings/{g["ns"]}-props.json'
+        cached_props_path = f'{BASE_DIR}/mappings/{g["ns"]}-props.json'
         if os.path.exists(cached_props_path):
             with open (cached_props_path, 'r') as fp:
                 props = json.load(fp)
@@ -312,30 +312,33 @@ class KnowledgeGraph(object):
                     SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
                 }
                 ORDER BY ASC(xsd:integer(STRAFTER(STR(?property), 'P')))'''
-            sparql_results = requests.post(
+            logger.info(g['sparql_endpoint'])
+            resp = requests.post(
                 g['sparql_endpoint'],
                 headers={
                     'Accept': 'application/sparql-results+json',
                     'Content-type': 'application/x-www-form-urlencoded',
                     'User-agent': 'JSTOR Labs python client'},
                 data='query=%s' % quote(sparql)
-            ).json()['results']['bindings']
-            props = [
-                {
-                    'id': p['property']['value'].split('/')[-1],
-                    'type': p['propertyType']['value'].split('#')[-1],
-                    'label': p['propertyLabel']['value'],
-                    'description': p['propertyDescription']['value'] if 'propertyDescription' in p else None,
-                    'aliases': p['propertyAltLabel']['value'].split(',') if 'propertyAltLabel' in p else []
-                } for p in sparql_results
-            ]
-            with open (cached_props_path, 'w') as fp:
-                json.dump(props, fp)
-            return props
+            )
+            if resp.status_code == 200:
+                sparql_results = resp.json()['results']['bindings']
+                props = [
+                    {
+                        'id': p['property']['value'].split('/')[-1],
+                        'type': p['propertyType']['value'].split('#')[-1],
+                        'label': p['propertyLabel']['value'],
+                        'description': p['propertyDescription']['value'] if 'propertyDescription' in p else None,
+                        'aliases': p['propertyAltLabel']['value'].split(',') if 'propertyAltLabel' in p else []
+                    } for p in sparql_results
+                ]
+                with open (cached_props_path, 'w') as fp:
+                    json.dump(props, fp)
+                return props
 
     def _formatter_urls(self, g):
         '''Get all formatter URLs for graph for converting external entity IDs to full URL'''
-        cached_path = f'mappings/{g["ns"]}-formatter-urls.json'
+        cached_path = f'{BASE_DIR}/mappings/{g["ns"]}-formatter-urls.json'
         if os.path.exists(cached_path):
             with open (cached_path, 'r') as fp:
                 formatter_urls = json.load(fp)
@@ -408,6 +411,7 @@ class KnowledgeGraph(object):
                     resp = resp.json()
                     if resp['results']['bindings']:
                         summary_url = resp['results']['bindings'][0]['mwPage']['value']
+                        entity['wikipedia_page'] = {'en': {'language': 'en', 'value':  summary_url}}
                 else:
                     logger.info(f'_add_summary_text: resp_code={resp.status_code} msg={resp.text}')
 
