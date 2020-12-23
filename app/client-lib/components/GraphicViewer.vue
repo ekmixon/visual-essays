@@ -1,13 +1,14 @@
 <template>
-    <div id="graphic" :style="containerStyle">
-
-        <div v-if="this.svg">
-            <div v-html="this.svg"></div>
+    <div class="grid-container" :style="containerStyle">
+        <div id="graphic-container" v-if="this.svg" :style="graphicStyle">
+            <div id="graphic" v-html="this.svg"></div>
         </div>
-        <div v-if="this.image">
-            <img :src="this.image">
+        <div id="graphic-container" v-if="this.image" :style="graphicStyle">
+            <img id="graphic" :src="this.image">
         </div>
-
+        <div class="citation">
+            <span class="title">{{this.items[0].title}}</span>
+        </div>
     </div>
 </template>
 
@@ -28,8 +29,15 @@ module.exports = {
     
     computed: {
         containerStyle() { return { width: `${this.width}px`, height: `${this.height}px`} },
-        input() { return this.items[0].img || this.items[0].url || this.items[0].file }
-        
+        input() { return this.items[0].img || this.items[0].url || this.items[0].file },
+        graphicStyle() {
+            return {
+                //width: `${this.width*.95}px`,
+                //height: `${this.height*.95}px`,
+                overflowY: 'auto !important',
+                marginLeft: '0',   
+            }
+        }      
     },
     mounted() {
         this.init();
@@ -56,4 +64,39 @@ module.exports = {
 </script>
 
 <style scoped>
+
+    .grid-container {
+        display: grid;
+        grid-template-rows: 95% 5%;
+        grid-template-areas:
+        "main"
+        "footer";
+    }
+
+    #graphic-container {
+        grid-area: main
+    }
+
+    #graphic {
+        max-width:100%;
+        max-height:100%;
+    }
+
+    .citation {
+      /* row-start / column-start / row-end / column-end */
+      grid-area: footer;
+      z-index: 2;
+      justify-self: stretch;
+      align-self: stretch;
+      /* background-color: rgba(255, 255, 255, 0.8); */
+      background-color: #ccc;
+      padding: 3px 6px;
+        text-align: center;
+        line-height: 1;
+    }
+
+    .title {
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
 </style>
