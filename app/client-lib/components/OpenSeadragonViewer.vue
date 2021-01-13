@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="image-viewer" :style="`width:${width}px;height:${height}px;`">
     
-      <div class="osd" id="osd"></div>
+      <div class="osd" id="osd" :style="osdContainerStyle"></div>
       <div id="osd-toolbar" class="controls auto-hide">
         <span id="go-home"><i class="fas fa-home"></i></span>
         <span id="zoom-in"><i class="fas fa-search-plus"></i></span>
@@ -104,7 +104,6 @@ module.exports = {
     viewer: undefined,
     imageSize: {x:0,y:0},
     annotator: undefined,
-    annotatorEnabled: false,
     annoCursor: 0,
     overlay: undefined,
     annosEditor: undefined,
@@ -124,7 +123,7 @@ module.exports = {
         textAlign: 'center',
         height: `${this.height}px`,
         width: `${this.width}px`,
-        maxHeight: this.annotatorEnabled ? `${this.width}px` : '',
+        maxHeight: this.showAnnotations ? `${this.width}px` : '',
         position: 'relative'
       }
     },
@@ -673,6 +672,7 @@ module.exports = {
     },
     showAnnotationsNavigator(show) {
       if (show) {
+        if (this.showAnnotations) this.showAnnotations = false
         this.gotoAnnotationSeq()
       } else {
         this.goHome()
@@ -680,6 +680,7 @@ module.exports = {
     },
     showAnnotations(show) {
       Array.from (document.querySelectorAll('.a9s-annotationlayer')).forEach(elem => elem.style.display = show ? 'unset' : 'none')
+      if (!show && !this.showAnnotationsNavigator) setTimeout(() => this.goHome(true), 10)
     },
     sliderPct() {
       const numItems = this.viewer.world.getItemCount()
