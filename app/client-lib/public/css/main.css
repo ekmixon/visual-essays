@@ -318,6 +318,9 @@
     border: 1px solid #aaa;
   }
 
+  .entity { white-space: nowrap }
+  .footnote-ref { white-space: nowrap }
+
 .highlight .hll { background-color: #ffffcc }
 .highlight  { background: #eeeeee; display: inline-block; border: 1px solid #d6d6d6;}
 .highlight .c { color: #408080; font-style: italic } /* Comment */
