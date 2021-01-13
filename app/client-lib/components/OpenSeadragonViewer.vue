@@ -664,7 +664,7 @@ module.exports = {
       } else {
         // vvvvv this causes an infinite loop!!!!
         // if (previous && previous.annotations) this.currentItem = { ...this.currentItem, ...{ annotations: [...previous.annotations] } }
-        if (previous && previous.annotations) this.currentItem.annotations = [...previous.annotations]
+        if (current && previous && previous.annotations) this.currentItem.annotations = [...previous.annotations]
       }
     },
     mode() {
