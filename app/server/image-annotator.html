@@ -181,7 +181,7 @@
                 <div v-html="label" style="float:left;"></div>
             </div>
 
-            <div id="osd" class="containerStyle"></div>
+            <div id="osd" class="osdContainerStyle"></div>
 
             <v-navigation-drawer
                     v-model="drawer"
@@ -369,6 +369,14 @@
                 this.visibleAnnotationList = this.annotations.slice((this.page - 1) * this.perPage, this.page * this.perPage);
                 return this.visibleAnnotationList;
             },
+            osdContainerStyle(){
+              return {
+                backgroundColor: 'black',
+                height: `${this.height}px`,
+                width: `${this.width}px`,
+                maxHeight: `${this.width}px`,
+              }
+            }
         },
         mounted() {
           const qargs = this.parseQueryString()
