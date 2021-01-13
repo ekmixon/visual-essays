@@ -422,6 +422,7 @@ p {
     border-bottom: 2px solid #219653;
     cursor: pointer;
     z-index: 10;
+    white-space: nowrap;
   }
 
   .entity-highlight,
