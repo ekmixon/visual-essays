@@ -1,7 +1,9 @@
 <template>
-  <div id="vis" :style="containerStyle">
-    <div id="networktitle">{{this.items[0].title}}</div>
-    <div id="mynetwork"></div>
+  <div class="grid-container" :style="containerStyle">
+    <div id="mynetwork" :style="networkStyle"></div>
+    <div class="citation">
+    <span class="title">{{this.items[0].title}}</span>
+    </div>
   </div>
 </template>
 
@@ -32,6 +34,14 @@ module.exports = {
     active: new Set(),
   }),
   computed: {
+    networkStyle() {
+            return {
+                width: `${this.width}px`,
+                //height: `${this.height}px`,
+                overflowY: 'auto !important',
+                marginLeft: '0',   
+            }
+    },
     containerStyle() {
       return {
         width: `${this.width}px`,
@@ -274,9 +284,33 @@ module.exports = {
     overflow: visible;
   }
   #vis,
+
+  .grid-container {
+        display: grid;
+        grid-template-rows: 95% 5%;
+        grid-template-areas:
+        "main"
+        "footer";
+    }
+
+  .citation {
+      /* row-start / column-start / row-end / column-end */
+      grid-area: footer;
+      z-index: 2;
+      justify-self: stretch;
+      align-self: stretch;
+      /* background-color: rgba(255, 255, 255, 0.8); */
+      background-color: #ccc;
+      padding: 3px 6px;
+        text-align: center;
+        line-height: 1;
+    }
+
   #mynetwork {
-    width: 100%;
+    /*width: 100%;
     height: 100%;
+    */
+    grid-area: main
   }
   #networktitle {
     z-index:100;
@@ -289,4 +323,10 @@ module.exports = {
     color: black;
     text-align: center;
   }
+
+  .title {
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
 </style>

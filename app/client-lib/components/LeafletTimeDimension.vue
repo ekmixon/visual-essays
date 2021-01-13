@@ -1,5 +1,10 @@
 <template>
-  <div id="map" :style="containerStyle"></div>
+<div class="grid-container" :style="containerStyle">
+  <div id="map" :style="mapStyle"></div>
+  <div class="citation">
+    <span class="title">{{this.items[0].title}}</span>
+  </div>
+</div>
 </template>
 
 <script>
@@ -109,12 +114,18 @@ module.exports = {
         duration() { return this.mapDef.duration || defaults.duration },
         autoFit() { return this.mapDef['auto-fit'] === 'true' || defaults.autoFit },
         dateFormat() { return this.mapDef['date-format'] || defaults.dateFormat },
+        mapStyle() {
+            return {
+                width: `${this.width}px`,
+                //height: `${this.height}px`,
+                overflowY: 'auto !important',
+                marginLeft: '0',   
+            }
+        },
         containerStyle() {
             return {
                 width: `${this.width}px`,
                 height: `${this.height}px`,
-                overflowY: 'auto !important',
-                marginLeft: '0',
             }
         }
   },
@@ -738,5 +749,34 @@ module.exports = {
     .map-interaction:hover {
       background: #a8e2bb !important;
       transition: all 0.2s ease-in;
+    }
+    .grid-container {
+        display: grid;
+        grid-template-rows: 95% 5%;
+        grid-template-areas:
+        "main"
+        "footer";
+    }
+
+    #map {
+        grid-area: main
+    }
+
+    .citation {
+      /* row-start / column-start / row-end / column-end */
+      grid-area: footer;
+      z-index: 2;
+      justify-self: stretch;
+      align-self: stretch;
+      /* background-color: rgba(255, 255, 255, 0.8); */
+      background-color: #ccc;
+      padding: 3px 6px;
+        text-align: center;
+        line-height: 1;
+    }
+
+    .title {
+      font-size: 0.9rem;
+      font-weight: bold;
     }
 </style>
