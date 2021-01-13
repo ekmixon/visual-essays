@@ -174,7 +174,7 @@ if __name__ == '__main__':
                 for line in infile:
                     try:
                         doc = json.loads(line)
-                        db[doc[key]] = doc
+                        cache[doc[key]] = doc
                     except KeyboardInterrupt:
                         break
                     except:
