@@ -2,7 +2,7 @@
 
 if output="$(git status --porcelain)" && [ -z "$output" ]; then
 
-  GCR_SERVICE=${1:-visual-essays-exp}
+  GCR_SERVICE=${1:-visual-essays-dev}
   REF=${2:-develop}
 
   echo $REF
