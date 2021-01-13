@@ -189,6 +189,13 @@ export default {
         window.onpopstate = (e) => { this.setEssay(e.state.file, true) }
         this.waitForHeaderFooter() // header and footer are dynamically loaded external components        
         this.setEssay(path)
+
+        const resizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
+          console.log(`resizeObserver: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
+          this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+          this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
+        })
+        resizeObserver.observe(this.$refs.app)
       },
       methods: {
         async loadEssay(path, replace) {
@@ -419,7 +426,7 @@ export default {
         }
       },
       updated() {
-        // console.log(`updated: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header.clientHeight} footer=${this.$refs.footer.clientHeight}`)
+        console.log(`updated: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
         this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
         this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
       },
@@ -459,7 +466,7 @@ export default {
     width: 100%;
   }
   #visual-essay.vertical {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 50% 50%;
     grid-template-rows: auto 1fr auto;
     grid-template-areas: 
       "header header"
