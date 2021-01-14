@@ -303,8 +303,8 @@ module.exports = {
 
 .vertical p.active-elem {
   background-color: #ffffff;
-  padding-top: 16px;
-  padding-bottom: 16px;
+  /* padding-top: 16px;
+  padding-bottom: 16px; */
   border-left: none;
   box-shadow:  0 1px 3px 1px rgba(0,0,0,0.25);
   position: relative;
@@ -422,7 +422,7 @@ p {
     border-bottom: 2px solid #219653;
     cursor: pointer;
     z-index: 10;
-    white-space: nowrap;
+    /* white-space: nowrap; */
   }
 
   .entity-highlight,

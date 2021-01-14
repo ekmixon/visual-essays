@@ -484,6 +484,7 @@ export default {
   .viewer {
     grid-area: viewer;
     justify-self: stretch;
+    background: #333;
   }
   .footer {
     grid-area: footer;
