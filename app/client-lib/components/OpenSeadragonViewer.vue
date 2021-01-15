@@ -61,7 +61,8 @@
 
 const dependencies = [
   'https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js',
-  'https://recogito.github.io/js/openseadragon-annotorious.min.js',
+  // 'https://recogito.github.io/js/openseadragon-annotorious.min.js',
+  'https://jstor-labs.github.io/visual-essays/js/openseadragon-annotorious.min.js',
   'https://cdn.jsdelivr.net/npm/sjcl@1.0.8/sjcl.min.js'
   // 'https://altert.github.io/OpenseadragonFabricjsOverlay/openseadragon-fabricjs-overlay.js',
   // 'https://altert.github.io/OpenseadragonFabricjsOverlay/fabric/fabric.adapted.js'
