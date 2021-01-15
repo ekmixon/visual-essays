@@ -95,7 +95,13 @@
       numImages() { return (this.essayConfigLoaded && this.essayConfig['num-images']) },
       numSpecimens() { return (this.essayConfigLoaded && this.essayConfig['num-specimens']) },
       numPrimarySources() { return (this.essayConfigLoaded && this.essayConfig['num-primary-sources']) },
-      hasStats() { return this.numMaps || this.numImages || this.numSpecimens || this.numPrimarySources }
+      hasStats() { return this.numMaps || this.numImages || this.numSpecimens || this.numPrimarySources },
+      loginRedirect() { return encodeURIComponent(this.href.split('/').length === 3
+        ? `${this.href}/`
+        : this.href.split('/').length > 4 && this.href.split('/').pop() === ''
+          ? this.href.slice(0,this.href.length-1)
+          : this.href)
+      }
     },
     mounted() {
       console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
