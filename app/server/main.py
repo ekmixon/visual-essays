@@ -22,7 +22,7 @@ from PIL import Image
 from io import StringIO, BytesIO
 import shutil
 
-from urllib.parse import urlparse, parse_qs, unquote, urlencode
+from urllib.parse import urlparse, parse_qs, quote, unquote, urlencode
 
 import requests
 logging.getLogger('requests').setLevel(logging.INFO)
@@ -342,8 +342,9 @@ def siteinfo(path=None):
 def login():
     site, acct, repo, ref, path, qargs = _context()
     redirect_url = qargs.get('redirect', site)
-    logger.info(f'login: OAUTH_ENDPOINT={OAUTH_ENDPOINT} redirect_url={redirect_url}')
-    return redirect(f'{OAUTH_ENDPOINT}/auth/login/github?redirect={redirect_url}')
+    url = f'{OAUTH_ENDPOINT}/auth/login/github?redirect={quote(redirect_url)}'
+    logger.info(f'login: OAUTH_ENDPOINT={OAUTH_ENDPOINT} url={url}')
+    return redirect(url)
 
 @app.route('/jwt-expiration/<token>')
 def expires(token):
