@@ -155,7 +155,12 @@ module.exports = {
         ? Object.fromEntries(this.currentItem.metadata.map(md => [md.label, md.value])) 
         : {}
     },
-    label() { return this.currentItem ? this.currentItem.label || this.metadata.label : null },
+    //label() { return this.currentItem ? this.currentItem.label || this.metadata.label : null },
+    label() {
+      return this.currentItem && this.metadata && this.metadata.title_formatted
+        ? this.metadata.title_formatted
+        : this.currentItem && this.currentItem.label ? this.currentItem.label : null
+    },
     description() { return this.currentItem ? this.currentItem.description || this.metadata.description : null },
     attribution() { return this.currentItem ? this.currentItem.attribution || this.metadata.attribution : null },
     date() { return this.currentItem ? this.currentItem.date || this.metadata.date : null },
