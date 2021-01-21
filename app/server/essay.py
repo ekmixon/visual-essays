@@ -335,6 +335,13 @@ def _find_ve_markup(soup):
                         attrs.pop(attr)
                         attrs['mode'] = attr
 
+                for attr in ('title', 'label', 'description', 'attribution'):
+                    if attr in attrs:
+                        formatted_val = markdown_parser.markdown(attrs[attr], output_format='html5')
+                        if formatted_val != attrs[attr]:
+                            attrs[f'{attr}_formatted'] = markdown_parser.markdown(attrs[attr], output_format='html5')
+                            attrs[attr] = attrs[attr].replace(' _', ' ').replace('_ ', ' ').replace(' *', ' ').replace('* ', ' ')
+
                 cur_image = attrs
             except:
                 pass # del attrs['region']
