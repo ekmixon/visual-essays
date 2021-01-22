@@ -115,6 +115,8 @@ if (qargs.token) {
   jwt = window.localStorage.getItem('ghcreds')
 }
 
+Vue.use(httpVueLoader)
+
 Vue.use(VueScrollmagic, {
   vertical: true,
   globalSceneOptions: {},

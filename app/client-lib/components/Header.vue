@@ -57,11 +57,9 @@
         margin-right: 1vw;
         margin-bottom: 0px;">
         <button type="button" @click="viewCitations" large color="blue">citation</button>
-        <span v-if="citationClick">
-          <!-- <citation-modal></citation-modal> -->
-        </span>
       </span>
     </div>
+    <citation-modal></citation-modal>
   </div>
 </template>
 
@@ -69,6 +67,9 @@
 
   module.exports = {
     name: 'Header',
+      components: {
+      citationModal: 'url:http://localhost:8080/components/Citation.vue'
+    },
     props: {
       essayConfig: { type: Object, default: function(){ return {}} },
       siteConfig: { type: Object, default: function(){ return {}} },
@@ -78,8 +79,7 @@
       contentRef: { type: String },
       isAuthenticated: { type: Boolean, default: false },
       readOnly: { type: Boolean, default: false },
-      href: { type: String, default: '' },
-      citationClick: {type: Boolean, default: false}
+      href: { type: String, default: '' }
     },    
     data: () => ({
       headerWidth: null,
@@ -184,9 +184,7 @@
         this.$emit('open-infobox-modal')
       },
       viewCitations(){
-        //this.$emit('open-citation-dialog')
-        //this.$modal.show('citation-modal')
-        this.citationClick = true;
+        this.$modal.show('citation-modal')
       }
     },
     beforeDestroy() {

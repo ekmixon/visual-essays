@@ -46,7 +46,7 @@ module.exports = {
     apiBaseURL() { return window.location.origin }
   },
   mounted() {
-    this.getSummaryInfo()
+    //this.getSummaryInfo()
   },
   methods: {
     toQueryString(args) {
@@ -83,6 +83,12 @@ module.exports = {
             this.$store.dispatch('updateItem', updated)
           })
       }
+    },
+    close() {
+      this.$modal.hide('citation-modal')
+    },
+    clearSelectedItem() {
+      console.log('clearSelectedItem')
     }
   },
   watch: {
