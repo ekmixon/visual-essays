@@ -29,6 +29,7 @@ import Tabulator from './components/Tabulator.vue'
 import VideoPlayer from './components/VideoPlayer.vue'
 import Viewer from './components/Viewer.vue'
 import VisNetwork from './components/VisNetwork.vue'
+import Citation from './components/Citation.vue'
 
 // Vue.config.productionTip = false
 Vue.config.devtools = true
@@ -55,7 +56,8 @@ const baseComponentIndex = [
   { name: 'videoPlayer', src: '/components/VideoPlayer.vue', component: VideoPlayer, selectors: ['tag:video'], icon: 'fa-video', label: 'Videos'},
   { name: 'viewer', src: '/components/Viewer.vue', component: Viewer },
   { name: 'visNetwork', src: '/components/VisNetwork.vue', component: VisNetwork, selectors: ['tag:vis-network'], icon: 'fa-chart-network', label: 'Networks'},
-  { name: 'graphicViewer', src: '/components/GraphicViewer.vue', component: GraphicViewer, selectors: ['tag:graphic'], icon: 'fa-table', label: 'Graphic Viewer'}  
+  { name: 'graphicViewer', src: '/components/GraphicViewer.vue', component: GraphicViewer, selectors: ['tag:graphic'], icon: 'fa-table', label: 'Graphic Viewer'},  
+  { name: 'citation', src: '/components/Citation.vue', component: Citation },
 
 ]
 
