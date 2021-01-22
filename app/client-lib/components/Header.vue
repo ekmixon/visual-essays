@@ -53,11 +53,20 @@
     <div class="title-bar">
       <div class="title" v-html="title"></div>
       <div class="author" v-html="author"></div>
+      <span style="margin-left: auto; 
+        margin-right: 1vw;
+        margin-bottom: 0px;">
+        <button type="button" @click="viewCitations" large color="blue">citation</button>
+        <span v-if="citationClick">
+          <citation-modal></citation-modal>
+        </span>
+      </span>
     </div>
   </div>
 </template>
 
 <script>
+
   module.exports = {
     name: 'Header',
     props: {
@@ -69,13 +78,15 @@
       contentRef: { type: String },
       isAuthenticated: { type: Boolean, default: false },
       readOnly: { type: Boolean, default: false },
-      href: { type: String, default: '' }
+      href: { type: String, default: '' },
+      citationClick: {type: Boolean, default: false}
     },    
     data: () => ({
       headerWidth: null,
       headerHeight: null,
       observer: null
     }),
+    //components: { CitationModal },
     computed: {
       essayConfigLoaded() { return this.essayConfig !== null },
       banner() { return this.essayConfigLoaded ? (this.essayConfig.banner || this.siteConfig.banner) : null },
@@ -98,6 +109,7 @@
       console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
       console.log(`href=${this.href} appVersion=${this.appVersion} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
     
+      
       // set initial height
       this.$refs.header.style.height = `${this.height}px`
       const header = this.$refs.header,
@@ -170,6 +182,11 @@
       openInfoboxModal() {
         this.closeDrawer()
         this.$emit('open-infobox-modal')
+      },
+      viewCitations(){
+        //this.$emit('open-citation-dialog')
+        //this.$modal.show('citation-modal')
+        this.citationClick = true;
       }
     },
     beforeDestroy() {
