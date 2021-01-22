@@ -53,13 +53,15 @@
     <div class="title-bar">
       <div class="title" v-html="title"></div>
       <div class="author" v-html="author"></div>
+      <!--
       <span style="margin-left: auto; 
         margin-right: 1vw;
         margin-bottom: 0px;">
         <button type="button" @click="viewCitations" large color="blue">citation</button>
       </span>
+      -->
     </div>
-    <citation-modal></citation-modal>
+    <!-- <citation-modal></citation-modal> -->
   </div>
 </template>
 
@@ -67,9 +69,7 @@
 
   module.exports = {
     name: 'Header',
-      components: {
-      citationModal: 'url:http://localhost:8080/components/Citation.vue'
-    },
+    // components: { citationModal: 'url:http://localhost:8080/components/Citation.vue' },
     props: {
       essayConfig: { type: Object, default: function(){ return {}} },
       siteConfig: { type: Object, default: function(){ return {}} },
@@ -183,9 +183,7 @@
         this.closeDrawer()
         this.$emit('open-infobox-modal')
       },
-      viewCitations(){
-        this.$modal.show('citation-modal')
-      }
+      // viewCitations(){ this.$modal.show('citation-modal') }
     },
     beforeDestroy() {
       if (this.observer) this.observer.disconnect()
