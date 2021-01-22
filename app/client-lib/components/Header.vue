@@ -58,7 +58,7 @@
         margin-bottom: 0px;">
         <button type="button" @click="viewCitations" large color="blue">citation</button>
         <span v-if="citationClick">
-          <citation-modal></citation-modal>
+          <!-- <citation-modal></citation-modal> -->
         </span>
       </span>
     </div>
