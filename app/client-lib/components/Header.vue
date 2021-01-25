@@ -53,13 +53,29 @@
     <div class="title-bar">
       <div class="title" v-html="title"></div>
       <div class="author" v-html="author"></div>
-      <span style="margin-left: auto; 
-        margin-right: 1vw;
-        margin-bottom: 0px;">
-        <button type="button" @click="viewCitations" large color="blue">citation</button>
+
+      <span style="margin-left: auto; margin-right: 1vw; margin-bottom: 0px;">
+        <button type="button" @click="$modal.show('citation-modal')" large color="blue">citation</button>
       </span>
     </div>
-    <citation-modal></citation-modal>
+
+    <modal 
+      class="modal"
+      name="citation-modal" 
+      height="auto" 
+      width="500px"
+      :draggable="true"
+    >
+      <button class="close-button" @click="$modal.hide('citation-modal')">
+        <i class="fal fa-times"></i>
+      </button>
+      <div>
+        <div class="citation-infobox">
+          Citations!
+        </div>
+      </div>
+  </modal>
+
   </div>
 </template>
 
@@ -67,10 +83,8 @@
 
   module.exports = {
     name: 'Header',
-      components: {
-      citationModal: 'url:http://localhost:8080/components/Citation.vue'
-    },
     props: {
+      //eid: { type: String, default: undefined },
       essayConfig: { type: Object, default: function(){ return {}} },
       siteConfig: { type: Object, default: function(){ return {}} },
       progress: { type: Number, default: 0 },
@@ -84,10 +98,13 @@
     data: () => ({
       headerWidth: null,
       headerHeight: null,
-      observer: null
+      observer: null,
+      requested: new Set(),
+      entityInfo: undefined,
     }),
     //components: { CitationModal },
     computed: {
+      //entity () { return this.$store.getters.items.find(entity => this.eid === entity.eid || this.eid === entity.id) || {} },
       essayConfigLoaded() { return this.essayConfig !== null },
       banner() { return this.essayConfigLoaded ? (this.essayConfig.banner || this.siteConfig.banner) : null },
       bannerHeight() { return this.essayConfig && this.essayConfig.bannerHeight || this.siteConfig.bannerHeight || 400 },
@@ -103,13 +120,20 @@
         : this.href.split('/').length > 4 && this.href.split('/').pop() === ''
           ? this.href.slice(0,this.href.length-1)
           : this.href)
-      }
+      },
+      //entity() { return this.essayConfig.author }
+      entity () { return this.$store.getters.items.find(entity => this.essayConfig.author === entity.eid || this.essayConfig.author === entity.id) || {} },
+      //apiBaseURL() { return window.location.origin }
+      apiBaseURL() { return 'https://visual-essays.app'}
     },
     mounted() {
       console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
       console.log(`href=${this.href} appVersion=${this.appVersion} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
+      //console.log(this.eid, 'this.eid')
     
-      
+      //entity
+      this.getSummaryInfo()
+
       // set initial height
       this.$refs.header.style.height = `${this.height}px`
       const header = this.$refs.header,
@@ -183,9 +207,41 @@
         this.closeDrawer()
         this.$emit('open-infobox-modal')
       },
-      viewCitations(){
-        this.$modal.show('citation-modal')
-      }
+      toQueryString(args) {
+        const parts = []
+        Object.keys(args).forEach((key) => {
+          parts.push(`${key}=${encodeURIComponent(args[key])}`)
+        })
+        return parts.join('&')
+      },
+      getEntity() {
+        let url = `${this.apiBaseURL}/entity/${encodeURIComponent(this.essayConfig.author)}`
+        const args = {}
+        if (this.context) args.context = this.context
+        if (this.entity.article) args.article = this.entity.article
+        if (Object.keys(args).length > 0) {
+          url += `?${this.toQueryString(args)}`
+        }
+        console.log(`getEntity=${url}`)
+        return fetch(url).then(resp => resp.json())
+      },
+      getSummaryInfo() {
+        console.log('getSummaryInfo', this.essayConfig.author, this.entity)
+        if (this.entity['summary info']) {
+          this.entityInfo = this.entity['summary info']
+        } else if (!this.requested.has(this.entity.id)) {
+          this.requested.add(this.entity.id)
+          this.getEntity()
+            .then((updated) => {
+              if (!updated['summary info']) {
+                updated['summary info'] = null
+              }
+              this.entityInfo = updated['summary info']
+              updated.id = this.essayConfig.author
+              this.$store.dispatch('updateItem', updated)
+            })
+        }
+      },
     },
     beforeDestroy() {
       if (this.observer) this.observer.disconnect()
