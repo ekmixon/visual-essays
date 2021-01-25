@@ -83,8 +83,8 @@ except:
    public_key = None
 
 default_gh_token = os.environ.get('gh_token')
-if default_gh_token is None and os.path.exists(f'{SCRIPT_DIR}/gh-token'):
-    with open(f'{SCRIPT_DIR}/gh-token', 'r') as fp:
+if default_gh_token is None and os.path.exists(f'{BASEDIR}/app/creds/gh-token'):
+    with open(f'{BASEDIR}/app/creds/gh-token', 'r') as fp:
         default_gh_token = fp.read().strip()
 
 def gh_token():
@@ -470,7 +470,7 @@ def specimens(path):
         else:
             _specimens['from_cache'] = True
         if content_type == 'text/html':
-            return (open(os.path.join(BASEDIR, 'src', 'json-viewer.html'), 'r').read().replace("'{{DATA}}'", json.dumps(specimens)), 200, cors_headers)
+            return (open(os.path.join(BASEDIR, 'server', 'json-viewer.html'), 'r').read().replace("'{{DATA}}'", json.dumps(specimens)), 200, cors_headers)
         else:
             return (specimens, 200, cors_headers)
 
