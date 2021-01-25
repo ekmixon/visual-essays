@@ -7,6 +7,7 @@ logger = logging.getLogger()
 
 import os
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
+BASEDIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 
 import sys
 import getopt
@@ -17,7 +18,7 @@ from datetime import datetime, timedelta
 
 DEFAULT_PROJECT_NAME = 'visual-essays'
 DEFAULT_BUCKET_NAME = 'visual-essays-cache'
-DEFAULT_CREDS_PATH = os.path.join(SCRIPT_DIR, 'visual-essay-gcreds.json')
+DEFAULT_CREDS_PATH = os.path.join(BASEDIR, 'app', 'creds', 'visual-essay-gcreds.json')
 
 DEFAULT_KEYFIELD = 'id'
 

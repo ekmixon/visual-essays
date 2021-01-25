@@ -1,6 +1,5 @@
 __pycache__
-gh-token
-visual-essay-gcreds.json
+creds
 *.pyc
 gcr-build
 node_modules
