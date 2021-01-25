@@ -15,6 +15,7 @@ RUN set -e; \
 WORKDIR /usr/src/app
 
 ADD server server
+ADD creds creds
 ADD index.html .
 ADD js js
 ADD css css

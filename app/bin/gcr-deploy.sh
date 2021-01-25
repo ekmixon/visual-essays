@@ -34,6 +34,7 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   cp -va app/client-lib/components gcr-build
   cp -va app/client-lib/public/css gcr-build
 
+  cp -va app/creds gcr-build
   cp -va js gcr-build
   cp -va images gcr-build
 
