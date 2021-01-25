@@ -54,10 +54,12 @@
       <div class="title" v-html="title"></div>
       <div class="author" v-html="author"></div>
 
+      <!--
       <span style="margin-left: auto; margin-right: 1vw; margin-bottom: 0px;">
         <button type="button" @click="$modal.show('citation-modal')" large color="blue">citation</button>
       </span>
       -->
+
     </div>
 
     <modal 
