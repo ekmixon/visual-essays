@@ -58,6 +58,8 @@ OAUTH_ENDPOINT = 'https://labs-auth-atjcn6za6q-uc.a.run.app'
 KNOWN_SITES = {
     'default': ['jstor-labs', 've-docs'],
     'plant-humanities.app': ['jstor-labs', 'plant-humanities'],
+    'planthumanities.org': ['jstor-labs', 'plant-humanities'],
+    'lab.planthumanities.org': ['jstor-labs', 'plant-humanities'],
     'kent-maps.online': ['kent-map', 'kent'],
     've.rsnyder.info': ['rsnyder', 've'],
     'docs.visual-essays.app': ['jstor-labs', 've-docs']
