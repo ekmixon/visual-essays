@@ -337,9 +337,10 @@ def _find_ve_markup(soup):
 
                 for attr in ('title', 'label', 'description', 'attribution'):
                     if attr in attrs:
-                        formatted_val = markdown_parser.markdown(attrs[attr], output_format='html5')
+                        formatted_val = markdown_parser.markdown(attrs[attr], output_format='html5').replace('<p>','').replace('</p>','')
+                        # logger.info(f'{attr} {attrs[attr]} {formatted_val}')
                         if formatted_val != attrs[attr]:
-                            attrs[f'{attr}_formatted'] = markdown_parser.markdown(attrs[attr], output_format='html5')
+                            attrs[f'{attr}_formatted'] = formatted_val
                             attrs[attr] = attrs[attr].replace(' _', ' ').replace('_ ', ' ').replace(' *', ' ').replace('* ', ' ')
 
                 cur_image = attrs
