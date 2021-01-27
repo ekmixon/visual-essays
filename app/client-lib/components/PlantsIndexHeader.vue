@@ -24,7 +24,7 @@
             <a v-if="isAuthenticated" @click="logout">
               <i :class="`fas fa-user`"></i>Logout
             </a>
-            <a v-else :href="`https://dev.visual-essays.app/login?redirect=${loginRedirect}`">
+            <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
               <i :class="`fas fa-user`"></i>Login
             </a>
           </li>

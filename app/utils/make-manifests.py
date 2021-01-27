@@ -24,7 +24,7 @@ from urllib.parse import quote, urlparse
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 BASEDIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 
-default_workbook = 'Kent images'
+default_workbook = 'plant-humanities-image-inventory'
 default_worksheet = 'metadata'
 
 import gspread
@@ -141,7 +141,8 @@ if __name__ == '__main__':
                         'iiif-url': img['service']['@id'],
                         'height': img['height'],
                         'width': img['width'],
-                        'format': img['format'].split('/')[-1]
+                        'format': img['format'].split('/')[-1],
+                        'ready': 'processed'
                     }
                     updates += [Cell(row, field_idx[fld] + 1, val) for fld, val in row_updates.items() if fld in field_idx]
             except:
