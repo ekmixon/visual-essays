@@ -53,25 +53,43 @@
     <div class="title-bar">
       <div class="title" v-html="title"></div>
       <div class="author" v-html="author"></div>
-
-      <span style="margin-left: auto; margin-right: 1vw; margin-bottom: 0px;">
-        <button type="button" @click="$modal.show('citation-modal')" large color="blue">citation</button>
-      </span>
+      <div class="citation" @click="$modal.show('citation-modal')">Cite this essay</div>
     </div>
 
     <modal 
       class="modal"
       name="citation-modal" 
       height="auto" 
-      width="500px"
+      width="600px"
       :draggable="true"
     >
       <button class="close-button" @click="$modal.hide('citation-modal')">
         <i class="fal fa-times"></i>
       </button>
       <div>
-        <div class="citation-infobox">
-          Citations!
+        <div class="entity-infobox">
+          <h3 class="entity-title" primary-title>Cite this essay</h3>
+          <br>
+
+          <div class="subtitle">MLA</div>
+          <div class="citation-wrapper">
+            <div class="citation-text" @click="copyTextToClipboard" v-html="mlaCitation"></div>
+            <div class="copy-citation" @click="copyCitationToClipboard(`${mlaCitation}`)" title="Copy to clipboard">Copy</div>
+              <span class="tooltiptext">Copy to clipboard</span>
+          </div>
+          
+          <div class="subtitle">APA</div>
+          <div class="citation-wrapper">
+            <div class="citation-text" @click="copyTextToClipboard" v-html="apaCitation"></div>
+            <div class="copy-citation" @click="copyCitationToClipboard(`${apaCitation}`)" title="Copy to clipboard">Copy</div>
+          </div>
+
+          <div class="subtitle">Chicago</div>
+          <div class="citation-wrapper">
+            <div class="citation-text" @click="copyTextToClipboard" v-html="chicagoCitation"></div>
+            <div class="copy-citation" @click="copyCitationToClipboard(`${chicagoCitation}`)" title="Copy to clipboard">Copy</div>
+          </div>
+
         </div>
       </div>
   </modal>
@@ -84,6 +102,7 @@
   module.exports = {
     name: 'Header',
     props: {
+      //eid: { type: String, default: undefined },
       essayConfig: { type: Object, default: function(){ return {}} },
       siteConfig: { type: Object, default: function(){ return {}} },
       progress: { type: Number, default: 0 },
@@ -97,9 +116,13 @@
     data: () => ({
       headerWidth: null,
       headerHeight: null,
-      observer: null
+      observer: null,
+      requested: new Set(),
+      entityInfo: undefined,
+      mla: undefined,
+      apa: undefined,
+      chicago: undefined
     }),
-    //components: { CitationModal },
     computed: {
       essayConfigLoaded() { return this.essayConfig !== null },
       banner() { return this.essayConfigLoaded ? (this.essayConfig.banner || this.siteConfig.banner) : null },
@@ -116,13 +139,22 @@
         : this.href.split('/').length > 4 && this.href.split('/').pop() === ''
           ? this.href.slice(0,this.href.length-1)
           : this.href)
-      }
+      },
+      entity () { return this.$store.getters.items.find(entity => this.essayConfig.qid === entity.eid || this.essayConfig.qid === entity.id) || {} },
+      //apiBaseURL() { return window.location.origin }
+      apiBaseURL() { return 'https://visual-essays.app'},
+
+      mlaCitation() { return this.mla },
+      apaCitation() { return this.apa },
+      chicagoCitation() { return this.chicago },
+
     },
     mounted() {
       console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
       console.log(`href=${this.href} appVersion=${this.appVersion} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
-    
       
+      this.getClaimsInfo()
+
       // set initial height
       this.$refs.header.style.height = `${this.height}px`
       const header = this.$refs.header,
@@ -195,8 +227,69 @@
       openInfoboxModal() {
         this.closeDrawer()
         this.$emit('open-infobox-modal')
-      }
+      },
+      toQueryString(args) {
+        const parts = []
+        Object.keys(args).forEach((key) => {
+          parts.push(`${key}=${encodeURIComponent(args[key])}`)
+        })
+        return parts.join('&')
+      },
+      getEntity() {
+        let url = `${this.apiBaseURL}/entity/${encodeURIComponent(this.essayConfig.qid)}`
+        const args = {}
+        if (this.context) args.context = this.context
+        if (this.entity.article) args.article = this.entity.article
+        if (Object.keys(args).length > 0) {
+          url += `?${this.toQueryString(args)}`
+        }
+        console.log(`getEntity=${url}`)
+        return fetch(url).then(resp => resp.json())
+        //console.log('resp', resp)
+      },
+      getClaimsInfo() {
+        console.log('getSummaryInfo', this.essayConfig.qid)
+        this.getEntity()
+          .then((data) => {
+            if (data['claims']){
+              console.log('claims info', data['claims'])
+              this.claimsInfo = data['claims']
+
+              this.formatCitations()
+            }
+          })
+      },
+      formatCitations(){
+        let author = this.claimsInfo['author name string'][0]['value']
+        let title = this.claimsInfo['title'][0]['value']['text']
+        let sponsor = this.claimsInfo['sponsor'][0]['value']['value']
+        let publish_date = '2021'
+        let access_date = new Date()
+        let url = this.claimsInfo['full work available at'][0]['value']
+        //mla        
+        this.mla = author.split(' ').pop() + ', ' + author.split(' ')[0] + '. <i>'+title+'</i>. ' + sponsor + ', ' + publish_date + '. '
+        this.mla += url + '. Accessed ' + access_date.getDate() + ' ' + access_date.toLocaleString('default', { month: 'short' }) + '. ' + access_date.getFullYear()+ '.' 
+
+        //apa
+        this.apa = author.split(' ').pop() + ', ' + author.split(' ')[0].charAt(0) + '. ('+ publish_date + '). ' + '<i>'+title+'</i>. ' + sponsor + '.'
+
+        //chicago
+        this.chicago = author.split(' ').pop() + ', ' + author.split(' ')[0] + '. <i>'+title+'</i>. ' + sponsor + ', '
+        this.chicago += publish_date + '. Accessed ' + access_date.toLocaleString('default', { month: 'long' }) + ' ' + access_date.getDate() + ', ' + access_date.getFullYear()+ '.'
+      },
+      copyTextToClipboard(e) {
+        console.log('clicked!', e.target.textContent)
+        if (navigator.clipboard) navigator.clipboard.writeText(e.target.textContent)
+      },
+      copyCitationToClipboard(citation) {
+        console.log('clicked!', 'citation', citation)
+        if (navigator.clipboard){
+          navigator.clipboard.writeText(citation)
+          alert("Copied to clipboard!");
+        }
+      },
     },
+
     beforeDestroy() {
       if (this.observer) this.observer.disconnect()
     }
@@ -229,11 +322,11 @@
   .title-bar {
     display: grid;
     align-items: stretch;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     grid-template-areas: 
-      "title"
-      "author";
+      "title title"
+      "author citation";
     color: white;
     background-color: rgba(0, 0, 0, .6);
     /*padding: 24px 0 0 70px;*/
@@ -255,6 +348,20 @@
     font-size: 1.3em;
     margin: 0 0 0 70px;
     padding: 0 0 6px 0;
+  }
+
+  .citation {
+    grid: citation;
+    margin-left: auto;
+    margin-right: 1vw;
+    font-size: 1em;
+    color: white;
+    background-color: green;
+    border: 1px solid green;
+    padding: 6px;
+    padding-bottom: 7px !important;
+    height: 2vh;
+    cursor: pointer;
   }
 
   #menuToggle a {
@@ -390,5 +497,91 @@
   .app-version {
     font-size: 0.9rem;
   }
+
+  .subtitle {
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  .citation-wrapper {
+    margin: 16px 0;
+    line-height: 1.3;
+    max-height: 380px;
+    display: flex;
+    font-size: 1.1rem;
+    overflow:auto
+  }
+
+  .citation-text {
+    float: left;
+    padding: 10px;
+    border: 1px solid black;
+    margin: 10px;
+    cursor: pointer;
+  }
+
+  .copy-citation {
+    float: left;
+    border: 2px solid green;
+    color: white;
+    background-color: green;
+    padding: 6px;
+    padding-bottom: 7px !important;
+    height: 2vh;
+    margin: 10px;
+    cursor: pointer;
+  }
+
+  .entity-infobox {
+    align-items: left;
+    margin: 1rem;
+  }
+
+  .entity-infobox .v-card__text {
+    height: 100%;
+    min-height: 165px;
+    padding-bottom: 0 !important;
+  }
+
+  h3.entity-title {
+    font-size: 1.5em;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -60px;
+}
+.tooltip .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  top: 100%; /* At the bottom of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.close-button {
+  margin-left: auto;
+  float:left;
+  margin: 10px;
+}
 
 </style>
