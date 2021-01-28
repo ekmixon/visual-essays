@@ -109,7 +109,11 @@ export default {
         href: undefined,
         hash: undefined,
         anchor: undefined,
-        externalWindow: undefined
+        externalWindow: undefined,
+    
+        headerPrior: 0,
+        heightPrior: 0,
+        widthPrior: 0,
       }),
       computed: {
         acct() { return this.$store.getters.siteInfo.acct },
@@ -174,7 +178,6 @@ export default {
       },
       mounted() {
         console.log(window.location)
-        console.log(window.location.href)
         if (window.location.href.indexOf('#') > 0) {
           this.hash = window.location.href.split('#').pop()
         }
@@ -191,7 +194,7 @@ export default {
         this.setEssay(path)
 
         const resizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
-          console.log(`resizeObserver: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
+          // console.log(`resizeObserver: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
           this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
           this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
         })
@@ -213,7 +216,7 @@ export default {
 
           // Update browser URL
           if (path[path.length-1] !== '/') path += '/'
-          console.log(`browser url: baseurl=${this.baseurl} path=${path} refArg=${this.refQueryArg}`)
+          // console.log(`browser url: baseurl=${this.baseurl} path=${path} refArg=${this.refQueryArg}`)
           let browserPath = `${this.baseurl}${path}${this.refQueryArg}`
           if (replace) {
             history.replaceState({file: path || ''}, '', browserPath)
@@ -246,7 +249,7 @@ export default {
           if (!window.essayCache) {
             window.essayCache = {}
           }
-          console.log(`cached=${this.siteInfo.mode !== 'dev' && window.essayCache[url] !== undefined}`)
+          // console.log(`cached=${this.siteInfo.mode !== 'dev' && window.essayCache[url] !== undefined}`)
           if (this.siteInfo.mode === 'dev' || !window.essayCache[url]) {
             window.essayCache[url] = fetch(url).then(resp => resp.text())
           }
@@ -269,10 +272,10 @@ export default {
               let target = link.dataset.target
               if (!target) { 
                 const parsedUrl = this.parseUrl(link.href)
-                console.log(parsedUrl)
+                // console.log(parsedUrl)
                 target = parsedUrl.hash === '' ? parsedUrl.pathname : parsedUrl.hash.split('?')[0]
               }
-              console.log(link.href, target)
+              // console.log(link.href, target)
               link.removeAttribute('href')
               link.setAttribute('data-target', target)
 
@@ -426,9 +429,17 @@ export default {
         }
       },
       updated() {
-        console.log(`updated: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
-        this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
-        this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
+        let headerHeight = this.$refs.header ? this.$refs.header.clientHeight : null
+        if (headerHeight && headerHeight !== this.headerPrior ||
+            this.$refs.app.clientHeight !== this.heightPrior ||
+            this.$refs.app.clientWidth !== this.widthPrior) {
+          console.log(`updated: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${headerHeight} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
+          this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+          this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
+          this.headerPrior = headerHeight
+          this.heightPrior = this.$refs.app.clientHeight
+          this.widthPrior = this.$refs.app.clientWidth
+        }
       },
       watch: {
         layout: {

@@ -30,7 +30,7 @@ module.exports = {
   }),
   computed: {},
   mounted() {
-    console.log(`${this.$options.name}.mounted`)
+    // console.log(`${this.$options.name}.mounted`)
     this.$nextTick(() => this.init())
   },
   methods: {

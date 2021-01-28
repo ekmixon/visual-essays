@@ -50,10 +50,11 @@
         </ul>
       </div>
     </nav>
+
     <div class="title-bar">
       <div class="title" v-html="title"></div>
       <div class="author" v-html="author"></div>
-      <div class="citation" @click="$modal.show('citation-modal')">Cite this essay</div>
+      <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">Cite this essay</div>
     </div>
 
     <modal 
@@ -62,12 +63,13 @@
       height="auto" 
       width="600px"
       :draggable="true"
+      @opened="initTippy"
     >
       <button class="close-button" @click="$modal.hide('citation-modal')">
         <i class="fal fa-times"></i>
       </button>
       <div>
-        <div class="entity-infobox">
+        <div class="entity-infobox" id="cite-modal" title="Citation saved to clipboard">
           <h3 class="entity-title" primary-title>Cite this essay</h3>
           <br>
 
@@ -121,9 +123,11 @@
       entityInfo: undefined,
       mla: undefined,
       apa: undefined,
-      chicago: undefined
+      chicago: undefined,
+      tippy: null
     }),
     computed: {
+      essayQid() { return this.essayConfigLoaded ? this.essayConfig.qid : null },
       essayConfigLoaded() { return this.essayConfig !== null },
       banner() { return this.essayConfigLoaded ? (this.essayConfig.banner || this.siteConfig.banner) : null },
       bannerHeight() { return this.essayConfig && this.essayConfig.bannerHeight || this.siteConfig.bannerHeight || 400 },
@@ -150,8 +154,8 @@
 
     },
     mounted() {
-      console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
-      console.log(`href=${this.href} appVersion=${this.appVersion} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
+      // console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
+      // console.log(`href=${this.href} appVersion=${this.appVersion} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
       
       this.getClaimsInfo()
 
@@ -164,6 +168,7 @@
 
       // initialize a header size observer
       this.initObserver()
+
     },
     methods: {
       initObserver() {
@@ -235,8 +240,21 @@
         })
         return parts.join('&')
       },
+      initTippy() {
+        if (!this.tippy) {
+          new this.$tippy(document.querySelectorAll('.copy-citation'), {
+            animation:'scale',
+            trigger:'click',
+            // theme: 'light-border',
+            content: 'Citation saved to clipboard',
+            onShow: (instance) => {
+              setTimeout(() => { instance.hide() }, 2000) 
+            }
+          })
+        }
+      },
       getEntity() {
-        let url = `${this.apiBaseURL}/entity/${encodeURIComponent(this.essayConfig.qid)}`
+        let url = `${this.apiBaseURL}/entity/${encodeURIComponent(this.essayQid)}`
         const args = {}
         if (this.context) args.context = this.context
         if (this.entity.article) args.article = this.entity.article
@@ -248,13 +266,12 @@
         //console.log('resp', resp)
       },
       getClaimsInfo() {
-        console.log('getSummaryInfo', this.essayConfig.qid)
+        // console.log('getSummaryInfo', this.essayConfig.qid)
         this.getEntity()
           .then((data) => {
             if (data['claims']){
               console.log('claims info', data['claims'])
               this.claimsInfo = data['claims']
-
               this.formatCitations()
             }
           })
@@ -285,13 +302,21 @@
         console.log('clicked!', 'citation', citation)
         if (navigator.clipboard){
           navigator.clipboard.writeText(citation)
-          alert("Copied to clipboard!");
+          // alert("Copied to clipboard!");
         }
       },
     },
 
     beforeDestroy() {
       if (this.observer) this.observer.disconnect()
+    },
+    watch: {
+      essayConfigLoaded: {
+        handler: function () {
+          console.log('essayConfigLoaded')
+        },
+        immediate: true
+      },
     }
   }
 </script>
@@ -338,20 +363,20 @@
   }
 
   .title {
-    grid: title;
+    grid-area: title;
     font-size: 2em;
     margin: 0 0 0 70px;
     padding: 22px 0 0 0;
   }
   .author {
-    grid: author;
+    grid-area: author;
     font-size: 1.3em;
     margin: 0 0 0 70px;
     padding: 0 0 6px 0;
   }
 
   .citation {
-    grid: citation;
+    grid-area: citation;
     margin-left: auto;
     margin-right: 1vw;
     font-size: 1em;

@@ -182,7 +182,7 @@ module.exports = {
   methods: {
     init() {
       console.log(this.$options.name, this.items, this.active, this.width, this.height, this.selected)
-      console.log(`acct=${this.acct} repo=${this.repo} path=${this.path}`)
+      // console.log(`acct=${this.acct} repo=${this.repo} path=${this.path}`)
       this.initViewer()
       this.loadManifests(this.items)
     },
@@ -329,7 +329,7 @@ module.exports = {
             const fit = this.fit === 'cover'
               ? scaleY/scaleX > 1 ? 'horizontal' : 'vertical'
               : scaleY/scaleX > 1 ? 'vertical' : 'horizontal'
-            console.log(`fit=${this.fit} ${fit}`)
+            // console.log(`fit=${this.fit} ${fit}`)
             if (fit === 'horizontal') {
               this.viewer.viewport.fitHorizontally(immediately)
             } else {
@@ -369,7 +369,7 @@ module.exports = {
     },
     loadAnnotations() {
       const url = `${this.annosEndpoint}?target=${encodeURIComponent(this.target)}`
-      console.log('loadAnnotations', this.target, url)
+      // console.log('loadAnnotations', this.target, url)
       return fetch(url)
         .then(resp => resp.json())
         .then(data => {
@@ -379,7 +379,7 @@ module.exports = {
               ? data.items
               : []
           this.currentItem = { ...this.currentItem, ...{ annotations } } 
-          console.log(`annotations=${this.currentItem.annotations.length}`)
+          // console.log(`annotations=${this.currentItem.annotations.length}`)
           return this.currentItem.annotations
         })
     },
@@ -664,7 +664,7 @@ module.exports = {
       immediate: true
     },
     currentItem(current, previous) {
-      console.log('currentItem', current, previous)
+      // console.log('currentItem', current, previous)
       if (this.viewer && current && (!previous || current['@id'] !== previous['@id'])) {
         this.loadAnnotations().then(() => this.initAnnotator())
       } else {

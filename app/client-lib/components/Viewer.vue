@@ -97,7 +97,7 @@
       }
     },
     mounted() {
-      console.log(`viewer: viewerIsOpen=${this.viewerIsOpen} activeTab=${this.activeTab} actions-${this.actions[this.activeTab]} width=${this.width} viewerWidth=${this.viewerWidth} height=${this.height} viewerHeight=${this.viewerHeight}`)
+      // console.log(`viewer: viewerIsOpen=${this.viewerIsOpen} activeTab=${this.activeTab} actions=${this.actions[this.activeTab]} width=${this.width} viewerWidth=${this.viewerWidth} height=${this.height} viewerHeight=${this.viewerHeight}`)
       this.activeElementChange()
     },
     methods: {
@@ -187,7 +187,7 @@
         this.actions = actions
       },
       activeElementChange(current, prior) {
-        console.log(`activeElementChange: ${current} ${this.activeElement}`)
+        // console.log(`activeElementChange: ${current} ${this.activeElement}`)
         current = current || this.activeElement
         const tabsBar = document.querySelector('#tabs-bar')
         // (`activeElementChange: current=${current} prior=${prior} tabsBar=${tabsBar !== null}`)

@@ -106,7 +106,7 @@ export function itemsInElements(elemIds, items) {
 }
 
 export function groupItems(items, componentSelectors) {
-  console.log('groupItems', items, componentSelectors)
+  // console.log('groupItems', items, componentSelectors)
   const exclude = ["essay"];
   const groups = {};
 
@@ -143,7 +143,7 @@ export function groupItems(items, componentSelectors) {
         }
       }
     });
-  console.log("groups", groups);
+  // console.log("groups", groups);
   return groups;
 }
 

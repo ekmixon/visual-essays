@@ -6,7 +6,9 @@ import httpVueLoader from 'http-vue-loader'
 import * as utils from './utils.js'
 import VueScrollmagic from 'vue-scrollmagic'
 import VModal from 'vue-js-modal'
-
+import tippy from 'tippy.js'
+import 'tippy.js/dist/tippy.css'
+import 'tippy.js/themes/light-border.css'
 
 import D3Network from './components/D3Network.vue'
 import D3PlusNetwork from './components/D3PlusNetwork.vue'
@@ -114,6 +116,8 @@ if (qargs.token) {
 } else {
   jwt = window.localStorage.getItem('ghcreds')
 }
+
+Vue.prototype.$tippy = tippy
 
 Vue.use(httpVueLoader)
 
@@ -224,7 +228,6 @@ const doRemoteRequests = async () => {
   store.dispatch('setComponents', components)
   store.dispatch('setJWT', jwt)
   document.querySelectorAll('script[data-ve-meta]').forEach(scr => eval(scr.text))
-  console.log('veMeta', window.veMeta)
   store.dispatch('setAppVersion', window.veMeta ? window.veMeta.version : undefined)
   store.dispatch('setServiceBase', service)
 }
