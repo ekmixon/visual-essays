@@ -51,19 +51,9 @@
       </div>
     </nav>
     <div class="title-bar">
-      <div class="title" v-html="title">
-
-      </div>
-      
-      <span style="margin-left: auto; margin-right: 1vw; margin-bottom: 0px;">
-        <button type="button" @click="$modal.show('citation-modal')" large color="blue">Citation</button>
-      </span>
-      <div class="author" v-html="author">
-
-  
-      </div>
-
-      
+      <div class="title" v-html="title"></div>
+      <div class="author" v-html="author"></div>
+      <div class="citation" @click="$modal.show('citation-modal')">Cite this essay</div>
     </div>
 
     <modal 
@@ -82,20 +72,20 @@
           <br>
 
           <div class="subtitle">MLA</div>
-          <div class="entity-description">
+          <div class="citation-wrapper">
             <div class="citation-text" @click="copyTextToClipboard" v-html="mlaCitation"></div>
             <div class="copy-citation" @click="copyCitationToClipboard(`${mlaCitation}`)" title="Copy to clipboard">Copy</div>
               <span class="tooltiptext">Copy to clipboard</span>
           </div>
           
           <div class="subtitle">APA</div>
-          <div class="entity-description">
+          <div class="citation-wrapper">
             <div class="citation-text" @click="copyTextToClipboard" v-html="apaCitation"></div>
             <div class="copy-citation" @click="copyCitationToClipboard(`${apaCitation}`)" title="Copy to clipboard">Copy</div>
           </div>
 
           <div class="subtitle">Chicago</div>
-          <div class="entity-description">
+          <div class="citation-wrapper">
             <div class="citation-text" @click="copyTextToClipboard" v-html="chicagoCitation"></div>
             <div class="copy-citation" @click="copyCitationToClipboard(`${chicagoCitation}`)" title="Copy to clipboard">Copy</div>
           </div>
@@ -150,7 +140,7 @@
           ? this.href.slice(0,this.href.length-1)
           : this.href)
       },
-      entity () { return this.$store.getters.items.find(entity => this.essayConfig.author === entity.eid || this.essayConfig.author === entity.id) || {} },
+      entity () { return this.$store.getters.items.find(entity => this.essayConfig.qid === entity.eid || this.essayConfig.qid === entity.id) || {} },
       //apiBaseURL() { return window.location.origin }
       apiBaseURL() { return 'https://visual-essays.app'},
 
@@ -162,9 +152,7 @@
     mounted() {
       console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
       console.log(`href=${this.href} appVersion=${this.appVersion} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
-      //console.log(this.eid, 'this.eid')
-    
-      //entity
+      
       this.getClaimsInfo()
 
       // set initial height
@@ -248,7 +236,7 @@
         return parts.join('&')
       },
       getEntity() {
-        let url = `${this.apiBaseURL}/entity/${encodeURIComponent(this.essayConfig.author)}`
+        let url = `${this.apiBaseURL}/entity/${encodeURIComponent(this.essayConfig.qid)}`
         const args = {}
         if (this.context) args.context = this.context
         if (this.entity.article) args.article = this.entity.article
@@ -260,7 +248,7 @@
         //console.log('resp', resp)
       },
       getClaimsInfo() {
-        console.log('getSummaryInfo', this.essayConfig.author)
+        console.log('getSummaryInfo', this.essayConfig.qid)
         this.getEntity()
           .then((data) => {
             if (data['claims']){
@@ -334,11 +322,11 @@
   .title-bar {
     display: grid;
     align-items: stretch;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     grid-template-areas: 
-      "title"
-      "author";
+      "title title"
+      "author citation";
     color: white;
     background-color: rgba(0, 0, 0, .6);
     /*padding: 24px 0 0 70px;*/
@@ -360,6 +348,20 @@
     font-size: 1.3em;
     margin: 0 0 0 70px;
     padding: 0 0 6px 0;
+  }
+
+  .citation {
+    grid: citation;
+    margin-left: auto;
+    margin-right: 1vw;
+    font-size: 1em;
+    color: white;
+    background-color: green;
+    border: 1px solid green;
+    padding: 6px;
+    padding-bottom: 7px !important;
+    height: 2vh;
+    cursor: pointer;
   }
 
   #menuToggle a {
@@ -501,7 +503,7 @@
     font-weight: bold;
   }
 
-  .entity-description {
+  .citation-wrapper {
     margin: 16px 0;
     line-height: 1.3;
     max-height: 380px;
@@ -521,6 +523,8 @@
   .copy-citation {
     float: left;
     border: 2px solid green;
+    color: white;
+    background-color: green;
     padding: 6px;
     padding-bottom: 7px !important;
     height: 2vh;
@@ -572,6 +576,12 @@
 }
 .tooltip:hover .tooltiptext {
   visibility: visible;
+}
+
+.close-button {
+  margin-left: auto;
+  float:left;
+  margin: 10px;
 }
 
 </style>
