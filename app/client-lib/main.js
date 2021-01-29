@@ -6,6 +6,7 @@ import httpVueLoader from 'http-vue-loader'
 import * as utils from './utils.js'
 import VueScrollmagic from 'vue-scrollmagic'
 import VModal from 'vue-js-modal'
+import VueYoutube from 'vue-youtube'
 import tippy from 'tippy.js'
 import 'tippy.js/dist/tippy.css'
 import 'tippy.js/themes/light-border.css'
@@ -120,6 +121,7 @@ if (qargs.token) {
 Vue.prototype.$tippy = tippy
 
 Vue.use(httpVueLoader)
+Vue.use(VueYoutube)
 
 Vue.use(VueScrollmagic, {
   vertical: true,
