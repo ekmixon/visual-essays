@@ -544,7 +544,7 @@ module.exports = {
             if (!this.popups[id]) {
                 const popup = L.popup({ ...defaults.popupOptions, ...{ offset: L.point(0, offset || 0)}})
                 popup.setLatLng(latLng)
-                popup.setContent(`<h1 data-eid="${id}">${label}</h1>`)
+                popup.setContent(`<div style="width:100%; margin: 0.6em;" data-eid="${id}">${label}</div>`)
                 popup.options.id = id
                 this.popups[id] = popup
             }

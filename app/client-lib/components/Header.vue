@@ -54,7 +54,8 @@
     <div class="title-bar">
       <div class="title" v-html="title"></div>
       <div class="author" v-html="author"></div>
-      <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">Cite this essay</div>
+      <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">
+        <i class="fas fa-sm fa-quote-left"></i> Cite this essay</div>
     </div>
 
     <modal 
@@ -65,19 +66,21 @@
       :draggable="true"
       @opened="initTippy"
     >
-      <button class="close-button" @click="$modal.hide('citation-modal')">
-        <i class="fal fa-times"></i>
-      </button>
+
       <div>
         <div class="entity-infobox" id="cite-modal" title="Citation saved to clipboard">
-          <h3 class="entity-title" primary-title>Cite this essay</h3>
-          <br>
+          <div class="dialog-header">
+            <button class="close-button" @click="$modal.hide('citation-modal')">
+              <i class="fal fa-times"></i>
+            </button>
+            <h3 class="entity-title">Cite this essay</h3>
+          </div>
+
 
           <div class="subtitle">MLA</div>
           <div class="citation-wrapper">
             <div class="citation-text" @click="copyTextToClipboard" v-html="mlaCitation"></div>
             <div class="copy-citation" @click="copyCitationToClipboard(`${mlaCitation}`)" title="Copy to clipboard">Copy</div>
-              <span class="tooltiptext">Copy to clipboard</span>
           </div>
           
           <div class="subtitle">APA</div>
@@ -379,14 +382,18 @@
     grid-area: citation;
     margin-left: auto;
     margin-right: 1vw;
-    font-size: 1em;
+    font-size: 14px;
     color: white;
-    background-color: green;
-    border: 1px solid green;
-    padding: 6px;
-    padding-bottom: 7px !important;
-    height: 2vh;
+    background-color: #219653;
+    border-radius: 4px;
+    padding: 8px 24px 4px;
+    font-weight: normal;
+    height: 21px;
     cursor: pointer;
+  }
+
+  .citation .fa-sm {
+    margin-bottom: 1px;
   }
 
   #menuToggle a {
@@ -529,7 +536,8 @@
   }
 
   .citation-wrapper {
-    margin: 16px 0;
+    margin-top: 16px;
+    margin-bottom: 32px;
     line-height: 1.3;
     max-height: 380px;
     display: flex;
@@ -540,26 +548,25 @@
   .citation-text {
     float: left;
     padding: 10px;
-    border: 1px solid black;
-    margin: 10px;
+    border: 1px solid #626262;
     cursor: pointer;
   }
 
   .copy-citation {
     float: left;
-    border: 2px solid green;
     color: white;
-    background-color: green;
-    padding: 6px;
-    padding-bottom: 7px !important;
-    height: 2vh;
-    margin: 10px;
+    background-color: #219653;
+    border-radius: 4px;
+    padding: 12px;
+    height: 20px;
+    margin-left: 10px;
     cursor: pointer;
   }
 
   .entity-infobox {
+    color: black;
     align-items: left;
-    margin: 1rem;
+    margin: 1.5rem;
   }
 
   .entity-infobox .v-card__text {
@@ -568,45 +575,24 @@
     padding-bottom: 0 !important;
   }
 
-  h3.entity-title {
-    font-size: 1.5em;
-    margin: 0 0 0.5rem 0;
+  .dialog-header {
+    margin-bottom: 2rem;
   }
 
-  .tooltiptext {
-  visibility: hidden;
-  width: 120px;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  
-  /* Position the tooltip */
-  position: absolute;
-  z-index: 1;
-  bottom: 100%;
-  left: 50%;
-  margin-left: -60px;
-}
-.tooltip .tooltiptext::after {
-  content: " ";
-  position: absolute;
-  top: 100%; /* At the bottom of the tooltip */
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: black transparent transparent transparent;
-}
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-}
+  .close-button {
+    float: right;
+  }
 
-.close-button {
-  margin-left: auto;
-  float:left;
-  margin: 10px;
-}
+  .entity-title {
+    display: inline !important;
+    margin: unset;
+    font-size: 1.5em;
+    font-weight: normal;
+    font-family: 'Playfair Display', Serif;
+  }
+
+  .tippy-content {
+    font-family: Roboto !important;
+  }
 
 </style>
