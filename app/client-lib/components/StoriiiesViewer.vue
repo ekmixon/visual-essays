@@ -100,7 +100,7 @@ module.exports = {
     bottom: 20px;
     left: 20px;
     z-index: 100;
-    background: url("https://visual-essays.netlify.app/images/show.svg") no-repeat center center;
+    background: url("https://jstor-labs.github.io/visual-essays/images/show.svg") no-repeat center center;
     background-color: rgba(255, 255, 255, 0.85);
     transition: opacity 0.4s 0s;
     opacity: 0;
@@ -112,13 +112,13 @@ module.exports = {
     transition-delay: 0.4s; }
 
   .caption-box__header .button--toggle {
-    background: url("https://visual-essays.netlify.app/images/hide.svg") no-repeat center center;
+    background: url("https://jstor-labs.github.io/visual-essays/images/hide.svg") no-repeat center center;
     width: 26px; }
 
   .caption-box__controls .button {
     width: 34px;
     height: 31px;
-    background: url("https://visual-essays.netlify.app/images/arrow.svg") no-repeat center center; }
+    background: url("https://jstor-labs.github.io/visual-essays/images/arrow.svg") no-repeat center center; }
 
   .button:focus {
     outline: none;
