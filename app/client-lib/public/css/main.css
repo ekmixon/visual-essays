@@ -75,15 +75,17 @@
   }
   code {
     padding: 4px 8px;
-    background-color: #373750;
-    color: white;
+    background-color: rgba(255, 242, 216, 0.53);
+    color: black;
     font-family: monospace, serif;
     font-size: 16px;
+    border: 1px solid #d6d6d6;
   }
   .highlight code {
     padding: 0 !important;
     background-color: unset !important;
     color: unset !important;
+    border: unset;
   }
   img {
     border: 0;
