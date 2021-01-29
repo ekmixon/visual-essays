@@ -57,7 +57,7 @@
     <div id="logo" ref="logo"> <img src="https://jstor-labs.github.io/plant-humanities/images/ph-logo.png" height="50px">  </div>
     <div id="brand" ref="brand"> 
         <span class="brand-name">Plant Humanities</span> <br/>
-        <span class="tagline" ref="tagline">Explore the cutural history of plants and their influence on human societies. </span>
+        <span class="tagline" ref="tagline">Explore the cultural history of plants and their influence on human societies. </span>
     </div>
     
     <div class="title-bar">
