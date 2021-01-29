@@ -839,7 +839,7 @@ module.exports = {
       align-self: stretch;
       /* background-color: rgba(255, 255, 255, 0.8); */
       background-color: #ccc;
-      padding: 3px 6px;
+      padding: 9px 6px;
         text-align: center;
         line-height: 1;
     }

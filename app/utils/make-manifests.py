@@ -18,8 +18,11 @@ sys.path.append('/opt/lib')
 
 import os
 import sys
+import re
 import getopt
 from urllib.parse import quote, urlparse
+
+import markdown as markdown_parser
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 BASEDIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
@@ -38,15 +41,27 @@ iiif_service_endpoint = 'https://iiif-v2.visual-essays.app/manifest/'
 
 ignore_fields = {'ready', 'essay', 'thumbnail', 'manifest', 'iiif-url', 'width', 'height', 'format'}
 
+strip_html_regex = re.compile(r'<[^>]+>')
+
 def get_workbook(workbook=default_workbook, **kwargs):
     logger.info(f'get_workbook: {workbook}')
     creds = ServiceAccountCredentials.from_json_keyfile_name(f'{BASEDIR}/app/creds/labs-gs-creds.json', scope)
     client = gspread.authorize(creds)
     return client.open(workbook)
 
+def format_fields(metadata):
+    for field in ('title', 'label', 'description', 'attribution'):
+        if field in metadata:
+            formatted_val = markdown_parser.markdown(metadata[field], output_format='html5').replace('<p>','').replace('</p>','')
+            if formatted_val != metadata[field]:
+                metadata[f'{field}_formatted'] = formatted_val
+                metadata[field] = strip_html_regex.sub('', formatted_val)
+    return metadata
+
 def create_manifest(iiif_service=iiif_service_endpoint, **kwargs):
     logger.info(f'create_manifest: service_endpoint={iiif_service} kwargs={kwargs}')
     data = {**dict([(f,kwargs[f]) for f in kwargs if f not in ignore_fields and kwargs[f]]), **{'iiif': True,}}
+    data = format_fields(data)
     resp = requests.post(iiif_service, headers={'Content-type': 'application/json'}, json=data)
     if resp.status_code == 200:
         return resp.json()
@@ -142,7 +157,7 @@ if __name__ == '__main__':
                         'height': img['height'],
                         'width': img['width'],
                         'format': img['format'].split('/')[-1],
-                        'ready': 'processed'
+                        'ready': ''
                     }
                     updates += [Cell(row, field_idx[fld] + 1, val) for fld, val in row_updates.items() if fld in field_idx]
             except:
