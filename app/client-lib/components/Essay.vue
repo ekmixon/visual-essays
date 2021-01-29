@@ -26,7 +26,7 @@ module.exports = {
     activeElement: undefined,
     spacer: undefined,
     triggerOffset: 500,
-    triggerHook: 0.2
+    triggerHook: 0.4
   }),
   computed: {},
   mounted() {
