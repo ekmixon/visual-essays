@@ -28,7 +28,7 @@ module.exports = {
   name: 'StoriiiesViewer',
   props: { items: Array, width: Number, height: Number },
   computed: {
-    containerStyle() { return { position: 'relative', width: `${this.width}px`, height: `${this.height}px`, overflowY: 'auto !important' } },
+    containerStyle() { return { position: 'relative', width: `${this.width}px`, height: `${this.height}px`, overflowY: 'hidden !important' } },
   },
   mounted() {
     console.log(`${this.$options.name}.mounted: height=${this.height} width=${this.width}`, this.mapDef)
@@ -55,6 +55,7 @@ module.exports = {
     right: 0;
     width: 100%;
     height: 100%;
+    overflow: hidden;
     background: #000;
     border: 1px solid #000; }
 
