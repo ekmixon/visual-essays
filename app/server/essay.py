@@ -59,7 +59,6 @@ def get_local_markdown(path, root):
     else:
         to_check = [f'{abs_path}.md'] + [f'{abs_path}{file}' for file in ('README.md', 'index.md')]
     if not markdown:
-        logger.info(to_check)
         for _path in to_check:
             logger.info(f'path={_path} exists={os.path.exists(_path)}')
             if os.path.exists(_path):
@@ -70,7 +69,6 @@ def get_local_markdown(path, root):
 
 def _img_to_figure(soup):
     for elem in soup.find_all('img'):
-        logger.info(f'img {elem}')
         if elem.parent.name == 'a' and 've-button' in elem.attrs.get('src'):
             elem.parent.extract()
             continue
@@ -94,7 +92,7 @@ def convert_relative_links(soup, site, acct, repo, ref, path, root=None):
     else:
         abs_baseurl = f'https://raw.githubusercontent.com/{acct}/{repo}/{ref}'
     rel_baseurl = f'{abs_baseurl}/{"/".join(path_elems[:-1])}' if len(path_elems) > 1 else abs_baseurl
-    logger.info(f'convert_relative_links: site={site} acct={acct} repo={repo} ref={ref} root={root} path={path} abs_baseurl={abs_baseurl} rel_baseurl={rel_baseurl}')
+    logger.debug(f'convert_relative_links: site={site} acct={acct} repo={repo} ref={ref} root={root} path={path} abs_baseurl={abs_baseurl} rel_baseurl={rel_baseurl}')
 
     for tag in ('img', 'var', 'span', 'param'):
         for elem in soup.find_all(tag):
@@ -105,7 +103,7 @@ def convert_relative_links(soup, site, acct, repo, ref, path, root=None):
                         elem.attrs[attr] = f'{abs_baseurl}{elem.attrs[attr]}'
                     else:
                         elem.attrs[attr] = f'{rel_baseurl}/{elem.attrs[attr]}'
-                    logger.info(f'{before} {elem.attrs[attr]}')
+                    logger.debug(f'{before} {elem.attrs[attr]}')
 
 def markdown_to_html5(markdown, site, acct, repo, ref, path, root):
     '''Transforms markdown generated HTML to semantic HTML'''
@@ -225,7 +223,7 @@ def _get_entity_data(qids):
                 _context = _jsonld.pop('@context')
                 _jsonld = {'@context': _context, '@graph': [_jsonld]}
             return _jsonld
-        logger.info(f'_get_entity_data: resp_code={resp.status_code} msg=${resp.text}')
+        logger.debug(f'_get_entity_data: resp_code={resp.status_code} msg=${resp.text}')
 
 def _update_entities_from_knowledgegraph(markup, refresh=False):
     by_eid = dict([(item['eid'], item) for item in markup.values() if 'eid' in item and is_qid(item['eid'])])
@@ -539,13 +537,12 @@ def _add_heading_ids(soup):
                 heading.attrs['id'] = slugify(heading.text)
 
 def _get_manifest(item, essay_path, acct, repo):
-    logger.info(f'_get_manifest_iiifhosting {item}')
+    logger.debug(f'_get_manifest_iiifhosting {item}')
     if 'manifest' not in item:
         label_map = {'title': 'label', 'date': 'navDate'}
         data = {**dict([(label_map.get(k,k),item[k]) for k in item if k not in ('id', 'region', 'fit', 'hires', 'iiif-url', 'static', 'iiif', 'tag', 'tagged_in')]),
                 **{'acct': acct, 'repo': repo, 'essay': essay_path}}
         data['iiif'] = 'true'
-        logger.info(json.dumps(data))
         resp = requests.post('https://iiif-v2.visual-essays.app/manifest/', headers={'Content-type': 'application/json'}, json=data)
         if resp.status_code == 200:
             item['manifest'] = resp.json()['@id']
@@ -554,14 +551,14 @@ def _get_manifest(item, essay_path, acct, repo):
 _manifests_cache = {}
 def _get_manifests(markup, essay_path, acct, repo):
     global _manifests_cache
-    logger.info(f'_get_manifests: essay_path={essay_path} acct={acct} repo={repo}')
+    logger.debug(f'_get_manifests: essay_path={essay_path} acct={acct} repo={repo}')
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         futures = {}
         for item in markup.values():
             if item['tag'] == 'image':
                 if 'manifest' not in item and 'url' in item:
                     mid = hashlib.sha256(f'{acct.lower()}{repo}{essay_path}{item["url"]}'.encode()).hexdigest()
-                    logger.info(f'{item["id"]} {item["tag"]} {mid} {mid in _manifests_cache}')
+                    logger.debug(f'{item["id"]} {item["tag"]} {mid} {mid in _manifests_cache}')
                     if mid in _manifests_cache:
                         item['manifest'] = _manifests_cache[mid]
                         continue
@@ -572,7 +569,7 @@ def _get_manifests(markup, essay_path, acct, repo):
             item = future.result()
             if 'manifest' in item:
                 _manifests_cache[item['manifest'].split('/')[-1]] = item['manifest']
-            logger.info(f'id={item["id"]} manifest={item.get("manifest")}')
+            logger.debug(f'id={item["id"]} manifest={item.get("manifest")}')
 
 def _add_data(soup, markup):
     data = soup.new_tag('script')
@@ -605,12 +602,12 @@ def parse(html, md_path, acct, repo):
 
 def _is_local(site):
     is_local = site.startswith('localhost') or site.endswith('gitpod.io')
-    logger.info(f'is_local={is_local}')
+    logger.debug(f'is_local={is_local}')
     return is_local
 
 def get_essay(markdown, site, acct, repo, ref, path, root, raw, token, **kwargs):
     if not path:  path = '/'
-    logger.info(f'essay: has_markdown={markdown is not None} site={site} acct={acct} repo={repo} ref={ref} root={root} path={path}')
+    logger.debug(f'essay: has_markdown={markdown is not None} site={site} acct={acct} repo={repo} ref={ref} root={root} path={path}')
     md_path = path
     content = url = sha = None
     if root and _is_local(site):

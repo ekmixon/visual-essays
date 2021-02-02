@@ -34,7 +34,10 @@ while BASEDIR != '/' and not os.path.exists(os.path.join(BASEDIR, 'index.html'))
 logger.info(f'SCRIPT_DIR={SCRIPT_DIR} BASEDIR={BASEDIR}')
 
 from flask import Flask, request, send_from_directory, redirect, Response, jsonify, g
+from flask_cors import CORS
+
 app = Flask(__name__, static_url_path='/static', static_folder=BASEDIR)
+cors = CORS(app, resources={r"/static/*": {"origins": "*"}})
 
 from gh import query_gh_file, get_gh_file, has_gh_repo_prefix, get_site_config
 from essay import get_essay
@@ -204,7 +207,7 @@ def _get_site_info(href):
         else:
             siteConfigUrl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
     resp = requests.get(siteConfigUrl)
-    logger.info(f'{siteConfigUrl} {resp.status_code}')
+    logger.info(f'siteConfigUrl={siteConfigUrl} {resp.status_code}')
     if resp.status_code == 200:
         site_config = resp.json()
         site_info['ref'] = site_info['ref'] if site_info['ref'] else site_config.get('ref')        
@@ -218,6 +221,7 @@ def _get_site_info(href):
         for key, value in site_config.items():
             #if key in site_info: continue
             if key == 'components':
+                logger.info('components')
                 site_info['components'] = []
                 for comp in value:
                     if not comp['src'].startswith('http'):
@@ -329,6 +333,10 @@ def siteinfo(path=None):
                 for key in ('banner', 'logo', 'favicon', 'css'):
                     if key in site_info and not site_info[key].startswith('http'):
                         site_info[key] = f'http://{site}/static{"" if site_info[key][0] == "/" else "/"}{site_info[key]}'
+                if 'components' in site_info:
+                    for comp in site_info['components']:
+                        if not comp['src'].startswith('http'):
+                            comp['src'] = f'http://{site}{"" if comp["src"][0] == "/" else "/"}{comp["src"]}' 
         else:
             site_info = _get_site_info(href)
         _site_info_cache[href] = site_info

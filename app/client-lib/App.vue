@@ -433,7 +433,7 @@ export default {
           if (headerHeight && headerHeight !== this.headerPrior ||
               this.$refs.app.clientHeight !== this.heightPrior ||
               this.$refs.app.clientWidth !== this.widthPrior) {
-            console.log(`updateViewerSize: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${headerHeight} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
+            // console.log(`updateViewerSize: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${headerHeight} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
             this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
             this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
             this.headerPrior = headerHeight
@@ -445,10 +445,10 @@ export default {
       updated() { this.updateViewerSize() },
       watch: {
         viewerWidth() {
-          console.log(`App.viewerWidth: width=${this.viewerWidth} height=${this.viewerHeight}`)
+          //console.log(`App.viewerWidth: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         viewerHeight() {
-          console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
+          //console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         layout: {
           handler: function (layout) {

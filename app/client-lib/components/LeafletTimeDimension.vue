@@ -380,7 +380,7 @@ module.exports = {
                     const props = feature.properties
                     if (props['marker-type'] === 'circle' || this.mapDef['marker-type'] === 'circle' || layerDef['marker-type'] === 'circle') {
                         return L.circleMarker(latLng, { radius: this.mapDef['radius'] || layerDef['radius'] || props.radius || 4 })
-                    } else {
+                    } else if (this.mapDef['marker-type'] !== 'none') {
                         return this.makeMarker(latLng, props)
                     }
                 },

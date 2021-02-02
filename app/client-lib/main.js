@@ -75,7 +75,7 @@ if (loc.hostname.indexOf('.github.io') > 0) {
   site = `${loc.origin}/${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
   service = 'http://localhost:8080'
-  site = `${service}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  site = `${service}${loc.pathname}${loc.search ? loc.search : ''}`
   mode = 'dev'
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
   service = `https://8080-${loc.host.slice(5)}`
