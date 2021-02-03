@@ -56,7 +56,7 @@
       <div class="author" v-html="author"></div>
       <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">
         <i class="fas fa-sm fa-quote-left"></i> Cite this essay</div>
-      <div v-if="essayQid" class="search" @click="openSearchTool">
+      <div v-if="aboutQid" class="search" @click="openSearchTool">
         <i class="fas fa-sm fa-search"></i> More resources</div>
     </div>
 
@@ -133,6 +133,7 @@
     }),
     computed: {
       essayQid() { return this.essayConfigLoaded ? this.essayConfig.qid || this.essayConfig.eid : null },
+      aboutQid() { return this.essayConfig.loaded ? this.essayConfig.about : null },
       essayConfigLoaded() { return this.essayConfig !== null },
       banner() { return this.essayConfigLoaded ? (this.essayConfig.banner || this.siteConfig.banner) : null },
       bannerHeight() { return this.essayConfig && this.essayConfig.bannerHeight || this.siteConfig.bannerHeight || 400 },
@@ -239,8 +240,8 @@
         this.$emit('open-infobox-modal')
       },
       openSearchTool() {
-        console.log('open search tool');
-        this.$emit('open-search-tool')
+        console.log('open search tool', this.aboutQid);
+        this.$emit('open-search-tool', this.aboutQid)
       },
       toQueryString(args) {
         const parts = []

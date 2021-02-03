@@ -399,8 +399,8 @@ export default {
         openDocsSite() {
           this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
         },
-        openSearchTool() {
-          this.openWindow(`https://lodsearch.net`, null)
+        openSearchTool(qid) {
+          this.openWindow(`https://lodsearch.net?eid=${qid}`, null)
         },
         openWindow(url, options) {
           console.log('openWindow', url)
