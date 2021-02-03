@@ -100,9 +100,21 @@ module.exports = {
                 }
             },
             immediate: true
+        },
+        selected: {
+            handler: function(selected) {
+              console.log(`PlantSpecimensViewer.watch.selected=${selected}`)
+            },
+            immediate: true
+        },
+        images: {
+            handler: function(images) {
+              console.log(`PlantSpecimensViewer.watch.images=${images}`)
+            },
+            immediate: true
         }
     }
-};
+}
 </script>
 
 <style scoped>
