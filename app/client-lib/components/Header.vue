@@ -56,6 +56,8 @@
       <div class="author" v-html="author"></div>
       <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">
         <i class="fas fa-sm fa-quote-left"></i> Cite this essay</div>
+      <div v-if="essayQid" class="search" @click="openSearchTool">
+        <i class="fas fa-sm fa-search"></i> More resources</div>
     </div>
 
     <modal 
@@ -236,6 +238,10 @@
         this.closeDrawer()
         this.$emit('open-infobox-modal')
       },
+      openSearchTool() {
+        console.log('open search tool');
+        //this.$emit('open-search-tool')
+      },
       toQueryString(args) {
         const parts = []
         Object.keys(args).forEach((key) => {
@@ -350,17 +356,17 @@
   .title-bar {
     display: grid;
     align-items: stretch;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
     grid-template-areas: 
-      "title title"
-      "author citation";
+      "title title search"
+      "author author citation";
     color: white;
     background-color: rgba(0, 0, 0, .6);
     /*padding: 24px 0 0 70px;*/
     position: absolute;
     top: calc(100% - 104px);
-    height: 104px;
+    height:104px;
     width: 100%;
     font-weight: bold;    
   }
@@ -368,16 +374,15 @@
   .title {
     grid-area: title;
     font-size: 2em;
-    margin: 0 0 0 70px;
+    margin: 0 0 0 22px;
     padding: 22px 0 0 0;
   }
   .author {
     grid-area: author;
     font-size: 1.3em;
-    margin: 0 0 0 70px;
+    margin: 0 0 0 22px;
     padding: 0 0 6px 0;
   }
-
   .citation {
     grid-area: citation;
     margin-left: auto;
@@ -387,6 +392,20 @@
     background-color: #219653;
     border-radius: 4px;
     padding: 8px 24px 4px;
+    font-weight: normal;
+    height: 21px;
+    cursor: pointer;
+  }
+  .search {
+    grid-area: search;
+    margin-left: auto;
+    margin-right: 1vw;
+    margin-top: 2vh;
+    font-size: 14px;
+    color: white;
+    background-color: #219653;
+    border-radius: 4px;
+    padding: 8px 20px 4px;
     font-weight: normal;
     height: 21px;
     cursor: pointer;
