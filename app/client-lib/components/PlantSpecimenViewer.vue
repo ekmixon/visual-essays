@@ -109,7 +109,7 @@ module.exports = {
         },
         images: {
             handler: function(images) {
-              console.log(`PlantSpecimensViewer.watch.images=${images}`)
+              console.log('PlantSpecimensViewer.watch.images', images)
             },
             immediate: true
         }
