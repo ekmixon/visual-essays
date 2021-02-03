@@ -243,6 +243,8 @@ module.exports = {
         this.viewer.addHandler('page', this.newPage)
         this.viewer.addHandler('viewport-change', this.viewportChange)
         this.viewer.world.addHandler('add-item', (e) => {
+          console.log('add-item', this.currentItem)
+
           const numItems = this.viewer.world.getItemCount()
           // console.log('add-item', numItems, e, e.item)
 
@@ -353,6 +355,7 @@ module.exports = {
     }, 100),
     newPage(e) {
       this.page = e.page
+      console.log(e)
     },
     initAnnotator() {
       // console.log('initAnnotator', this.currentItem.annotations.length)
@@ -628,6 +631,13 @@ module.exports = {
       }
     },
     items (current, previous) {
+      current = current.sort((a, b) => {
+        let aIdx = parseInt(a.id.split('-').pop())
+        let bIdx = parseInt(b.id.split('-').pop())
+        // console.log(`sort: a=${aIdx} b=${bIdx}`)
+        return aIdx > bIdx ? 1 : -1
+      })
+      console.log(current)
       const cur = current.map(item => this.stringifyKeysInOrder(item))
       const prev = previous ? previous.map(item => this.stringifyKeysInOrder(item)) : []
       if (this.viewer) {
