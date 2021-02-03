@@ -120,7 +120,7 @@ module.exports = {
   computed: {
     osdContainerStyle() {
       return {
-        backgroundColor: 'black',
+        backgroundColor: this.currentItem ? this.currentItem.background || 'black' : 'black',
         textAlign: 'center',
         height: `${this.height}px`,
         width: `${this.width}px`,

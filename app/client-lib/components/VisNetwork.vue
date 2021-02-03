@@ -47,6 +47,7 @@ module.exports = {
         width: `${this.width}px`,
         height: `${this.height}px`,
         overflowY: "auto !important",
+        backgroundColor: this.items[0] ? this.items[0].background || 'white' : 'white',
       };
     },
     activeElements() {
