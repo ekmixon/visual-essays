@@ -73,10 +73,14 @@ module.exports = {
     addSpacer() {
       // Adds a spacer element that expands and contracts to match the size of the visualizer so
       // that content at the end of the article is still reachable by scrolling
-      this.spacer = document.createElement('div')
-      this.spacer.id = 'essay-spacer'
-      this.spacer.style.height = `${this.$refs.essay.clientHeight - 150 }px`
+      let essayWrapper = document.getElementById('scrollableContent')
+      if (essayWrapper) {
+        console.log(`addSpacer=${essayWrapper.clientHeight - 150}px`)
+        this.spacer = document.createElement('div')
+        this.spacer.id = 'essay-spacer'
+        this.spacer.style.height = `${essayWrapper.clientHeight - 150}px`
       document.getElementById('essay').appendChild(this.spacer)
+      }
     },
     setActiveElements(elemId) {
       if (elemId) {

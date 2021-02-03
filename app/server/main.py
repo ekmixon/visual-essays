@@ -454,7 +454,7 @@ def entity(eid=None):
 @app.route('/specimens/<path:path>', methods=['GET'])
 @app.route('/specimen/<path:path>', methods=['GET'])
 def specimens(path):
-    site, acct, repo, ref, path, qargs = _context()
+    site, acct, repo, ref, path, qargs = _context(path)
     accept = request.headers.get('Accept', 'application/json').split(',')
     content_type = ([ct for ct in accept if ct in ('text/html', 'application/json', 'text/csv', 'text/tsv')] + ['application/json'])[0]
     logger.info(f'specimens: path={path} qargs={qargs}')
@@ -462,9 +462,9 @@ def specimens(path):
         return ('', 204, cors_headers)
     else:
         taxon_name = gpid = wdid = None
-        path_elems = path.split('/')
+        path_elems = path.split('/')[1:]
         if len(path_elems) == 1:
-            if _is_entity_id(path_elems[0]):
+            if _is_entity_id(path_elems[0], False):
                 wdid = path_elems[0] if path_elems[0].startswith('wd:') else f'wd:{path_elems[0]}'
             else:
                 taxon_name = path_elems[0].replace('_', ' ')
@@ -480,9 +480,9 @@ def specimens(path):
         else:
             _specimens['from_cache'] = True
         if content_type == 'text/html':
-            return (open(os.path.join(BASEDIR, 'server', 'json-viewer.html'), 'r').read().replace("'{{DATA}}'", json.dumps(specimens)), 200, cors_headers)
+            return (open(os.path.join(BASEDIR, 'app', 'server', 'json-viewer.html'), 'r').read().replace("'{{DATA}}'", json.dumps(_specimens)), 200, cors_headers)
         else:
-            return (specimens, 200, cors_headers)
+            return (_specimens, 200, cors_headers)
 
 @app.route('/<path:path>', methods=['GET'])
 @app.route('/', methods=['GET'])

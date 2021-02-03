@@ -384,7 +384,22 @@ def _find_ve_markup(soup):
                 vem_elem.decompose()
         # logger.info(f'{attrs["id"]} {attrs["tagged_in"]}')
 
-        ve_markup[attrs['id']] = attrs
+        if attrs['id'] in ve_markup:
+            for fld in attrs['id']:
+                if fld in ('id',): continue
+                elif fld in ('tagged_in', 'found_in', 'aliases'):
+                    # merge multi-valued fields
+                    if fld in attrs:
+                        if fld not in ve_markup[attrs['id']]:
+                            ve_markup[attrs['id']][fld] = []
+                        for val in attrs[fld]:
+                            if val not in ve_markup[attrs['id']][fld]:
+                                ve_markup[attrs['id']][fld].append(val)
+                else:
+                    ve_markup[attrs['id']][fld] = attrs[fld]
+        else:
+            ve_markup[attrs['id']] = attrs
+
     # logger.info(json.dumps(ve_markup, indent=2))
     return ve_markup
 

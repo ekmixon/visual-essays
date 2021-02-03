@@ -24,9 +24,14 @@ const dependencies = []
 
 module.exports = {
     name: "PlantSpecimenViewer",
-    props: { items: Array, width: Number, height: Number },
+    props: {
+      items: Array,
+      width: Number,
+      height: Number,
+      serviceBase: String
+    },
     components: {
-        imageViewer: 'url:/components/OpenSeadragonViewer.vue'
+        imageViewer: `url:${this.serviceBase}/components/OpenSeadragonViewer.vue`
     },
     data: () => ({
       selected: undefined,
@@ -66,7 +71,7 @@ module.exports = {
                 const args = Object.keys(item)
                 .filter((arg) => ["max", "reverse"].includes(arg))
                 .map((arg) => `${arg}=${item[arg]}`)
-                const url = `/specimens/${id}` + (args ? `?${args.join("&")}` : "")
+                const url = `${this.serviceBase}/specimens/${id}` + (args ? `?${args.join("&")}` : "")
                 console.log(url)
                 fetch(url).then((resp) => resp.json())
                 .then((specimensMetadata) => {
