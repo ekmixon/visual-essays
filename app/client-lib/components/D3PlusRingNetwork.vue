@@ -24,7 +24,14 @@ module.exports = {
       height: Number
     },
     computed: {
-      containerStyle() { return { width: `${this.width}px`, height: `${this.height}px`, overflowY: 'auto !important', marginLeft: '24px' } },
+      containerStyle() { return { 
+          width: `${this.width}px`,
+          height: `${this.height}px`,
+          overflowY: 'auto !important', 
+          marginLeft: '24px',
+          backgroundColor: this.items[0] ? this.items[0].background || 'white' : 'white'
+        }
+      },
       item() { return this.items.length > 0 ? this.items[0] : {} }
     },
     mounted() {
