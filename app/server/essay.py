@@ -344,7 +344,6 @@ def _find_ve_markup(soup):
                 cur_image = attrs
             except:
                 pass # del attrs['region']
-            logger.info(f'{attrs["id"]} {attrs["title"]}')
 
         elif tag == 'annotation' and cur_image:
             if 'annotations' not in cur_image:
