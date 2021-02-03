@@ -67,7 +67,7 @@ const baseComponentIndex = [
 const loc = window.location
 console.log(loc)
 
-let service = 'https://visual-essays.app'
+let service = loc.host.indexOf('dev.') === 0 ? 'https://dev.visual-essays.app' : 'https://visual-essays.app'
 let site = loc.href
 let mode = 'prod'
 
