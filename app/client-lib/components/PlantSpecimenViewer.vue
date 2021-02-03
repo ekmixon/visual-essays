@@ -30,9 +30,9 @@ module.exports = {
       height: Number,
       serviceBase: String
     },
-    components: {
-        imageViewer: `url:${this.serviceBase}/components/OpenSeadragonViewer.vue`
-    },
+    //components: {
+    //    imageViewer: `url:http://localhost:8080/components/OpenSeadragonViewer.vue`
+    //},
     data: () => ({
       selected: undefined,
       specimensByTaxon: [],

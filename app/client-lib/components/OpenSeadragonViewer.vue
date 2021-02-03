@@ -536,7 +536,7 @@ module.exports = {
       // If it's an array - recursively order any
       // dictionary items within the array
       if (Array.isArray(unordered)) {
-        unordered.forEach(function (item, index) {
+        unordered.forEach((item, index) => {
           unordered[index] = this.recursivelyOrderKeys(item)
         })
         return unordered
