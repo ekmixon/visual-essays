@@ -240,7 +240,7 @@
       },
       openSearchTool() {
         console.log('open search tool');
-        //this.$emit('open-search-tool')
+        this.$emit('open-search-tool')
       },
       toQueryString(args) {
         const parts = []
