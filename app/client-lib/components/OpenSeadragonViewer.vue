@@ -616,7 +616,7 @@ module.exports = {
       console.log('this.manifests', this.manifests)
       console.log('this.items[0]', this.items[0])
       console.log('this.currentItem', this.currentItem)
-      var html = "<table style='max-width:100%'><tbody style='background:none;font-size: 0.8rem;padding: 5px;'>";
+      var html = "<table style='max-width:100%;table-layout: fixed;'><tbody style='background:none;font-size: 0.8rem;padding: 5px;'>";
       let content = {};
 
       if (this.manifests.length != 0){
@@ -632,12 +632,12 @@ module.exports = {
           });
           //this.items[0]['metadata'].forEach(a => authors[parseInt(a.ordinal)-1] = a['label'])
         }
-        if (this.manifests[0]['sequence']){
-          if (this.manifests[0]['sequence']['canvases'][0]){
-            if (this.manifests[0]['sequence']['canvases'][0]['images']){
-              content['image format'] = this.manifests[0]['sequence']['canvases'][0]['images'][0]['resource']['format']
-              content['image height'] = this.manifests[0]['sequence']['canvases'][0]['images'][0]['resource']['height']
-              content['image width'] = this.manifests[0]['sequence']['canvases'][0]['images'][0]['resource']['width']
+        if (this.manifests[0]['sequences']){
+          if (this.manifests[0]['sequences'][0]['canvases'][0]){
+            if (this.manifests[0]['sequences'][0]['canvases'][0]['images']){
+              content['image format'] = this.manifests[0]['sequences'][0]['canvases'][0]['images'][0]['resource']['format']
+              content['image height'] = this.manifests[0]['sequences'][0]['canvases'][0]['images'][0]['resource']['height']
+              content['image width'] = this.manifests[0]['sequences'][0]['canvases'][0]['images'][0]['resource']['width']
             }
           }
         }
@@ -645,25 +645,17 @@ module.exports = {
 
         for(var key in content){
             html+= '<tr style="background:none; padding: 0px">';
-            html+= '<td style="background:none; padding: 5px">' + key + '</td>';
-            html+= '<td style="background:none; padding: 5px">' + content[key]+ '</td>';
+            html+= '<td style="background:none; padding: 5px;max-width: 200px;overflow: auto;">' + key + '</td>';
+            html+= '<td style="background:none; padding: 5px;max-width: 200px;overflow: auto;">' + content[key]+ '</td>';
             html+= '</tr>';
         }
         html+='</tbody></table>';
-
-
-        console.log('parseManifest content', content);
-        console.log('parseManifest html', html);
-        
       }
 
       return html;
     },
     displayInfoBox(){
       this.imageInfo = this.parseManifest();
-      //this.imageInfo = Object.values(content);
-      //this.imageInfo = content;
-      console.log('this.imageInfo', this.imageInfo)
 
         if (!this.tippy) {
           new this.$tippy(document.querySelectorAll('.info-box-content'), {
@@ -671,16 +663,14 @@ module.exports = {
             trigger:'click',
             interactive: true,
             allowHTML: true,
-            placement: 'bottom-end',
+            placement: 'bottom-start',
             // theme: 'light-border',
-            //content: '<div v-if="imageInfo" id="info-box-content">{{imageInfo}}</div>',
             
             onShow: (instance) => {
-              //instance.popper.hidden = instance.reference.dataset.imageInfo ? false : true;
               instance.setContent(this.imageInfo)
               //this.querySelector('.tippy-content').innerHTML = this.imageInfo;
 
-              setTimeout(() => { instance.hide() }, 10000) 
+              //setTimeout(() => { instance.hide() }, 10000) 
             }
           })
         }
