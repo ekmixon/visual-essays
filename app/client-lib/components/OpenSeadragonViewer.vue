@@ -6,6 +6,8 @@
         <span id="go-home"><i class="fas fa-home"></i></span>
         <span id="zoom-in"><i class="fas fa-search-plus"></i></span>
         <span id="zoom-out"><i class="fas fa-search-minus"></i></span>
+        <span class="info-box"><span class="info-box-content"><i class="fas fa-info-circle"></i></span></span>
+
         <span v-if="hasAnnotations" @click="showAnnotations = !showAnnotations" title="Show Annotations">
           <i class="far fa-comment-alt-dots"></i>
         </span>
@@ -115,7 +117,9 @@ module.exports = {
     licenseUrl: null,
     licenseIcons: [],
     imageViewportCoords: null,
-    osdElem: null
+    osdElem: null,
+    tippy: null,
+    imageInfo: null
   }),
   computed: {
     osdContainerStyle() {
@@ -173,7 +177,9 @@ module.exports = {
       } else {
         return `Source: ${this.metadata.info || ''}`
       }
-    }
+    },
+    //imageInfo(){ return this.currentItem && this.currentItem.metadata ? this.parseManifest : null }
+    
   },
   mounted() {
     this.osdElem = document.getElementById('osd')
@@ -185,6 +191,7 @@ module.exports = {
       // console.log(`acct=${this.acct} repo=${this.repo} path=${this.path}`)
       this.initViewer()
       this.loadManifests(this.items)
+      //this.displayInfoBox()
     },
     sha256(s) {
       return sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(s))
@@ -201,6 +208,7 @@ module.exports = {
           zoomInButton:   'zoom-in',
           zoomOutButton:  'zoom-out',
           homeButton:     'go-home',
+          // infoButton: 'info-box',
           // fullPageButton: 'full-page',
           // nextButton:     'next',
           // previousButton: 'previous',
@@ -315,6 +323,8 @@ module.exports = {
             return { tileSource, opacity }
           })
           this.loadTileSources()
+          console.log('this.manifests:', this.manifests)
+          this.displayInfoBox()
         })
     },
     positionImage (immediately) {
@@ -601,7 +611,81 @@ module.exports = {
       }
       this.licenseUrl = licenseUrl
       this.licenseIcons = licenseIcons
-    }
+    },
+    parseManifest(){
+      console.log('this.manifests', this.manifests)
+      console.log('this.items[0]', this.items[0])
+      console.log('this.currentItem', this.currentItem)
+      var html = "<table style='max-width:100%'><tbody style='background:none;font-size: 0.8rem;padding: 5px;'>";
+      let content = {};
+
+      if (this.manifests.length != 0){
+        console.log(this.manifests[0])
+        if (this.manifests[0]['attribution']) { content['attribution'] = this.manifests[0]['attribution'] }
+        if (this.manifests[0]['description']) { content['description'] = this.manifests[0]['description'] }
+        if (this.manifests[0]['label']) { content['label'] = this.manifests[0]['label'] }
+        if (this.manifests[0]['metadata']){
+          this.manifests[0]['metadata'].forEach(function(message){
+            if (!content.hasOwnProperty(message['label'])){
+              content[message['label']] = message['value']
+            }
+          });
+          //this.items[0]['metadata'].forEach(a => authors[parseInt(a.ordinal)-1] = a['label'])
+        }
+        if (this.manifests[0]['sequence']){
+          if (this.manifests[0]['sequence']['canvases'][0]){
+            if (this.manifests[0]['sequence']['canvases'][0]['images']){
+              content['image format'] = this.manifests[0]['sequence']['canvases'][0]['images'][0]['resource']['format']
+              content['image height'] = this.manifests[0]['sequence']['canvases'][0]['images'][0]['resource']['height']
+              content['image width'] = this.manifests[0]['sequence']['canvases'][0]['images'][0]['resource']['width']
+            }
+          }
+        }
+        if (this.manifests[0]['@id']) { content['IIIF id'] = this.manifests[0]['@id'] }
+
+        for(var key in content){
+            html+= '<tr style="background:none; padding: 0px">';
+            html+= '<td style="background:none; padding: 5px">' + key + '</td>';
+            html+= '<td style="background:none; padding: 5px">' + content[key]+ '</td>';
+            html+= '</tr>';
+        }
+        html+='</tbody></table>';
+
+
+        console.log('parseManifest content', content);
+        console.log('parseManifest html', html);
+        
+      }
+
+      return html;
+    },
+    displayInfoBox(){
+      this.imageInfo = this.parseManifest();
+      //this.imageInfo = Object.values(content);
+      //this.imageInfo = content;
+      console.log('this.imageInfo', this.imageInfo)
+
+        if (!this.tippy) {
+          new this.$tippy(document.querySelectorAll('.info-box-content'), {
+            animation:'scale',
+            trigger:'click',
+            interactive: true,
+            allowHTML: true,
+            placement: 'bottom-end',
+            // theme: 'light-border',
+            //content: '<div v-if="imageInfo" id="info-box-content">{{imageInfo}}</div>',
+            
+            onShow: (instance) => {
+              //instance.popper.hidden = instance.reference.dataset.imageInfo ? false : true;
+              instance.setContent(this.imageInfo)
+              //this.querySelector('.tippy-content').innerHTML = this.imageInfo;
+
+              setTimeout(() => { instance.hide() }, 10000) 
+            }
+          })
+        }
+    
+    },
   },
   beforeDestroy() {
     this.actionSources.forEach(elem => elem.classList.remove('image-interaction'))
@@ -959,6 +1043,20 @@ module.exports = {
 
     .licenses svg {
       margin-left: 4px;
+    }
+    .tippy-content {
+      font-family: Roboto !important;
+      font-size: 1rem;
+      display: table;
+    }
+
+    table td th{
+      background:none;
+      font-size: 0.8rem;
+      padding: 5px;
+    }
+    .info-box-content{
+      display: flex;
     }
 
 </style>
