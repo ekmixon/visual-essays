@@ -6,7 +6,7 @@
         <span id="go-home"><i class="fas fa-home"></i></span>
         <span id="zoom-in"><i class="fas fa-search-plus"></i></span>
         <span id="zoom-out"><i class="fas fa-search-minus"></i></span>
-        <span class="info-box"><span class="info-box-content"><i class="fas fa-info-circle"></i></span></span>
+        <span class="info-box"><i class="fas fa-info-circle"></i></span>
 
         <span v-if="hasAnnotations" @click="showAnnotations = !showAnnotations" title="Show Annotations">
           <i class="far fa-comment-alt-dots"></i>
@@ -54,7 +54,6 @@
           </a>
         </span>
       </div>
-
     </div>
 </template>
 
@@ -119,7 +118,8 @@ module.exports = {
     imageViewportCoords: null,
     osdElem: null,
     tippy: null,
-    imageInfo: null
+    imageInfo: null,
+    showTippy: false,
   }),
   computed: {
     osdContainerStyle() {
@@ -613,14 +613,10 @@ module.exports = {
       this.licenseIcons = licenseIcons
     },
     parseManifest(){
-      console.log('this.manifests', this.manifests)
-      console.log('this.items[0]', this.items[0])
-      console.log('this.currentItem', this.currentItem)
       var html = "<table style='max-width:100%;table-layout: fixed;'><tbody style='background:none;font-size: 0.8rem;padding: 5px;'>";
       let content = {};
 
       if (this.manifests.length != 0){
-        console.log(this.manifests[0])
         if (this.manifests[0]['attribution']) { content['attribution'] = this.manifests[0]['attribution'] }
         if (this.manifests[0]['description']) { content['description'] = this.manifests[0]['description'] }
         if (this.manifests[0]['label']) { content['label'] = this.manifests[0]['label'] }
@@ -644,9 +640,18 @@ module.exports = {
         if (this.manifests[0]['@id']) { content['IIIF id'] = this.manifests[0]['@id'] }
 
         for(var key in content){
+          
+
             html+= '<tr style="background:none; padding: 0px">';
             html+= '<td style="background:none; padding: 5px;max-width: 200px;overflow: auto;">' + key + '</td>';
-            html+= '<td style="background:none; padding: 5px;max-width: 200px;overflow: auto;">' + content[key]+ '</td>';
+            if (key == 'license' && this.license && this.licenseUrl){
+              html += '<td style="background:none; padding: 5px;max-width: 200px;overflow: auto;">' + 
+                      '<span v-if="licenseUrl" class="licenses"><a :href="licenseUrl" target="_blank"><i v-for="(icon, idx) in licenseIcons" :key="idx" :class="icon"></i></a></span></td>';
+            }
+            else {
+              html+= '<td style="background:none; padding: 5px;max-width: 200px;overflow: auto;">' + content[key]+ '</td>';
+            }
+            //html+= '<td style="background:none; padding: 5px;max-width: 200px;overflow: auto;">' + content[key]+ '</td>';
             html+= '</tr>';
         }
         html+='</tbody></table>';
@@ -656,9 +661,11 @@ module.exports = {
     },
     displayInfoBox(){
       this.imageInfo = this.parseManifest();
+      //const template = document.getElementsByClassName('.info-box-content');
+      //console.log('template', template);
 
         if (!this.tippy) {
-          new this.$tippy(document.querySelectorAll('.info-box-content'), {
+          new this.$tippy(document.querySelectorAll('.info-box'), {
             animation:'scale',
             trigger:'click',
             interactive: true,
@@ -668,8 +675,6 @@ module.exports = {
             
             onShow: (instance) => {
               instance.setContent(this.imageInfo)
-              //this.querySelector('.tippy-content').innerHTML = this.imageInfo;
-
               //setTimeout(() => { instance.hide() }, 10000) 
             }
           })
