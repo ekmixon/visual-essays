@@ -2,7 +2,7 @@
 <div class="grid-container" :style="containerStyle">
   <div id="map" :style="mapStyle"></div>
   <div class="citation">
-    <span class="title">{{this.items[0].title}}</span>
+    <span v-if="title" class="title" v-html="title"></span>
   </div>
 </div>
 </template>
@@ -127,7 +127,8 @@ module.exports = {
                 width: `${this.width}px`,
                 height: `${this.height}px`,
             }
-        }
+        },
+        title() { return this.mapDef['title_formatted'] ? this.mapDef['title_formatted'] : this.mapDef['title'] }
   },
   mounted() {
         this.loadDependencies(dependencies, 0, this.init)
