@@ -271,7 +271,7 @@ def _find_ve_markup(soup):
         tags = [k[3:] for k in attrs if k[:3] == 've-']
         tag = tags[0] if len(tags) == 1 else None
         if tag is None:
-            if vem_elem.name in ('param',):
+            if vem_elem.name in ('param', 'span'):
                 tag = 'entity'
             else:
                 continue
