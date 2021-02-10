@@ -3,6 +3,8 @@
     class="modal"
     name="entity-infobox-modal" 
     height="auto" 
+    :maxHeight="modalStyle"
+    :scrollable="true"
     width="500px"
     :draggable="true"
     @closed="clearSelectedItem"
@@ -24,7 +26,12 @@ module.exports = {
     selectedItem: String
   },
   data: () => ({}),
-  computed: {},
+  computed: {
+    modalStyle() {
+      var h = window.innerHeight - 100;
+      return h;
+    },
+  },
   methods: {
     clearSelectedItem() {
       this.$emit('set-selected-item', null)
