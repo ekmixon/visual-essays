@@ -614,18 +614,18 @@ module.exports = {
     },
     parseManifest(){
       var html = "<table style='max-width:100%;table-layout: fixed;'><tbody style='background:none;font-size: 0.8rem;padding: 5px;'>";
-      let content = {};
+      let content = {}
 
       if (this.manifests.length != 0){
         if (this.manifests[0]['attribution']) { content['attribution'] = this.manifests[0]['attribution'] }
         if (this.manifests[0]['description']) { content['description'] = this.manifests[0]['description'] }
         if (this.manifests[0]['label']) { content['label'] = this.manifests[0]['label'] }
         if (this.manifests[0]['metadata']){
-          this.manifests[0]['metadata'].forEach(function(message){
-            if (!content.hasOwnProperty(message['label'])){
+          this.manifests[0]['metadata'].forEach(message => {
+            if (!content[message['label']]){
               content[message['label']] = message['value']
             }
-          });
+          })
           //this.items[0]['metadata'].forEach(a => authors[parseInt(a.ordinal)-1] = a['label'])
         }
         if (this.manifests[0]['sequences']){
