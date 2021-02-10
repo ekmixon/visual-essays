@@ -79,7 +79,7 @@ if (loc.hostname.indexOf('.github.io') > 0) {
   mode = 'dev'
 } else if (loc.hostname.indexOf('.gitpod.io') > 0) {
   service = `https://8080-${loc.host.slice(5)}`
-  site = `${service}${loc.pathname}${loc.search ? '?'+loc.search : ''}`
+  site = `${service}${loc.pathname}${loc.search ? loc.search : ''}`
   mode = 'dev'
 }
 
