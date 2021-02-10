@@ -5,6 +5,7 @@ import 'lodash'
 import httpVueLoader from 'http-vue-loader'
 import * as utils from './utils.js'
 import VueScrollmagic from 'vue-scrollmagic'
+import VueAnalytics from 'vue-analytics'
 import VModal from 'vue-js-modal'
 import VueYoutube from 'vue-youtube'
 import tippy from 'tippy.js'
@@ -210,6 +211,10 @@ const doRemoteRequests = async () => {
       components[component.name] = component
     }
   })
+
+  if (siteInfo.gaTrackingID) {
+    Vue.use(VueAnalytics, {id: siteInfo.gaTrackingID})
+  }
 
   if (siteInfo.favicon) {
     let e = document.createElement('link')

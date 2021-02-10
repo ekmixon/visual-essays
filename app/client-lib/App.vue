@@ -227,6 +227,7 @@ export default {
           }
           this.essayPath = path
           this.href = window.location.href
+          this.$ga.page(path)
 
           // Parse item data from HTML
           window.data = []
