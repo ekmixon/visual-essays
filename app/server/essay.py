@@ -320,6 +320,17 @@ def _find_ve_markup(soup):
                 except:
                     attrs['zoom'] = 2.5
 
+            if 'title' in attrs:
+                try:
+                    formatted_val = markdown_parser.markdown(attrs['title'], output_format='html5').replace('<p>','').replace('</p>','')
+                    logger.info(attrs['title'])
+                    logger.info(formatted_val)
+                    if formatted_val != attrs['title']:
+                        attrs['title_formatted'] = formatted_val
+                        attrs['title'] = attrs['title'].replace(' _', ' ').replace('_ ', ' ').replace(' *', ' ').replace('* ', ' ')
+                except:
+                    attrs['title'] = attrs['title']
+
         elif tag == 'map-layer':
             for layer_type in ('geojson', 'mapwarper'):
                 if layer_type in attrs:
