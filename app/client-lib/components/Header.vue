@@ -376,13 +376,13 @@
     grid-area: title;
     font-size: min(3vw, 2.2em);
     margin: 0 0 0 22px;
-    padding: 22px 0 0 0;
+    padding: 22px 0 0 50px;
   }
   .author {
     grid-area: author;
     font-size: min(3vw, 1.3em);
     margin: 0 0 0 22px;
-    padding: 0 0 6px 0;
+    padding: 0 0 6px 50px;
   }
   .citation {
     grid-area: citation;
