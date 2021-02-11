@@ -357,11 +357,11 @@
   .title-bar {
     display: grid;
     align-items: stretch;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 3r 1fr;
+    grid-template-rows: 1fr 1fr;
     grid-template-areas: 
-      "title title search"
-      "author author citation";
+      "title search"
+      "author citation";
     color: white;
     background-color: rgba(0, 0, 0, .6);
     /*padding: 24px 0 0 70px;*/
@@ -374,20 +374,20 @@
 
   .title {
     grid-area: title;
-    font-size: 2em;
+    font-size: min(3vw, 2.2em);
     margin: 0 0 0 22px;
     padding: 22px 0 0 0;
   }
   .author {
     grid-area: author;
-    font-size: 1.3em;
+    font-size: min(3vw, 1.3em);
     margin: 0 0 0 22px;
     padding: 0 0 6px 0;
   }
   .citation {
     grid-area: citation;
     margin-left: auto;
-    margin-right: 1vw;
+    margin-right: 1.3vw;
     font-size: 14px;
     color: white;
     background-color: #219653;
@@ -400,7 +400,7 @@
   .search {
     grid-area: search;
     margin-left: auto;
-    margin-right: 1vw;
+    margin-right: 1.3vw;
     margin-top: 2vh;
     font-size: 14px;
     color: white;
