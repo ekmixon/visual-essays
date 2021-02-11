@@ -68,11 +68,13 @@ const baseComponentIndex = [
 const loc = window.location
 console.log(loc)
 
-let service = loc.host.indexOf('dev.') === 0 ? 'https://dev.visual-essays.app' : 'https://visual-essays.app'
+//let service = loc.host.indexOf('dev.') === 0 ? `https://dev.visual-essays.app` : 'https://visual-essays.app'
+let service = loc.origin
 let site = loc.href
 let mode = 'prod'
 
 if (loc.hostname.indexOf('.github.io') > 0) {
+  service = 'https://visual-essays.app'
   site = `${loc.origin}/${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
   service = 'http://localhost:8080'
@@ -212,9 +214,7 @@ const doRemoteRequests = async () => {
     }
   })
 
-  if (siteInfo.gaTrackingID) {
-    Vue.use(VueAnalytics, {id: siteInfo.gaTrackingID})
-  }
+  Vue.use(VueAnalytics, {id: siteInfo.gaTrackingID || 'UA-125778965-6'})
 
   if (siteInfo.favicon) {
     let e = document.createElement('link')
