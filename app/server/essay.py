@@ -387,7 +387,7 @@ def _find_ve_markup(soup):
             if enclosing_element_id not in attrs['tagged_in'] and attrs.get('scope') != 'element':
                 attrs['tagged_in'].append(enclosing_element_id)
             if tag in ('entity',) and vem_elem.text:
-                vem_elem.attrs['data-eid'] = attrs['eid']
+                vem_elem.attrs['data-eid'] = attrs.get('eid', attrs.get('id'))
                 vem_elem.attrs['class'] = [tag, 'tagged']
                 #if _type == 'geojson':
                 #    attrs['scope'] = 'element'
