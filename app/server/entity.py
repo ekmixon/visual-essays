@@ -74,6 +74,7 @@ class KnowledgeGraph(object):
         self.site = kwargs.get('site')
         self.acct = kwargs.get('acct')
         self.repo = kwargs.get('repo')
+        self.ref = kwargs.get('ref')
         self.cache = kwargs.get('cache', {})
         self.entity_type = kwargs.get('entity_type', default_entity_type)
         self.prop_mappings = {}
@@ -81,7 +82,7 @@ class KnowledgeGraph(object):
         for g in GRAPHS:
             self.prop_mappings[g['ns']] = dict([(p['id'], p) for p in self._properties(g)])
             self.formatter_urls[g['ns']] = dict([(p['id'], p) for p in self._formatter_urls(g)])
-        logger.info(f'KnowledgeGraph: acct={self.acct} repo={self.repo}')
+        logger.info(f'KnowledgeGraph: acct={self.acct} repo={self.repo} ref={self.ref}')
 
     def entity(self, uri, project=None, raw=False, article=None, **kwargs):
         logger.info(f'entity={uri} project={project} raw={raw} article={article}')
@@ -379,7 +380,7 @@ class KnowledgeGraph(object):
         logger.info(f'_add_summary_text: id={entity.get("id")} project={project} article={article}')
         summary_url = None
         if article:
-            summary_url = f'https://raw.githubusercontent.com/{self.acct}/{self.repo}/main/articles/{article}.md'
+            summary_url = f'https://raw.githubusercontent.com/{self.acct}/{self.repo}/{self.ref if self.ref else "main"}/articles/{article}.md'
         elif entity.get('id'):
             if 'described at URL' in entity['claims']:
                 for stmt in entity['claims']['described at URL']:

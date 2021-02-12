@@ -448,7 +448,7 @@ def entity(eid=None):
     else:
         if eid:
             qargs['uri'] = as_uri(eid, **qargs)
-        entity = KnowledgeGraph(cache=cache, **qargs).entity(**qargs)
+        entity = KnowledgeGraph(cache=cache, **qargs).entity(acct=acct, ref=ref, repo=repo, **qargs)
         return entity, 200, cors_headers
 
 @app.route('/specimens/<path:path>', methods=['GET'])
