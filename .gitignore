@@ -8,3 +8,4 @@ client-lib/nohup.out
 .vscode
 nohup.out
 yarn.lock
+visual-essays.*.min.js

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#if output="$(git status --porcelain)" && [ -z "$output" ]; then
+if output="$(git status --porcelain)" && [ -z "$output" ]; then
 
   GCR_SERVICE=${1:-visual-essays-dev}
   REF=${2:-develop}
@@ -41,12 +41,12 @@
   cp -va images gcr-build
 
   cd gcr-build
-  #gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
-  #gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
+  gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
+  gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
 
   git checkout develop
 
-#else
-#  echo "There are Uncommitted changes. Please commit and try again"
-#  exit 1
-#fi
+else
+  echo "There are Uncommitted changes. Please commit and try again"
+  exit 1
+fi
