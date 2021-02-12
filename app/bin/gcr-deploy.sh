@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if output="$(git status --porcelain)" && [ -z "$output" ]; then
+#if output="$(git status --porcelain)" && [ -z "$output" ]; then
 
   GCR_SERVICE=${1:-visual-essays-dev}
   REF=${2:-develop}
@@ -22,15 +22,17 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   rm -rf gcr-build
 
   cd app/client-lib
-  yarn build
+  yarn build --hash=${COMMIT_HASH}
 
   cd ../..
 
   mkdir -p gcr-build/server
   cp -va app/Dockerfile gcr-build
   cp -va app/server/*.py app/creds/gh-token app/creds/visual-essay-gcreds.json app/server/*.txt app/server/*.html app/server/sparql app/server/mappings gcr-build/server
-  cp index.html gcr-build
-  cat index.html | sed "s/APP_VERSION/$APP_VERSION/" | sed 's/\/visual-essays\/js\//\/static\/js\//' | sed 's/\/visual-essays\/app\/client-lib\/public\/css\//\/static\/css\//' > gcr-build/index.html
+  cat index.html | sed "s/APP_VERSION/$APP_VERSION/" \
+                 | sed 's/\/visual-essays\/js\//\/static\/js\//' \
+                 | sed "s/visual-essays\.min/visual-essays.${COMMIT_HASH}.min/" \
+                 | sed 's/\/visual-essays\/app\/client-lib\/public\/css\//\/static\/css\//' > gcr-build/index.html
   cp -va app/client-lib/components gcr-build
   cp -va app/client-lib/public/css gcr-build
 
@@ -39,12 +41,12 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   cp -va images gcr-build
 
   cd gcr-build
-  gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
-  gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
+  #gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
+  #gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
 
   git checkout develop
 
-else
-  echo "There are Uncommitted changes. Please commit and try again"
-  exit 1
-fi
+#else
+#  echo "There are Uncommitted changes. Please commit and try again"
+#  exit 1
+#fi

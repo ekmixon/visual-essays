@@ -7,7 +7,6 @@ function resolve (dir) {
 }
 
 module.exports = (env, argv) => {
-  console.log(`BRANCH=${process.env.BRANCH}`);
   config = {
     entry: {
       'visual-essays' : './main.js'
@@ -16,7 +15,7 @@ module.exports = (env, argv) => {
       path: path.resolve(__dirname, '../../js'),
       publicPath: '/lib/',
       // filename: argv.mode === 'production' ? `[name]-${BUNDLE_VERSION}.min.js` : `[name].js`
-      filename: argv.mode === 'development' ? `[name].js` : `[name].min.js` 
+      filename: argv.mode === 'development' ? `[name].js` : `[name]${argv.hash ? '.'+argv.hash : ''}.min.js` 
     },
     resolve: {
       extensions: ['.js', '.vue', '.json'],

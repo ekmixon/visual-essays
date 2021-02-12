@@ -4,9 +4,10 @@
   "description": "Visual essay js library",
   "main": "webpack.config.js",
   "scripts": {
+    "demo": "echo \"Hello $npm_config_first $npm_config_last\"",
     "serve": "vue-cli-service --port 8088 serve main.js",
     "serve-lib": "webpack-dev-server --mode development --hot --port 8088 --output-public-path js --contentBase public --disableHostCheck",
-    "build": "webpack --mode production --progress",
+    "build": "webpack --mode production --progress $npm_config_hash",
     "bundle-report": "webpack-cli --profile --json > compilation-stats.json; webpack-bundle-analyzer --port 4200 compilation-stats.json"
   },
   "dependencies": {
