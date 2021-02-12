@@ -442,13 +442,13 @@ def fingerprints():
 def entity(eid=None):
     site, acct, repo, ref, path, qargs = _context()
     qargs['refresh'] = qargs.get('refresh', 'false') in ('true', '') or 'article' in qargs
-    logger.info(f'entity: eid={eid} qargs={qargs}')
+    logger.info(f'entity: eid={eid} site={site} acct={acct} repo={repo} ref={ref} qargs={qargs}')
     if request.method == 'OPTIONS':
         return ('', 204, cors_headers)
     else:
         if eid:
             qargs['uri'] = as_uri(eid, **qargs)
-        entity = KnowledgeGraph(cache=cache, **qargs).entity(acct=acct, ref=ref, repo=repo, **qargs)
+        entity = KnowledgeGraph(cache=cache, acct=acct, ref=ref, repo=repo, **qargs).entity(**qargs)
         return entity, 200, cors_headers
 
 @app.route('/specimens/<path:path>', methods=['GET'])
