@@ -507,7 +507,7 @@ export default {
 
   @media only screen and (min-width: 1000px) {
     #visual-essay {
-      grid-template-columns: 50% 50%;
+      grid-template-columns: auto 0;
       grid-template-rows: auto 1fr auto;
       grid-template-areas: 
         "header header"

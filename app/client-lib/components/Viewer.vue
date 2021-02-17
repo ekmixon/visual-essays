@@ -189,7 +189,7 @@
       activeElementChange(current, prior) {
         // console.log(`activeElementChange: ${current} ${this.activeElement}`)
         current = current || this.activeElement
-        // const tabsBar = document.querySelector('#tabs-bar')
+        const tabsBar = document.querySelector('#tabs-bar')
         // (`activeElementChange: current=${current} prior=${prior} tabsBar=${tabsBar !== null}`)
         document.querySelectorAll('.active-elem').forEach(elem => elem.classList.remove('active-elem'))
         // document.querySelectorAll('#tabs-bar').forEach(tb => tb.parentElement.removeChild(tb))
@@ -200,7 +200,7 @@
           if (currentElem) {
             currentElem.classList.add('active-elem')
             this.addInteractionHandlers(current)
-            // if (this.layout === 'vertical' && tabsBar) currentElem.appendChild(tabsBar)
+            if (this.layout === 'vertical' && tabsBar) currentElem.appendChild(tabsBar)
           }
         }
       }
