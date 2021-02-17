@@ -612,32 +612,32 @@ module.exports = {
       this.licenseUrl = licenseUrl
       this.licenseIcons = licenseIcons
     },
-    parseManifest(){
+    parseManifest(x){
       var html = "<table style='max-width:100%;table-layout: fixed;'><tbody style='background:none;font-size: 0.8rem;padding: 5px;'>";
       let content = {}
 
       if (this.manifests.length != 0){
-        if (this.manifests[0]['attribution']) { content['attribution'] = this.manifests[0]['attribution'] }
-        if (this.manifests[0]['description']) { content['description'] = this.manifests[0]['description'] }
-        if (this.manifests[0]['label']) { content['label'] = this.manifests[0]['label'] }
-        if (this.manifests[0]['metadata']){
-          this.manifests[0]['metadata'].forEach(message => {
+        if (this.manifests[x]['attribution']) { content['attribution'] = this.manifests[x]['attribution'] }
+        if (this.manifests[x]['description']) { content['description'] = this.manifests[x]['description'] }
+        if (this.manifests[x]['label']) { content['label'] = this.manifests[x]['label'] }
+        if (this.manifests[x]['metadata']){
+          this.manifests[x]['metadata'].forEach(message => {
             if (!content[message['label']] && message['label'] != 'mode' && message['label'] != 'repo' && message['label'] != 'acct' && message['label'] != 'essay' && message['label'] != 'title_formatted'){
               content[message['label']] = message['value']
             }
           })
           //this.items[0]['metadata'].forEach(a => authors[parseInt(a.ordinal)-1] = a['label'])
         }
-        if (this.manifests[0]['sequences']){
-          if (this.manifests[0]['sequences'][0]['canvases'][0]){
-            if (this.manifests[0]['sequences'][0]['canvases'][0]['images']){
-              content['image format'] = this.manifests[0]['sequences'][0]['canvases'][0]['images'][0]['resource']['format']
-              content['image height'] = this.manifests[0]['sequences'][0]['canvases'][0]['images'][0]['resource']['height']
-              content['image width'] = this.manifests[0]['sequences'][0]['canvases'][0]['images'][0]['resource']['width']
+        if (this.manifests[x]['sequences']){
+          if (this.manifests[x]['sequences'][0]['canvases'][0]){
+            if (this.manifests[x]['sequences'][0]['canvases'][0]['images']){
+              content['image format'] = this.manifests[x]['sequences'][0]['canvases'][0]['images'][0]['resource']['format']
+              content['image height'] = this.manifests[x]['sequences'][0]['canvases'][0]['images'][0]['resource']['height']
+              content['image width'] = this.manifests[x]['sequences'][0]['canvases'][0]['images'][0]['resource']['width']
             }
           }
         }
-        if (this.manifests[0]['@id']) { content['IIIF id'] = this.manifests[0]['@id'] }
+        if (this.manifests[x]['@id']) { content['IIIF id'] = this.manifests[0]['@id'] }
 
         for(var key in content){
           
@@ -660,7 +660,18 @@ module.exports = {
       return html;
     },
     displayInfoBox(){
-      this.imageInfo = this.parseManifest();
+      //this.imageInfo = this.parseManifest();
+
+      if (this.manifests.length == 2){
+        if (this.sliderPct < 50){
+          this.imageInfo = this.parseManifest(0)
+        }
+        else if (this.sliderPct > 50){
+          this.imageInfo = this.parseManifest(1)
+        }
+      } else {
+        this.imageInfo = this.parseManifest(0);
+      }
       //const template = document.getElementsByClassName('.info-box-content');
       //console.log('template', template);
 
@@ -789,6 +800,7 @@ module.exports = {
           const opacity = this.sliderPct/100
           this.viewer.world.getItemAt(0).setOpacity(1.0 - opacity)
           this.viewer.world.getItemAt(1).setOpacity(opacity)
+          this.displayInfoBox()
         }
       } else if (this.mode === 'curtain') {
         const numItems = this.viewer.world.getItemCount()
@@ -799,6 +811,7 @@ module.exports = {
           const bsize = backgroundImg.getContentSize()
           foregroundImg.setClip(new OpenSeadragon.Rect(this.sliderPct/100*fsize.x, 0, fsize.x, fsize.y))
           backgroundImg.setClip(new OpenSeadragon.Rect(0, 0, this.sliderPct/100*bsize.x, bsize.y))
+          this.displayInfoBox()
         }
       }
     }
