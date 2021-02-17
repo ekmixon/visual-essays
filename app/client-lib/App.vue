@@ -44,7 +44,7 @@
       ></component>
     </div>
     <div ref="viewer" class="viewer hidden">
-      <component v-if="html && viewerIsOpen" v-bind:is="viewerComponent"
+      <component v-if="html && viewerIsOpen" v-bind:is="viewerComponent" style="height:100%;"
         :width="viewerWidth"
         :hover-item="hoverItemID"
         :selected-item="selectedItemID"
@@ -242,11 +242,13 @@ export default {
           this.$store.dispatch('setItems', items)
           this.$store.dispatch('setEssayConfig', essayConfig)
           let layout = 'horizontal'
+          let matchMedia = window.matchMedia('only screen and (min-width: 1000px)').matches
           if (essayConfig.layout === 'vertical' || essayConfig.layout === 'vtl') {
-            if (window.matchMedia('min-width: 1000px').matches) layout = 'vertical'
+            if (matchMedia) layout = 'vertical'
           } else if (essayConfig.layout[0] !== 'h') {
             layout = essayConfig.layout
           }
+          console.log(`essayConfig.layout=${essayConfig.layout} matchMedia=${matchMedia} layout=${layout}`)
           this.$store.dispatch('setLayout', layout)
           this.$nextTick(() => {this.convertLinks()})
         },
@@ -313,7 +315,7 @@ export default {
           this.itemsInActiveElements = itemsInElements(activeElements, this.allItems)
         },
         resizeHeader(e) {
-          console.log('resizeHeader')
+          // console.log('resizeHeader')
           let delta
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 5
@@ -367,12 +369,10 @@ export default {
           if (option === 'header') this.headerEnabled = !this.headerEnabled
           if (option === 'footer') this.footerEnabled = !this.footerEnabled
         },
-        /*
         setLayout(layout) {
           this.$store.dispatch('setLayout', layout)
           this.setViewerIsOpen(layout === 'vertical')
         },
-        */
         setViewerIsOpen(isOpen) {
           this.$store.dispatch('setViewerIsOpen', isOpen)
         },
@@ -462,7 +462,7 @@ export default {
         },
         layout: {
           handler: function () {
-            // this.viewerIsOpen = this.layout === 'vertical'
+            this.viewerIsOpen = this.layout === 'vertical'
           },
           immediate: true
         },
