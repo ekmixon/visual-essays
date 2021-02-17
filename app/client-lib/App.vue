@@ -28,7 +28,6 @@
         :height="essayHeight"
         :anchor="anchor"
         :essay-config="essayConfig"
-        :style-class="styleClass"
         :hover-item="hoverItemID"
         :selected-item="selectedItemID"
         :viewer-is-open="viewerIsOpen"
@@ -47,7 +46,6 @@
     <div ref="viewer" class="viewer hidden">
       <component v-if="html && viewerIsOpen" v-bind:is="viewerComponent"
         :width="viewerWidth"
-        :height="viewerHeight"
         :hover-item="hoverItemID"
         :selected-item="selectedItemID"
         :acct="acct"
@@ -135,6 +133,7 @@ export default {
         serviceBase() { return this.siteInfo.service || '/' },
         debug() { return this.$store.getters.debug },
         appVersion() { return this.$store.getters.appVersion },
+        /*
         styleClass() { 
           return this.essayConfig && this.essayConfig.style
             ? this.essayConfig.style
@@ -142,6 +141,7 @@ export default {
               ? 'essay-default'
               : ''
         },
+        */
         contentComponents() { return this.components.filter(compConf => compConf.type === 'content') },
         contentComponent() { 
           const found = this.contentComponents.find(c => c.layouts && c.layouts.indexOf(this.layout) >= 0)
@@ -179,6 +179,8 @@ export default {
       },
       mounted() {
         console.log(window.location)
+        console.log('matchMedia',  )
+        // let vertical = window.matchMedia('min-width: 1000px').matches
         if (window.location.href.indexOf('#') > 0) {
           this.hash = window.location.href.split('#').pop()
         }
@@ -239,11 +241,12 @@ export default {
           this.$store.dispatch('setEssayHTML', essayElem.innerHTML)
           this.$store.dispatch('setItems', items)
           this.$store.dispatch('setEssayConfig', essayConfig)
-          const layout = essayConfig.layout
-            ? essayConfig.layout[0] === 'v'
-              ? 'vertical'
-              : essayConfig.layout
-            : 'horizontal'
+          let layout = 'horizontal'
+          if (essayConfig.layout === 'vertical' || essayConfig.layout === 'vtl') {
+            if (window.matchMedia('min-width: 1000px').matches) layout = 'vertical'
+          } else if (essayConfig.layout[0] !== 'h') {
+            layout = essayConfig.layout
+          }
           this.$store.dispatch('setLayout', layout)
           this.$nextTick(() => {this.convertLinks()})
         },
@@ -310,7 +313,7 @@ export default {
           this.itemsInActiveElements = itemsInElements(activeElements, this.allItems)
         },
         resizeHeader(e) {
-          // console.log('resizeHeader')
+          console.log('resizeHeader')
           let delta
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 5
@@ -359,15 +362,17 @@ export default {
           this.selectedItemID = itemID
         },
         toggleOption(option) {
-          if (option === 'layout') this.setLayout(this.layout === 'vertical' ? 'horizontal' : 'vertical')
+          // if (option === 'layout') this.setLayout(this.layout === 'vertical' ? 'horizontal' : 'vertical')
           if (option === 'viewerIsOpen') this.setViewerIsOpen(!this.viewerIsOpen)
           if (option === 'header') this.headerEnabled = !this.headerEnabled
           if (option === 'footer') this.footerEnabled = !this.footerEnabled
         },
+        /*
         setLayout(layout) {
           this.$store.dispatch('setLayout', layout)
           this.setViewerIsOpen(layout === 'vertical')
         },
+        */
         setViewerIsOpen(isOpen) {
           this.$store.dispatch('setViewerIsOpen', isOpen)
         },
@@ -456,8 +461,8 @@ export default {
           //console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         layout: {
-          handler: function (layout) {
-            this.viewerIsOpen = layout[0] === 'v'
+          handler: function () {
+            // this.viewerIsOpen = this.layout === 'vertical'
           },
           immediate: true
         },
@@ -480,7 +485,7 @@ export default {
   #visual-essay {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto auto;
+    grid-template-rows: auto auto auto auto;
     grid-template-areas: 
       "header"
       "essay"
@@ -489,15 +494,29 @@ export default {
     height: 100vh;
     width: 100%;
   }
-  #visual-essay.vertical {
-    grid-template-columns: 50% 50%;
-    grid-template-rows: auto 1fr auto;
+
+  .content {
+    grid-area: content;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
     grid-template-areas: 
-      "header header"
-      "essay  viewer"
-      "footer footer";
-    position: absolute;
+      "essay"
+      "viewer";
   }
+
+  @media only screen and (min-width: 1000px) {
+    #visual-essay {
+      grid-template-columns: 50% 50%;
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas: 
+        "header header"
+        "essay  viewer"
+        "footer footer";
+      position: absolute;
+    }
+  }
+
   .header {
     grid-area: header;
   }

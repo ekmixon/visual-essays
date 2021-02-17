@@ -59,8 +59,8 @@ module.exports = {
         .on('enter', () => this.setActiveElements(para.id) )
         .on('leave', () => this.setActiveElements(this.paragraphs[para.id].prior) )
         
-        if (this.debug) 
-        scene.addIndicators({indent: this.layout === 'vertical' ? this.width/2 : 0})
+        // if (this.debug) 
+        // scene.addIndicators({indent: this.layout === 'vertical' ? this.width/2 : 0})
         
         this.$scrollmagic.addScene(scene)
         this.scenes.push(scene)        
@@ -189,6 +189,7 @@ module.exports = {
       if (this.paragraphs[paraId]) {
         let scrollTo
         const para = this.paragraphs[paraId]
+        /*
         if (this.layout !== 'vertical') {
           // position active paragraph just above viewer pane, if possible
           const paraBottom = para.top + para.height
@@ -198,6 +199,7 @@ module.exports = {
         } else {
           scrollTo = para.top - 56
         }
+        */
         console.log(`paragraphClickHandler layout=${this.layout} para=${paraId} top=${para.top} height=${para.height} scrollTo=${scrollTo}`)
         let scrollable = document.getElementById('scrollableContent')
         if (!scrollable) scrollable = window
@@ -299,13 +301,13 @@ module.exports = {
 
 <style>
 
-.vertical .essay {
+.essay {
   background-color: #dadada;
   padding: 0 0 0 0 !important;
   /* box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3); */
 }
 
-.vertical p.active-elem {
+p.active-elem {
   background-color: #ffffff;
   /* padding-top: 16px;
   padding-bottom: 16px; */
@@ -315,12 +317,12 @@ module.exports = {
   cursor: default;
 }
 
-.vertical p.has-items:hover {
+p.has-items:hover {
   cursor: pointer !important;
   background-color: #f7f7f7;;
 }
   
-.vertical p {
+p {
   padding: 8px 28px 8px 24px;
   line-height: 1.6;
 }
@@ -329,12 +331,12 @@ p {
   /*margin-right: 9px;*/
 }
 
-.vertical h1,
-.vertical h2,
-.vertical h3, 
-.vertical h4, 
-.vertical h5,
-.vertical h6,
+h1,
+h2,
+h3, 
+h4, 
+h5,
+h6,
 .footnote {
   margin-left: 24px;
 }
@@ -347,63 +349,6 @@ p {
 .footnote-backref {
 
 }
-
-/*
-
-#visual-essay #essay p.active-elem {
-  background-color: #ffffff;
-  border-left: none;
-  box-shadow:  4px 4px 4px 0 rgba(0,0,0,0.25);
-  position: relative;
-  cursor: default;
-}
-
-#visual-essay #essay p.has-items:hover {
-  cursor: pointer !important;
-  background-color: #f7f7f7;;
-}
-*/
-
-/*
-#visual-essay.vertical #essay {
-    background-color: #eaeaea;
-    padding: 0 9px 0 0 !important;
-    box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.16);
-    font-family: Roboto, sans-serif;
-    font-size: 1.3rem;
-  }
-
-  #visual-essay.vertical #essay section {
-  }
-
-  #visual-essay.vertical #essay section p {
-    margin-left: 9px;
-    padding-left: 19px;
-    padding-right: 28px;
-    line-height: 1.6;
-  }
-
- #visual-essay.vertical #essay h1,
- #visual-essay.vertical #essay h2,
- #visual-essay.vertical #essay h3, 
- #visual-essay.vertical #essay h4, 
- #visual-essay.vertical #essay h5 {
-    margin-left: 24px;
-  }
-
-  #visual-essay.vertical #essay p.active-elem {
-    background-color: #ffffff;
-    border-left: none;
-    box-shadow:  4px 4px 4px 0 rgba(0,0,0,0.25);
-    position: relative;
-    cursor: default;
-  }
-  
-  #visual-essay.vertical #essay p.has-items:hover {
-    cursor: pointer !important;
-    background-color: #f7f7f7;;
-  }
-*/
 
   .tagged.location,
   p.active-elem .inferred.location,

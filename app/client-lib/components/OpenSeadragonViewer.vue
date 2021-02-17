@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="image-viewer" :style="`width:${width}px;height:${height}px;`">
+  <div id="app" class="image-viewer" :style="`width:100%;height:${height}px;`">
     
       <div class="osd" id="osd" :style="osdContainerStyle"></div>
       <div id="osd-toolbar" class="controls auto-hide">
@@ -126,8 +126,8 @@ module.exports = {
       return {
         backgroundColor: this.currentItem ? this.currentItem.background || 'black' : 'black',
         textAlign: 'center',
-        height: `${this.height}px`,
-        width: `${this.width}px`,
+        height: '`${this.height}px`',
+        width: '100%',
         maxHeight: this.showAnnotations ? `${this.width}px` : '',
         position: 'relative'
       }
