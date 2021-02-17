@@ -622,7 +622,7 @@ module.exports = {
         if (this.manifests[0]['label']) { content['label'] = this.manifests[0]['label'] }
         if (this.manifests[0]['metadata']){
           this.manifests[0]['metadata'].forEach(message => {
-            if (!content[message['label']]){
+            if (!content[message['label']] && message['label'] != 'mode' && message['label'] != 'repo' && message['label'] != 'acct' && message['label'] != 'essay' && message['label'] != 'title_formatted'){
               content[message['label']] = message['value']
             }
           })
@@ -667,16 +667,20 @@ module.exports = {
         if (!this.tippy) {
           new this.$tippy(document.querySelectorAll('.info-box'), {
             animation:'scale',
+            
             trigger:'click',
             interactive: true,
             allowHTML: true,
             placement: 'bottom-start',
+            zIndex: 11,
+            preventOverflow: { enabled: false },
+            hideOnClick: true,
             // theme: 'light-border',
             
             onShow: (instance) => {
               instance.setContent(this.imageInfo)
-              //setTimeout(() => { instance.hide() }, 10000) 
-            }
+              //setTimeout(() => { instance.hide() }, 10000)
+            },
           })
         }
     
@@ -923,7 +927,7 @@ module.exports = {
 
     .citation {
       grid-area: 5 / 1 / 6 / 3;
-      z-index: 2;
+      z-index: 1;
       justify-self: stretch;
       align-self: stretch;
       /* background-color: rgba(255, 255, 255, 0.8); */
@@ -1053,5 +1057,10 @@ module.exports = {
     .info-box-content{
       display: flex;
     }
+
+    .info-box {
+      z-index: 11,
+    }
+    
 
 </style>
