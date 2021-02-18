@@ -74,6 +74,7 @@
       :selected-item="selectedItemID"
       @set-selected-item="setSelectedItem"
     ></component>
+    <component v-bind:is="viewerModalComponent"></component>
   </div>
 </template>
 
@@ -166,6 +167,10 @@ export default {
           const found = this.components.find(c => c.name === 'entityInfoboxModal')
           return found ? found.component : null
         },
+        viewerModalComponent() {
+          const found = this.components.find(c => c.name === 'viewerModal')
+          return found ? found.component : null
+        },
         viewerComponent() {
           const found = this.components.find(c => c.name === 'viewer')
           return found ? found.component : null
@@ -180,6 +185,7 @@ export default {
       },
       mounted() {
         console.log(window.location)
+        // this.$modal.show('viewer-modal')
         if (window.location.href.indexOf('#') > 0) {
           this.hash = window.location.href.split('#').pop()
         }
@@ -360,9 +366,9 @@ export default {
         },
         calcViewerHeight() {
           let height = this.$refs.app.clientHeight
-          console.log(height, this.$refs.header ? this.$refs.header.clientHeight : 0, this.$refs.footer ? this.$refs.footer.clientHeight : 0)
           if (this.$refs.header) height -= this.$refs.header.clientHeight
           if (this.$refs.footer) height -= this.$refs.footer.clientHeight
+          console.log(`calculated=${height} app=${this.$refs.app.clientHeight} header=${this.$refs.header ? this.$refs.header.clientHeight : 0} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : 0}`)
           return this.layout === 'horizontal' ? height/2 : height
         },
         setHoverItem(itemID) {
@@ -519,13 +525,10 @@ export default {
     #visual-essay,
     #visual-essay.vertical {
       width: 100%;
-      grid-template-columns: auto auto;
-      grid-template-rows: auto 1fr auto auto;
-      grid-template-areas: 
-        "header"
-        "essay"  
-        "viewer"
-        "footer";
+      grid-template-columns: 100vw;
+      grid-template-rows: 100vh;
+      /* grid-template-areas: "header" "essay" "viewer" "footer"; */
+      grid-template-areas: "essay";
     }
   }
 

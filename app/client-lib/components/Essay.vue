@@ -326,17 +326,17 @@ p.has-items:hover {
   background-color: #f7f7f7;;
 }
   
-p.vertical {
+.vertical p {
   padding: 8px 28px 8px 24px;
   line-height: 1.6;
 }
 
-h1.vertical,
-h2.vertical,
-h3.vertical, 
-h4.vertical, 
-h5.vertical,
-h6.vertical,
+.vertical h1,
+.vertical h2,
+.vertical h3, 
+.vertical h4, 
+.vertical h5,
+.vertical h6,
 .footnote {
   margin-left: 24px;
 }

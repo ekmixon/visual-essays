@@ -1,7 +1,7 @@
 <template>
-  <div id="app" class="image-viewer" style="height:329px;">
+  <div id="app" class="image-viewer" :style="osdContainerStyle">
     
-      <div class="osd" id="osd" :style="osdContainerStyle"></div>
+      <div class="osd" id="osd"></div>
       <div id="osd-toolbar" class="controls auto-hide">
         <span id="go-home"><i class="fas fa-home"></i></span>
         <span id="zoom-in"><i class="fas fa-search-plus"></i></span>
@@ -144,8 +144,10 @@ module.exports = {
       if (this.currentItem.target) {
         return this.currentItem.target
       } else {
+        let path = this.path === '/' ? '' : this.path[this.path.length-1] === '/' ? this.path.slice(0,this.path.length-1): this.path
+        console.log(`path=${path}`)
         const imageSourceHash = this.currentItem ? this.sha256(this.currentItem['@id']).slice(0,8) : ''
-        return `${this.acct}/${this.repo}/${this.branch}${this.path === '/' ? '' : this.path}/${imageSourceHash}`
+        return `${this.acct}/${this.repo}/${this.branch}${path}/${imageSourceHash}`
       }
     },
     annotations() { const annos = this.currentItem ? this.currentItem.annotations || [] : []; return annos; },
