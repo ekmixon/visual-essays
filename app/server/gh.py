@@ -13,7 +13,7 @@ import requests
 logging.getLogger('requests').setLevel(logging.INFO)
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
-BASEDIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+BASEDIR = os.path.dirname(SCRIPT_DIR)
 logger.info(f'SCRIPT_DIR={SCRIPT_DIR} BASEDIR={BASEDIR}')
 
 _gh_token = os.environ.get('gh_token')
