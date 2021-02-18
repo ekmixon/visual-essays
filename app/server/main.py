@@ -151,7 +151,8 @@ def _get_site_info(href):
         'baseurl': '',
         'acct': None,
         'repo': None,
-        'ref': _qargs.get('ref'),
+        'ref': None,
+        # 'ref': _qargs.get('ref'),
         'defaultBranch': None,
         'editBranch': None
     }
@@ -189,6 +190,7 @@ def _get_site_info(href):
         else:
             site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
             siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
+    logger.info(f'ref={site_info["ref"]}')
     if repo_info is None:
         url = f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}'
         resp = requests.get(url)
@@ -200,7 +202,7 @@ def _get_site_info(href):
             site_info['defaultBranch'] = repo_info['default_branch']
         elif resp.status_code == 404:
             site_info['private'] = True
-
+    logger.info(f'ref={site_info["ref"]}')
     if not siteConfigUrl:
         if repo_info is None: # Probably a private GH site 
             siteConfigUrl = f'https://{site_info["acct"]}.github.io/{site_info["repo"]}/config.json'
@@ -221,7 +223,6 @@ def _get_site_info(href):
         for key, value in site_config.items():
             #if key in site_info: continue
             if key == 'components':
-                logger.info('components')
                 site_info['components'] = []
                 for comp in value:
                     if not comp['src'].startswith('http'):
@@ -232,7 +233,7 @@ def _get_site_info(href):
                     value = f'https://{site_info["acct"]}.github.io/{site_info["repo"]}{"" if value[0] == "/" else "/"}{value}'
                 else:
                     value = f'{resource_baseurl}{"" if value[0] == "/" else "/"}{value}'
-            elif key in ('ref',): continue
+            # elif key in ('ref',): continue
             site_info[key] = value
 
     if site_info['ref'] and len(site_info['ref']) == 7 and re.match(r'^[0-9a-f]+$', site_info['ref']):

@@ -49,6 +49,7 @@
         :height="viewerHeight"
         :hover-item="hoverItemID"
         :selected-item="selectedItemID"
+        :siteInfo="siteInfo"
         :acct="acct"
         :repo="repo"
         :branch="branch"
@@ -117,9 +118,10 @@ export default {
         widthPrior: 0,
       }),
       computed: {
-        acct() { return this.$store.getters.siteInfo.acct },
-        repo() { return this.$store.getters.siteInfo.repo },
-        branch() { return this.$store.getters.siteInfo.ref },
+        siteInfo() { return this.$store.getters.siteInfo || {} },
+        acct() { return this.siteInfo.acct },
+        repo() { return this.siteInfo.repo },
+        branch() { return this.siteInfo.ref },
         // path() { return `${this.$store.getters.mdPath}` },
         // hash() { return `${this.$store.getters.hash}` },
         jwt() { return this.$store.getters.jwt },
@@ -130,7 +132,6 @@ export default {
         components() { return Object.values(this.$store.getters.components) },
         layout() { return this.$store.getters.layout },
         essayConfig() { return this.$store.getters.essayConfig },
-        siteInfo() { return this.$store.getters.siteInfo || {} },
         baseurl() { return this.siteInfo.baseurl || '' },
         serviceBase() { return this.siteInfo.service || '/' },
         debug() { return this.$store.getters.debug },

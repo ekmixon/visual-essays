@@ -86,9 +86,10 @@ module.exports = {
   props: {
     actions: { type: Array, default: () => ([]) },
     actionSources: { type: Array, default: () => ([]) },
-    acct: String,
-    repo: String,
-    branch: String,
+    siteInfo: { type: Object, default: () => ({}) },
+    //acct: String,
+    //repo: String,
+    //branch: String,
     path: String,
     active: String,
     items: Array,
@@ -147,7 +148,7 @@ module.exports = {
         let path = this.path === '/' ? '' : this.path[this.path.length-1] === '/' ? this.path.slice(0,this.path.length-1): this.path
         console.log(`path=${path}`)
         const imageSourceHash = this.currentItem ? this.sha256(this.currentItem['@id']).slice(0,8) : ''
-        return `${this.acct}/${this.repo}/${this.branch}${path}/${imageSourceHash}`
+        return `${this.siteInfo.acct}/${this.siteInfo.repo}/${this.siteInfo.editBranch}${path}/${imageSourceHash}`
       }
     },
     annotations() { const annos = this.currentItem ? this.currentItem.annotations || [] : []; return annos; },

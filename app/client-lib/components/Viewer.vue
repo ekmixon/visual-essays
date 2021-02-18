@@ -23,6 +23,7 @@
     <component ref="viewer"
       v-if="viewerIsOpen && activeTab && actions[activeTab]"
       v-bind:is="groups[activeTab].component"
+      :siteInfo="siteInfo"
       :acct="acct"
       :repo="repo"
       :branch="branch"
@@ -57,6 +58,7 @@
       hoverItem: String,
       selectedItem: String,
       layout: String,
+      siteInfo: { type: Object, default: () => ({}) },
       acct: String,
       repo: String,
       branch: String,
