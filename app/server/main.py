@@ -93,11 +93,12 @@ if default_gh_token is None and os.path.exists(f'{BASEDIR}/app/creds/gh-token'):
         default_gh_token = fp.read().strip()
 
 def gh_token():
-    logger.info(f'gh_token: g.token={g.token} default_gh_token={default_gh_token}')
     try:
-        return g.token
+        token = g.token
     except:
-        return default_gh_token
+        token = default_gh_token
+    logger.info(f'gh_token: token={token} default_gh_token={default_gh_token}')
+    return token 
 
 # Middleware decorator to enforce logins
 def login_required(f):
