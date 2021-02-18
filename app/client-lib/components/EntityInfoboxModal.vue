@@ -57,7 +57,7 @@ module.exports = {
   .close-button {
     position: absolute;
     top: 8px;
-    left: 8px;
+    right: 8px;
     background-color: black;
     border-radius: 40px;
     display: block;
