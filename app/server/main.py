@@ -151,7 +151,7 @@ def _get_site_info(href):
         'baseurl': '',
         'acct': None,
         'repo': None,
-        'ref': None,
+        'ref': _qargs.get('ref'),
         'defaultBranch': None,
         'editBranch': None
     }
