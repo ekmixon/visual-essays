@@ -30,12 +30,9 @@ def _github_api_urls(target):
     #  essay-path can be variable length
     logger.info(f'target={target}')
     path = target.split('/')
-    logger.info(path)
     acct, repo, branch = path[:3]
     image_hash = path[-1]
     essay_elems = path[3:-1]
-    # path_elems = essay_elems[:-1]
-    logger.info(essay_elems)
     essay_root = '/' if len(essay_elems) == 0 else f'/{"/".join(essay_elems)}/'
     logger.info(f'acct={acct} repo={repo} branch={branch} essay_root={essay_root} image_hash={image_hash}')
     content_url = f'https://api.github.com/repos/{acct}/{repo}/contents{essay_root}{image_hash}.json?ref={branch}'
@@ -70,9 +67,11 @@ def _get_annos(target, auth_token):
         'Accept': 'application/vnd.github.v3+json',
         'User-agent': 'JSTOR Labs visual essays client'
     })
+    logger.info(f'_get_annos: url={gh_content_url} status_code={resp.status_code}')
     if resp.status_code == 200:
         resp = resp.json()
         anno_page = json.loads(base64.b64decode(resp['content']).decode('utf-8'))
+        logger.info(anno_page)
         sha = resp['sha']
     return anno_page, sha
 
