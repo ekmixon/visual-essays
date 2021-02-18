@@ -45,7 +45,7 @@ strip_html_regex = re.compile(r'<[^>]+>')
 
 def get_workbook(workbook=default_workbook, **kwargs):
     logger.info(f'get_workbook: {workbook}')
-    creds = ServiceAccountCredentials.from_json_keyfile_name(f'{BASEDIR}/app/creds/labs-gs-creds.json', scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name(f'{BASEDIR}/creds/labs-gs-creds.json', scope)
     client = gspread.authorize(creds)
     return client.open(workbook)
 

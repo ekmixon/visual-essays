@@ -17,8 +17,8 @@ BASEDIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 # logger.info(f'SCRIPT_DIR={SCRIPT_DIR} BASEDIR={BASEDIR}')
 
 _gh_token = os.environ.get('gh_token')
-if not _gh_token and os.path.exists(f'{BASEDIR}/app/creds/gh-token'):
-    with open(f'{BASEDIR}/app/creds/gh-token', 'r') as fp:
+if not _gh_token and os.path.exists(f'{BASEDIR}/creds/gh-token'):
+    with open(f'{BASEDIR}/creds/gh-token', 'r') as fp:
         _gh_token = fp.read().strip()
 def gh_token():
     return _gh_token
