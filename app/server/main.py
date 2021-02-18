@@ -155,7 +155,6 @@ def _get_site_info(href):
         'defaultBranch': None,
         'editBranch': None
     }
-    logger.info(f'ref={site_info["ref"]}')
     siteConfigUrl = None
     if hostname.endswith('.github.io'):
         acct = hostname[:-10]
@@ -180,7 +179,6 @@ def _get_site_info(href):
                 })
         else:
             site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
-        logger.info(f'x ref={site_info["ref"]}')
     else:
         _site = hostname[4:] if hostname[:4] in ('dev.', 'exp.') else hostname
         logger.info(f'{_site} {_site in KNOWN_SITES}')
@@ -210,7 +208,6 @@ def _get_site_info(href):
             siteConfigUrl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
     resp = requests.get(siteConfigUrl)
     logger.info(f'siteConfigUrl={siteConfigUrl} {resp.status_code}')
-    logger.info(f'ref={site_info["ref"]}')
     if resp.status_code == 200:
         site_config = resp.json()
         site_info['ref'] = site_info['ref'] if site_info['ref'] else site_config.get('ref')        
@@ -235,6 +232,7 @@ def _get_site_info(href):
                     value = f'https://{site_info["acct"]}.github.io/{site_info["repo"]}{"" if value[0] == "/" else "/"}{value}'
                 else:
                     value = f'{resource_baseurl}{"" if value[0] == "/" else "/"}{value}'
+            elif key in ('ref',): continue
             site_info[key] = value
 
     if site_info['ref'] and len(site_info['ref']) == 7 and re.match(r'^[0-9a-f]+$', site_info['ref']):
