@@ -67,7 +67,7 @@ def _get_annos(target, auth_token):
         'Accept': 'application/vnd.github.v3+json',
         'User-agent': 'JSTOR Labs visual essays client'
     })
-    logger.info(f'_get_annos: url={gh_content_url} status_code={resp.status_code}')
+    logger.info(f'_get_annos: url={gh_content_url} token={auth_token} status_code={resp.status_code}')
     if resp.status_code == 200:
         resp = resp.json()
         anno_page = json.loads(base64.b64decode(resp['content']).decode('utf-8'))

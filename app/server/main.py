@@ -93,6 +93,7 @@ if default_gh_token is None and os.path.exists(f'{BASEDIR}/app/creds/gh-token'):
         default_gh_token = fp.read().strip()
 
 def gh_token():
+    logger.info(f'gh_token: g.token={g.token} default_gh_token={default_gh_token}')
     try:
         return g.token
     except:
