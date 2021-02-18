@@ -215,7 +215,7 @@ module.exports = {
           visibilityRatio: 1.0,
           constrainDuringPan: true,
           // minZoomImageRatio: 0, 
-          //minZoomImageRatio: 0,
+          minZoomImageRatio: 0.5,
           // maxZoomPixelRatio: Infinity,
           maxZoomPixelRatio: 10,
           homeFillsViewer: this.fit === 'cover',
