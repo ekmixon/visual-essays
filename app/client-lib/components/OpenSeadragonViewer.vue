@@ -942,12 +942,14 @@ module.exports = {
       grid-area: 5 / 1 / 6 / 3;
       z-index: 1;
       justify-self: stretch;
-      align-self: stretch;
+      /*align-self: stretch;*/
+      max-height: 30px;
+      overflow: auto;
       /* background-color: rgba(255, 255, 255, 0.8); */
       background-color: #ccc;
       padding: 9px 6px;
-        text-align: center;
-        line-height: 1;
+      text-align: center;
+      line-height: 1;
     }
 
     .viewport-coords {
