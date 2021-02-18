@@ -155,6 +155,7 @@ def _get_site_info(href):
         'defaultBranch': None,
         'editBranch': None
     }
+    logger.info(f'ref={site_info["ref"]}')
     siteConfigUrl = None
     if hostname.endswith('.github.io'):
         acct = hostname[:-10]
@@ -179,6 +180,7 @@ def _get_site_info(href):
                 })
         else:
             site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
+        logger.info(f'x ref={site_info["ref"]}')
     else:
         _site = hostname[4:] if hostname[:4] in ('dev.', 'exp.') else hostname
         logger.info(f'{_site} {_site in KNOWN_SITES}')
@@ -208,6 +210,7 @@ def _get_site_info(href):
             siteConfigUrl = f'https://raw.githubusercontent.com/{site_info["acct"]}/{site_info["repo"]}/{site_info["ref"]}/config.json'
     resp = requests.get(siteConfigUrl)
     logger.info(f'siteConfigUrl={siteConfigUrl} {resp.status_code}')
+    logger.info(f'ref={site_info["ref"]}')
     if resp.status_code == 200:
         site_config = resp.json()
         site_info['ref'] = site_info['ref'] if site_info['ref'] else site_config.get('ref')        
@@ -244,6 +247,7 @@ def _get_site_info(href):
             site_info['editBranch'] = commit_info[0]['name']
     else:
         site_info['editBranch'] = _qargs.get('ref', site_info['ref'])
+    logger.info(f'ref={site_info["ref"]}')
     return site_info
 
 def _context(path=None):
