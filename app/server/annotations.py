@@ -33,8 +33,7 @@ def _github_api_urls(target):
     acct, repo, branch = path[:3]
     image_hash = path[-1]
     essay_elems = path[3:-1]
-    path_elems = essay_elems[:-1]
-    essay_root = '/' if len(path_elems) == 0 else f'/{"/".join(path_elems)}/'
+    essay_root = '/' if len(essay_elems) == 0 else f'/{"/".join(essay_elems)}/'
     logger.info(f'acct={acct} repo={repo} branch={branch} essay_root={essay_root} image_hash={image_hash}')
     content_url = f'https://api.github.com/repos/{acct}/{repo}/contents{essay_root}{image_hash}.json?ref={branch}'
     logger.info(content_url)
@@ -68,9 +67,11 @@ def _get_annos(target, auth_token):
         'Accept': 'application/vnd.github.v3+json',
         'User-agent': 'JSTOR Labs visual essays client'
     })
+    logger.info(f'_get_annos: url={gh_content_url} token={auth_token} status_code={resp.status_code}')
     if resp.status_code == 200:
         resp = resp.json()
         anno_page = json.loads(base64.b64decode(resp['content']).decode('utf-8'))
+        logger.info(anno_page)
         sha = resp['sha']
     return anno_page, sha
 
@@ -117,7 +118,6 @@ def get_annotation(annoid, **kwargs):
     for _anno in anno_page.get('items', []):
         if _anno['id'] == rel_annoid:
             return _anno
-    raise 
 
 def query_annotations(**kwargs):
     kwargs['reader']('some file')

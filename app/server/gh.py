@@ -13,18 +13,20 @@ import requests
 logging.getLogger('requests').setLevel(logging.INFO)
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
-BASEDIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
-# logger.info(f'SCRIPT_DIR={SCRIPT_DIR} BASEDIR={BASEDIR}')
+BASEDIR = os.path.dirname(SCRIPT_DIR)
+logger.info(f'SCRIPT_DIR={SCRIPT_DIR} BASEDIR={BASEDIR}')
 
 _gh_token = os.environ.get('gh_token')
-if not _gh_token and os.path.exists(f'{BASEDIR}/app/creds/gh-token'):
-    with open(f'{BASEDIR}/app/creds/gh-token', 'r') as fp:
+exists = os.path.exists(f'{BASEDIR}/creds/gh-token')
+logger.info(f'{BASEDIR}/creds/gh-token exists={exists}')
+if not _gh_token and os.path.exists(f'{BASEDIR}/creds/gh-token'):
+    with open(f'{BASEDIR}/creds/gh-token', 'r') as fp:
         _gh_token = fp.read().strip()
 def gh_token():
     return _gh_token
 
 def get_gh_file(url, token=None):
-    logger.info(f'get_gh_file {url}')
+    logger.info(f'get_gh_file {url} {token} {gh_token()}')
     content = sha = None
     resp = requests.get(url, headers={
         'Authorization': f'Token {token or gh_token()}',

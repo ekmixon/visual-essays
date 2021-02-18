@@ -28,7 +28,7 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
 
   mkdir -p gcr-build/server
   cp -va app/Dockerfile gcr-build
-  cp -va app/server/*.py app/creds/gh-token app/creds/visual-essay-gcreds.json app/server/*.txt app/server/*.html app/server/sparql app/server/mappings gcr-build/server
+  cp -va app/server/*.py app/server/*.txt app/server/*.html app/server/sparql app/server/mappings gcr-build/server
   cat index.html | sed "s/APP_VERSION/$APP_VERSION/" \
                  | sed 's/\/visual-essays\/js\//\/static\/js\//' \
                  | sed "s/visual-essays\.min/visual-essays.${COMMIT_HASH}.min/" \
@@ -36,7 +36,7 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   cp -va app/client-lib/components gcr-build
   cp -va app/client-lib/public/css gcr-build
 
-  cp -va app/creds gcr-build
+  cp -va creds gcr-build
   cp -va js gcr-build
   cp -va images gcr-build
 

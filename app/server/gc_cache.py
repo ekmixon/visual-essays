@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 
 DEFAULT_PROJECT_NAME = 'visual-essays'
 DEFAULT_BUCKET_NAME = 'visual-essays-cache'
-DEFAULT_CREDS_PATH = os.path.join(BASEDIR, 'app', 'creds', 'visual-essay-gcreds.json')
+DEFAULT_CREDS_PATH = os.path.join(BASEDIR, 'creds', 'visual-essay-gcreds.json')
 
 DEFAULT_KEYFIELD = 'id'
 

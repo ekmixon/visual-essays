@@ -18,11 +18,12 @@
       >
         <i :class="groups[tab].icon" class="fal"></i>
       </button>
-      <button>{{viewerLabel}}</button>
+      <!-- <button>{{viewerLabel}}</button> -->
     </div>
     <component ref="viewer"
       v-if="viewerIsOpen && activeTab && actions[activeTab]"
       v-bind:is="groups[activeTab].component"
+      :siteInfo="siteInfo"
       :acct="acct"
       :repo="repo"
       :branch="branch"
@@ -57,6 +58,7 @@
       hoverItem: String,
       selectedItem: String,
       layout: String,
+      siteInfo: { type: Object, default: () => ({}) },
       acct: String,
       repo: String,
       branch: String,
@@ -97,7 +99,7 @@
       }
     },
     mounted() {
-      // console.log(`viewer: viewerIsOpen=${this.viewerIsOpen} activeTab=${this.activeTab} actions=${this.actions[this.activeTab]} width=${this.width} viewerWidth=${this.viewerWidth} height=${this.height} viewerHeight=${this.viewerHeight}`)
+      console.log(`viewer: viewerIsOpen=${this.viewerIsOpen} activeTab=${this.activeTab} actions=${this.actions[this.activeTab]} width=${this.width} viewerWidth=${this.viewerWidth} height=${this.height} viewerHeight=${this.viewerHeight}`)
       this.activeElementChange()
     },
     methods: {
@@ -226,6 +228,7 @@
       },
       height() {
         this.viewerHeight = this.height - (this.$refs.tabs ? this.$refs.tabs.clientHeight : 0)
+        console.log(`Viewer.height=${this.viewerHeight}`)
         // this.viewerHeight = this.height
       },
       width() { this.viewerWidth = this.width },

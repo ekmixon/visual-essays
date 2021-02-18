@@ -17,6 +17,7 @@ import D3PlusNetwork from './components/D3PlusNetwork.vue'
 import D3PlusRingNetwork from './components/D3PlusRingNetwork.vue'
 import EntityInfobox from './components/EntityInfobox.vue'
 import EntityInfoboxModal from './components/EntityInfoboxModal.vue'
+import ViewerModal from './components/ViewerModal.vue'
 import Essay from './components/Essay.vue'
 import Header from './components/Header.vue'
 import EssayIndex from './components/EssayIndex.vue'
@@ -44,6 +45,7 @@ const baseComponentIndex = [
   { name: 'd3PlusRingNetwork', src: '/components/D3PlusRingNetwork.vue', component: D3PlusRingNetwork, selectors: ['tag:d3plus-ring-network'], icon: 'fa-chart-network', label: 'Networks'},
   { name: 'entityInfobox', src: '/components/EntityInfobox.vue', component: EntityInfobox},
   { name: 'entityInfoboxModal', src: '/components/EntityInfoboxModal.vue', component: EntityInfoboxModal},
+  { name: 'viewerModal', src: '/components/ViewerModal.vue', component: ViewerModal},
   { name: 'essay', src: '/components/Essay.vue', component: Essay, type: 'content', layouts: ['default', 'vertical', 'horizontal']},
   { name: 'essayHeader', src: '/components/Header.vue', component: Header, type: 'header', layouts: ['default', 'vertical', 'horizontal']},
   { name: 'essayIndex', src: '/components/EssayIndex.vue', component: EssayIndex, type: 'content', layouts: ['index']},

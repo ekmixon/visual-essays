@@ -28,7 +28,6 @@
         :height="essayHeight"
         :anchor="anchor"
         :essay-config="essayConfig"
-        :style-class="styleClass"
         :hover-item="hoverItemID"
         :selected-item="selectedItemID"
         :viewer-is-open="viewerIsOpen"
@@ -50,6 +49,7 @@
         :height="viewerHeight"
         :hover-item="hoverItemID"
         :selected-item="selectedItemID"
+        :siteInfo="siteInfo"
         :acct="acct"
         :repo="repo"
         :branch="branch"
@@ -75,6 +75,7 @@
       :selected-item="selectedItemID"
       @set-selected-item="setSelectedItem"
     ></component>
+    <component v-bind:is="viewerModalComponent"></component>
   </div>
 </template>
 
@@ -117,9 +118,10 @@ export default {
         widthPrior: 0,
       }),
       computed: {
-        acct() { return this.$store.getters.siteInfo.acct },
-        repo() { return this.$store.getters.siteInfo.repo },
-        branch() { return this.$store.getters.siteInfo.ref },
+        siteInfo() { return this.$store.getters.siteInfo || {} },
+        acct() { return this.siteInfo.acct },
+        repo() { return this.siteInfo.repo },
+        branch() { return this.siteInfo.ref },
         // path() { return `${this.$store.getters.mdPath}` },
         // hash() { return `${this.$store.getters.hash}` },
         jwt() { return this.$store.getters.jwt },
@@ -130,11 +132,11 @@ export default {
         components() { return Object.values(this.$store.getters.components) },
         layout() { return this.$store.getters.layout },
         essayConfig() { return this.$store.getters.essayConfig },
-        siteInfo() { return this.$store.getters.siteInfo || {} },
         baseurl() { return this.siteInfo.baseurl || '' },
         serviceBase() { return this.siteInfo.service || '/' },
         debug() { return this.$store.getters.debug },
         appVersion() { return this.$store.getters.appVersion },
+        /*
         styleClass() { 
           return this.essayConfig && this.essayConfig.style
             ? this.essayConfig.style
@@ -142,6 +144,7 @@ export default {
               ? 'essay-default'
               : ''
         },
+        */
         contentComponents() { return this.components.filter(compConf => compConf.type === 'content') },
         contentComponent() { 
           const found = this.contentComponents.find(c => c.layouts && c.layouts.indexOf(this.layout) >= 0)
@@ -165,6 +168,10 @@ export default {
           const found = this.components.find(c => c.name === 'entityInfoboxModal')
           return found ? found.component : null
         },
+        viewerModalComponent() {
+          const found = this.components.find(c => c.name === 'viewerModal')
+          return found ? found.component : null
+        },
         viewerComponent() {
           const found = this.components.find(c => c.name === 'viewer')
           return found ? found.component : null
@@ -179,6 +186,7 @@ export default {
       },
       mounted() {
         console.log(window.location)
+        // this.$modal.show('viewer-modal')
         if (window.location.href.indexOf('#') > 0) {
           this.hash = window.location.href.split('#').pop()
         }
@@ -195,12 +203,13 @@ export default {
         this.setEssay(path)
 
         const resizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
-          // console.log(`resizeObserver: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
-          this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+          console.log(`resizeObserver: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
+          // this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+          this.viewerHeight = this.calcViewerHeight()
           this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
         })
         resizeObserver.observe(this.$refs.app)
-        this.updateViewerSize()
+        // this.updateViewerSize()
       },
       methods: {
         async loadEssay(path, replace) {
@@ -239,11 +248,14 @@ export default {
           this.$store.dispatch('setEssayHTML', essayElem.innerHTML)
           this.$store.dispatch('setItems', items)
           this.$store.dispatch('setEssayConfig', essayConfig)
-          const layout = essayConfig.layout
-            ? essayConfig.layout[0] === 'v'
-              ? 'vertical'
-              : essayConfig.layout
-            : 'horizontal'
+          let layout = 'horizontal'
+          let matchMedia = window.matchMedia('only screen and (min-width: 1000px)').matches
+          if (essayConfig.layout === 'vertical' || essayConfig.layout === 'vtl') {
+            if (matchMedia) layout = 'vertical'
+          } else if (essayConfig.layout[0] !== 'h') {
+            layout = essayConfig.layout
+          }
+          console.log(`essayConfig.layout=${essayConfig.layout} matchMedia=${matchMedia} layout=${layout}`)
           this.$store.dispatch('setLayout', layout)
           this.$nextTick(() => {this.convertLinks()})
         },
@@ -313,7 +325,7 @@ export default {
           // console.log('resizeHeader')
           let delta
           if (e.touches) {
-            delta = (e.touches[0].screenY - this.lastTouchY) / 5
+            delta = (e.touches[0].screenY - this.lastTouchY) / 20
           } else {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           }
@@ -350,7 +362,15 @@ export default {
               this.footerHeight = this.footer.clientHeight
             }
           }
+          this.viewerHeight = this.calcViewerHeight()
           if (!this.header || !this.footer) setTimeout(this.waitForHeaderFooter, 250)
+        },
+        calcViewerHeight() {
+          let height = this.$refs.app.clientHeight
+          if (this.$refs.header) height -= this.$refs.header.clientHeight
+          if (this.$refs.footer) height -= this.$refs.footer.clientHeight
+          console.log(`calculated=${height} app=${this.$refs.app.clientHeight} header=${this.$refs.header ? this.$refs.header.clientHeight : 0} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : 0}`)
+          return this.layout === 'horizontal' ? height/2 : height
         },
         setHoverItem(itemID) {
           this.hoverItemID = itemID
@@ -359,7 +379,7 @@ export default {
           this.selectedItemID = itemID
         },
         toggleOption(option) {
-          if (option === 'layout') this.setLayout(this.layout === 'vertical' ? 'horizontal' : 'vertical')
+          // if (option === 'layout') this.setLayout(this.layout === 'vertical' ? 'horizontal' : 'vertical')
           if (option === 'viewerIsOpen') this.setViewerIsOpen(!this.viewerIsOpen)
           if (option === 'header') this.headerEnabled = !this.headerEnabled
           if (option === 'footer') this.footerEnabled = !this.footerEnabled
@@ -439,7 +459,8 @@ export default {
               this.$refs.app.clientHeight !== this.heightPrior ||
               this.$refs.app.clientWidth !== this.widthPrior) {
             // console.log(`updateViewerSize: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${headerHeight} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
-            this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+            // this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+            this.viewerHeight = this.calcViewerHeight()
             this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
             this.headerPrior = headerHeight
             this.heightPrior = this.$refs.app.clientHeight
@@ -453,11 +474,11 @@ export default {
           //console.log(`App.viewerWidth: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         viewerHeight() {
-          //console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
+          console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         layout: {
-          handler: function (layout) {
-            this.viewerIsOpen = layout[0] === 'v'
+          handler: function () {
+            this.viewerIsOpen = this.layout === 'vertical'
           },
           immediate: true
         },
@@ -477,18 +498,20 @@ export default {
 
 <style scoped>
 
+
   #visual-essay {
     display: grid;
-    grid-template-columns: 1fr;
+    height: 100vh;
+    width: 100%;
+    grid-template-columns: auto auto;
     grid-template-rows: auto 1fr auto auto;
     grid-template-areas: 
       "header"
-      "essay"
+      "essay"  
       "viewer"
       "footer";
-    height: 100vh;
-    width: 100%;
   }
+
   #visual-essay.vertical {
     grid-template-columns: 50% 50%;
     grid-template-rows: auto 1fr auto;
@@ -498,6 +521,18 @@ export default {
       "footer footer";
     position: absolute;
   }
+
+  @media only screen and (max-width: 1000px) {
+    #visual-essay,
+    #visual-essay.vertical {
+      width: 100%;
+      grid-template-columns: 100vw;
+      grid-template-rows: 100vh;
+      /* grid-template-areas: "header" "essay" "viewer" "footer"; */
+      grid-template-areas: "essay";
+    }
+  }
+
   .header {
     grid-area: header;
   }

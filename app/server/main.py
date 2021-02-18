@@ -88,15 +88,17 @@ except:
    public_key = None
 
 default_gh_token = os.environ.get('gh_token')
-if default_gh_token is None and os.path.exists(f'{BASEDIR}/app/creds/gh-token'):
-    with open(f'{BASEDIR}/app/creds/gh-token', 'r') as fp:
+if default_gh_token is None and os.path.exists(f'{BASEDIR}/creds/gh-token'):
+    with open(f'{BASEDIR}/creds/gh-token', 'r') as fp:
         default_gh_token = fp.read().strip()
 
 def gh_token():
     try:
-        return g.token
+        token = g.token
     except:
-        return default_gh_token
+        token = default_gh_token
+    logger.info(f'gh_token: token={token} default_gh_token={default_gh_token}')
+    return token 
 
 # Middleware decorator to enforce logins
 def login_required(f):
@@ -152,6 +154,7 @@ def _get_site_info(href):
         'acct': None,
         'repo': None,
         'ref': None,
+        # 'ref': _qargs.get('ref'),
         'defaultBranch': None,
         'editBranch': None
     }
@@ -189,6 +192,7 @@ def _get_site_info(href):
         else:
             site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
             siteConfigUrl = f'{parsed.scheme}://{parsed.netloc}/config.json'
+    logger.info(f'ref={site_info["ref"]}')
     if repo_info is None:
         url = f'https://api.github.com/repos/{site_info["acct"]}/{site_info["repo"]}'
         resp = requests.get(url)
@@ -200,7 +204,7 @@ def _get_site_info(href):
             site_info['defaultBranch'] = repo_info['default_branch']
         elif resp.status_code == 404:
             site_info['private'] = True
-
+    logger.info(f'ref={site_info["ref"]}')
     if not siteConfigUrl:
         if repo_info is None: # Probably a private GH site 
             siteConfigUrl = f'https://{site_info["acct"]}.github.io/{site_info["repo"]}/config.json'
@@ -221,7 +225,6 @@ def _get_site_info(href):
         for key, value in site_config.items():
             #if key in site_info: continue
             if key == 'components':
-                logger.info('components')
                 site_info['components'] = []
                 for comp in value:
                     if not comp['src'].startswith('http'):
@@ -232,6 +235,7 @@ def _get_site_info(href):
                     value = f'https://{site_info["acct"]}.github.io/{site_info["repo"]}{"" if value[0] == "/" else "/"}{value}'
                 else:
                     value = f'{resource_baseurl}{"" if value[0] == "/" else "/"}{value}'
+            # elif key in ('ref',): continue
             site_info[key] = value
 
     if site_info['ref'] and len(site_info['ref']) == 7 and re.match(r'^[0-9a-f]+$', site_info['ref']):
@@ -244,6 +248,7 @@ def _get_site_info(href):
             site_info['editBranch'] = commit_info[0]['name']
     else:
         site_info['editBranch'] = _qargs.get('ref', site_info['ref'])
+    logger.info(f'ref={site_info["ref"]}')
     return site_info
 
 def _context(path=None):
