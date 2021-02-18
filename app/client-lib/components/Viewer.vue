@@ -18,7 +18,7 @@
       >
         <i :class="groups[tab].icon" class="fal"></i>
       </button>
-      <button>{{viewerLabel}}</button>
+      <!-- <button>{{viewerLabel}}</button> -->
     </div>
     <component ref="viewer"
       v-if="viewerIsOpen && activeTab && actions[activeTab]"
@@ -226,6 +226,7 @@
       },
       height() {
         this.viewerHeight = this.height - (this.$refs.tabs ? this.$refs.tabs.clientHeight : 0)
+        console.log(`Viewer.height=${this.viewerHeight}`)
         // this.viewerHeight = this.height
       },
       width() { this.viewerWidth = this.width },

@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="image-viewer" :style="`width:100%;height:100%;`">
+  <div id="app" class="image-viewer" style="height:329px;">
     
       <div class="osd" id="osd" :style="osdContainerStyle"></div>
       <div id="osd-toolbar" class="controls auto-hide">
@@ -93,7 +93,7 @@ module.exports = {
     active: String,
     items: Array,
     width: Number,
-    // height: Number,
+    height: Number,
     selected: String,
     jwt: String,
     serviceBase: String
@@ -126,8 +126,8 @@ module.exports = {
       return {
         backgroundColor: this.currentItem ? this.currentItem.background || 'black' : 'black',
         textAlign: 'center',
-        height: '100%',
-        width: '100%',
+        height: `${this.height}px`,
+        width: `${this.width}px`,
         maxHeight: this.showAnnotations ? `${this.width}px` : '',
         position: 'relative'
       }
@@ -947,6 +947,7 @@ module.exports = {
     .image-viewer {
       display: grid;
       width: 100%;
+      height: 100%;
       grid-template-rows: 20px 1fr auto auto auto;
       grid-template-columns: 1fr 60px;
       font-family: Roboto, sans-serif;

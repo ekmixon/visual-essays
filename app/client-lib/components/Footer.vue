@@ -1,6 +1,6 @@
 <template>
   <div id="footer">
-    <img v-if="logo" :src="logo">
+    <img v-if="logo" :src="logo"> Footer
   </div>
 </template>
 
@@ -30,6 +30,7 @@
     display: flex;
     align-items: center;
     height: 50px;
+    background-color: lightgrey;
   } 
   #footer img {
     height: 30px;

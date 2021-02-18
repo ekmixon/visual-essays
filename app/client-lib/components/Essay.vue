@@ -302,12 +302,16 @@ module.exports = {
 <style>
 
 .essay {
+  padding: 0 6px !important;
+}
+
+.vertical .essay {
   background-color: #dadada;
   padding: 0 0 0 0 !important;
   /* box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3); */
 }
 
-p.active-elem {
+.vertical p.active-elem {
   background-color: #ffffff;
   /* padding-top: 16px;
   padding-bottom: 16px; */
@@ -322,21 +326,17 @@ p.has-items:hover {
   background-color: #f7f7f7;;
 }
   
-p {
+p.vertical {
   padding: 8px 28px 8px 24px;
   line-height: 1.6;
 }
 
-p {
-  /*margin-right: 9px;*/
-}
-
-h1,
-h2,
-h3, 
-h4, 
-h5,
-h6,
+h1.vertical,
+h2.vertical,
+h3.vertical, 
+h4.vertical, 
+h5.vertical,
+h6.vertical,
 .footnote {
   margin-left: 24px;
 }
@@ -346,55 +346,51 @@ h6,
   font-size: 1rem;
 }
 
-.footnote-backref {
-
+.tagged.location,
+p.active-elem .inferred.location,
+.tagged.building,
+p.active-elem .inferred.building,
+.tagged.place,
+p.active-elem .inferred.place,
+.tagged.person,
+p.active-elem .inferred.person,
+.tagged.fictional_character,
+p.active-elem .inferred.fictional_character,
+.tagged.written_work,
+p.active-elem .inferred.written_work,
+.tagged.plant,
+p.active-elem .inferred.plant,
+.tagged.entity,
+p.active-elem .inferred.entity,
+.tagged.event,
+p.active-elem .inferred.event {
+  border-bottom: 2px solid #219653;
+  cursor: pointer;
+  z-index: 10;
+  /* white-space: nowrap; */
 }
 
-  .tagged.location,
-  p.active-elem .inferred.location,
-  .tagged.building,
-  p.active-elem .inferred.building,
-  .tagged.place,
-  p.active-elem .inferred.place,
-  .tagged.person,
-  p.active-elem .inferred.person,
-  .tagged.fictional_character,
-  p.active-elem .inferred.fictional_character,
-  .tagged.written_work,
-  p.active-elem .inferred.written_work,
-  .tagged.plant,
-  p.active-elem .inferred.plant,
-  .tagged.entity,
-  p.active-elem .inferred.entity,
-  .tagged.event,
-  p.active-elem .inferred.event {
-    border-bottom: 2px solid #219653;
-    cursor: pointer;
-    z-index: 10;
-    /* white-space: nowrap; */
-  }
-
-  .entity-highlight,
-  .tagged.location:hover,
-  p.active-elem .inferred.location:hover,
-  .tagged.building:hover,
-  p.active-elem .inferred.building:hover,
-  .tagged.place:hover,
-  p.active-elem .inferred.place:hover,
-  .tagged.person:hover,
-  p.active-elem .inferred.person:hover,
-  .tagged.fictional_character:hover,
-  p.active-elem .inferred.fictional_character:hover,
-  .tagged.written_work:hover,
-  p.active-elem .inferred.written_work:hover,
-  .tagged.plant:hover,
-  p.active-elem .inferred.plant:hover,
-  .tagged.entity:hover,
-  p.active-elem .inferred.entity:hover,
-  .tagged.event:hover,
-  p.active-elem .inferred.event:hover {
-    background: #a8e2bb !important;
-    transition: all 0.2s ease-in;
-  }
+.entity-highlight,
+.tagged.location:hover,
+p.active-elem .inferred.location:hover,
+.tagged.building:hover,
+p.active-elem .inferred.building:hover,
+.tagged.place:hover,
+p.active-elem .inferred.place:hover,
+.tagged.person:hover,
+p.active-elem .inferred.person:hover,
+.tagged.fictional_character:hover,
+p.active-elem .inferred.fictional_character:hover,
+.tagged.written_work:hover,
+p.active-elem .inferred.written_work:hover,
+.tagged.plant:hover,
+p.active-elem .inferred.plant:hover,
+.tagged.entity:hover,
+p.active-elem .inferred.entity:hover,
+.tagged.event:hover,
+p.active-elem .inferred.event:hover {
+  background: #a8e2bb !important;
+  transition: all 0.2s ease-in;
+}
 
 </style>

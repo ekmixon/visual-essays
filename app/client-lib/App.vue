@@ -44,8 +44,9 @@
       ></component>
     </div>
     <div ref="viewer" class="viewer hidden">
-      <component v-if="html && viewerIsOpen" v-bind:is="viewerComponent" style="height:100%;"
+      <component v-if="html && viewerIsOpen" v-bind:is="viewerComponent"
         :width="viewerWidth"
+        :height="viewerHeight"
         :hover-item="hoverItemID"
         :selected-item="selectedItemID"
         :acct="acct"
@@ -179,8 +180,6 @@ export default {
       },
       mounted() {
         console.log(window.location)
-        console.log('matchMedia',  )
-        // let vertical = window.matchMedia('min-width: 1000px').matches
         if (window.location.href.indexOf('#') > 0) {
           this.hash = window.location.href.split('#').pop()
         }
@@ -197,12 +196,13 @@ export default {
         this.setEssay(path)
 
         const resizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
-          // console.log(`resizeObserver: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
-          this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+          console.log(`resizeObserver: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
+          // this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+          this.viewerHeight = this.calcViewerHeight()
           this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
         })
         resizeObserver.observe(this.$refs.app)
-        this.updateViewerSize()
+        // this.updateViewerSize()
       },
       methods: {
         async loadEssay(path, replace) {
@@ -318,7 +318,7 @@ export default {
           // console.log('resizeHeader')
           let delta
           if (e.touches) {
-            delta = (e.touches[0].screenY - this.lastTouchY) / 5
+            delta = (e.touches[0].screenY - this.lastTouchY) / 50
           } else {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           }
@@ -355,7 +355,15 @@ export default {
               this.footerHeight = this.footer.clientHeight
             }
           }
+          this.viewerHeight = this.calcViewerHeight()
           if (!this.header || !this.footer) setTimeout(this.waitForHeaderFooter, 250)
+        },
+        calcViewerHeight() {
+          let height = this.$refs.app.clientHeight
+          console.log(height, this.$refs.header ? this.$refs.header.clientHeight : 0, this.$refs.footer ? this.$refs.footer.clientHeight : 0)
+          if (this.$refs.header) height -= this.$refs.header.clientHeight
+          if (this.$refs.footer) height -= this.$refs.footer.clientHeight
+          return this.layout === 'horizontal' ? height/2 : height
         },
         setHoverItem(itemID) {
           this.hoverItemID = itemID
@@ -444,7 +452,8 @@ export default {
               this.$refs.app.clientHeight !== this.heightPrior ||
               this.$refs.app.clientWidth !== this.widthPrior) {
             // console.log(`updateViewerSize: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${headerHeight} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
-            this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+            // this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+            this.viewerHeight = this.calcViewerHeight()
             this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
             this.headerPrior = headerHeight
             this.heightPrior = this.$refs.app.clientHeight
@@ -458,7 +467,7 @@ export default {
           //console.log(`App.viewerWidth: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         viewerHeight() {
-          //console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
+          console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         layout: {
           handler: function () {
@@ -482,38 +491,41 @@ export default {
 
 <style scoped>
 
+
   #visual-essay {
     display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto;
-    grid-template-areas: 
-      "header"
-      "essay"
-      "viewer"
-      "footer";
     height: 100vh;
     width: 100%;
-  }
-
-  .content {
-    grid-area: content;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto 1fr auto auto;
     grid-template-areas: 
-      "essay"
-      "viewer";
+      "header"
+      "essay"  
+      "viewer"
+      "footer";
   }
 
-  @media only screen and (min-width: 1000px) {
-    #visual-essay {
-      grid-template-columns: auto 0;
-      grid-template-rows: auto 1fr auto;
+  #visual-essay.vertical {
+    grid-template-columns: 50% 50%;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: 
+      "header header"
+      "essay  viewer"
+      "footer footer";
+    position: absolute;
+  }
+
+  @media only screen and (max-width: 1000px) {
+    #visual-essay,
+    #visual-essay.vertical {
+      width: 100%;
+      grid-template-columns: auto auto;
+      grid-template-rows: auto 1fr auto auto;
       grid-template-areas: 
-        "header header"
-        "essay  viewer"
-        "footer footer";
-      position: absolute;
+        "header"
+        "essay"  
+        "viewer"
+        "footer";
     }
   }
 

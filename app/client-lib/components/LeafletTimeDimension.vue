@@ -1,10 +1,10 @@
 <template>
-<div class="grid-container" :style="containerStyle">
-  <div id="map" :style="mapStyle"></div>
-  <div class="citation">
-    <span v-if="title" class="title" v-html="title"></span>
-  </div>
-</div>
+    <div class="map-viewer" :style="containerStyle">
+        <div id="map" class="map-main" :style="mapStyle"></div>
+        <div class="map-label">
+            <span v-if="title" class="title" v-html="title"></span>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -117,7 +117,7 @@ module.exports = {
         mapStyle() {
             return {
                 width: `${this.width}px`,
-                //height: `${this.height}px`,
+                height: '100%',
                 overflowY: 'auto !important',
                 marginLeft: '0',   
             }
@@ -751,21 +751,23 @@ module.exports = {
       background: #a8e2bb !important;
       transition: all 0.2s ease-in;
     }
-    .grid-container {
+
+    .map-viewer {
         display: grid;
-        grid-template-rows: 95% 5%;
+        grid-template-columns: auto;
+        grid-template-rows: 1fr auto;
         grid-template-areas:
-        "main"
-        "footer";
+        "map-main"
+        "mapcite";
     }
 
     #map {
-        grid-area: main
+        grid-area: map-main;
     }
 
-    .citation {
+    .map-label {
       /* row-start / column-start / row-end / column-end */
-      grid-area: footer;
+      grid-area: mapcite;
       z-index: 2;
       justify-self: stretch;
       align-self: stretch;
