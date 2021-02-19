@@ -43,7 +43,7 @@
         @collapse-header="collapseHeader"
       ></component>
     </div>
-    <div ref="viewer" class="viewer floating-div">
+    <div ref="viewer" class="viewer hidden">
       <component v-if="html && viewerIsOpen" v-bind:is="viewerComponent"
         :width="viewerWidth"
         :height="viewerHeight"
@@ -75,11 +75,7 @@
       :selected-item="selectedItemID"
       @set-selected-item="setSelectedItem"
     ></component>
-    <!-- <component v-bind:is="viewerPanelComponent" 
-                :viewer-is-open="viewerIsOpen"
-                @set-viewer-is-open="viewerIsOpen = $event"
-    ></component> -->
-
+    <component v-bind:is="viewerModalComponent"></component>
   </div>
 </template>
 
@@ -107,7 +103,7 @@ export default {
         lastTouchY: undefined,
         hoverItemID: null,
         selectedItemID: null,
-        viewerIsOpen: true,
+        viewerIsOpen: false,
         essayBase: undefined,
         essayPath: undefined,
         essayFname: undefined,
@@ -172,8 +168,8 @@ export default {
           const found = this.components.find(c => c.name === 'entityInfoboxModal')
           return found ? found.component : null
         },
-        viewerPanelComponent() {
-          const found = this.components.find(c => c.name === 'viewerPanel')
+        viewerModalComponent() {
+          const found = this.components.find(c => c.name === 'viewerModal')
           return found ? found.component : null
         },
         viewerComponent() {
@@ -190,6 +186,7 @@ export default {
       },
       mounted() {
         console.log(window.location)
+        // this.$modal.show('viewer-modal')
         if (window.location.href.indexOf('#') > 0) {
           this.hash = window.location.href.split('#').pop()
         }
@@ -365,7 +362,7 @@ export default {
               this.footerHeight = this.footer.clientHeight
             }
           }
-          // this.viewerHeight = this.calcViewerHeight()
+          this.viewerHeight = this.calcViewerHeight()
           if (!this.header || !this.footer) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
@@ -389,7 +386,7 @@ export default {
         },
         setLayout(layout) {
           this.$store.dispatch('setLayout', layout)
-          // this.setViewerIsOpen(layout === 'vertical')
+          this.setViewerIsOpen(layout === 'vertical')
         },
         setViewerIsOpen(isOpen) {
           this.$store.dispatch('setViewerIsOpen', isOpen)
@@ -471,7 +468,7 @@ export default {
           }
         }
       },
-      // updated() { this.updateViewerSize() },
+      updated() { this.updateViewerSize() },
       watch: {
         viewerWidth() {
           //console.log(`App.viewerWidth: width=${this.viewerWidth} height=${this.viewerHeight}`)
@@ -482,10 +479,6 @@ export default {
         layout: {
           handler: function () {
             this.viewerIsOpen = this.layout === 'vertical'
-            if (this.layout === 'horizontal') {
-              this.headerEnabled = false
-              this.footerEnabled = false
-            }
           },
           immediate: true
         },
@@ -573,16 +566,4 @@ export default {
     transition: visibility 0s 1s, opacity 1s linear;
     */
   }
-
-  .floating-div {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 50%;
-    background-color: #eee;
-    min-height: 200px;
-    min-width: 200px;
-  }
-
 </style>

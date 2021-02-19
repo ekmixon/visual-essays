@@ -1,6 +1,6 @@
 <template>
   <div id="footer">
-    <img v-if="logo" :src="logo"> Footer
+    <img v-if="logo" :src="logo">
   </div>
 </template>
 
