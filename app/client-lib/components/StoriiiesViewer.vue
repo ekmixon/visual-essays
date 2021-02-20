@@ -150,7 +150,8 @@ module.exports = {
     transition: transform 1s; }
 
   body {
-    overflow: hidden; }
+    /* overflow: hidden; */
+  }
 
   canvas.morph {
     transform: translate(25%, -25%) rotateY(0deg) rotateX(45deg) rotateZ(75deg) scale(1) skew(64deg, 14deg);

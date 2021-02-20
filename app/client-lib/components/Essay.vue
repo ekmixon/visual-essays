@@ -302,7 +302,7 @@ module.exports = {
 <style>
 
 .essay {
-  padding: 0 6px !important;
+  /* padding: 0 6px !important; */
 }
 
 .vertical .essay {

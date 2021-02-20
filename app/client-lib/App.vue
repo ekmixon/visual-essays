@@ -36,7 +36,7 @@
         :items-in-active-elements="itemsInActiveElements"
         :service-base=serviceBase
         :debug="debug"
-        @set-viewer-is-open="viewerIsOpen = $event"
+        @set-viewer-is-open="setViewerIsOpen"
         @set-active-elements="setActiveElements"
         @set-hover-item="setHoverItem"
         @set-selected-item="setSelectedItem"
@@ -62,7 +62,7 @@
         :items-in-active-elements="itemsInActiveElements"
         :groups="groups"
         :service-base=serviceBase
-        @set-viewer-is-open="viewerIsOpen = $event"
+        @set-viewer-is-open="setViewerIsOpen"
         @set-hover-item="setHoverItem"
         @set-selected-item="setSelectedItem"
         @toggle-viewer="toggleOption('viewerIsOpen')"
@@ -75,7 +75,9 @@
       :selected-item="selectedItemID"
       @set-selected-item="setSelectedItem"
     ></component>
-    <component v-bind:is="viewerModalComponent"></component>
+      <button v-if="isMobile" class="floating-action-button" @click="setViewerIsOpen(true)">
+        <i class="fal fa-times"></i>
+      </button>
   </div>
 </template>
 
@@ -99,11 +101,11 @@ export default {
         headerMinHeight: 104,
         headerMaxHeight: 400,
         header: null,
+        essay: null,
         footer: null,
         lastTouchY: undefined,
         hoverItemID: null,
         selectedItemID: null,
-        viewerIsOpen: false,
         essayBase: undefined,
         essayPath: undefined,
         essayFname: undefined,
@@ -113,12 +115,14 @@ export default {
         anchor: undefined,
         externalWindow: undefined,
     
+        isMobile: false,
         headerPrior: 0,
         heightPrior: 0,
         widthPrior: 0,
       }),
       computed: {
         siteInfo() { return this.$store.getters.siteInfo || {} },
+        viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         acct() { return this.siteInfo.acct },
         repo() { return this.siteInfo.repo },
         branch() { return this.siteInfo.ref },
@@ -186,6 +190,7 @@ export default {
       },
       mounted() {
         console.log(window.location)
+        
         // this.$modal.show('viewer-modal')
         if (window.location.href.indexOf('#') > 0) {
           this.hash = window.location.href.split('#').pop()
@@ -199,19 +204,44 @@ export default {
         console.log(`App: baseurl=${this.baseurl} path=${path}`, this.qargs, this.siteInfo, this.essayConfig)
         console.log(`ref=${this.ref} refQueryArg=${this.refQueryArg}`)
         window.onpopstate = (e) => { this.setEssay(e.state.file, true) }
+
+        const resizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
+          // this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
+          let calculated = this.calcViewerHeight()
+          if (calculated !== this.viewerHeight) this.viewerHeight = this.calcViewerHeight()
+          this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
+          let isMobile = window.matchMedia('only screen and (max-width: 1000px)').matches
+          if (isMobile) {
+            if (!this.isMobile) {
+              if (this.$refs.essay && this.header) this.$refs.essay.style.paddingTop = `${this.header.clientHeight}px`
+              this.isMobile = isMobile
+            }
+          } else {
+            if (this.isMobile) {
+              if (this.$refs.essay) this.$refs.essay.style.paddingTop = 0             
+              this.isMobile = isMobile
+            }
+          }
+          console.log(`resizeObserver: isMobile=${this.isMobile} viewerHeight=${this.viewerHeight} height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
+        })
+        resizeObserver.observe(this.$refs.app)
+        
         this.waitForHeaderFooter() // header and footer are dynamically loaded external components        
         this.setEssay(path)
 
-        const resizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
-          console.log(`resizeObserver: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
-          // this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
-          this.viewerHeight = this.calcViewerHeight()
-          this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
-        })
-        resizeObserver.observe(this.$refs.app)
         // this.updateViewerSize()
       },
       methods: {
+        addHeaderSizeObserver() {
+          console.log('addHeaderSizeObserver')
+          if (this.header && !this.headerResizeObserver) {
+            this.headerResizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
+              console.log(`headerResizeObserver: isMobile=${this.isMobile} headerHeight=${this.header.clientHeight} essayTopPadding=${this.$refs.essay ? this.$refs.essay.style.paddingTop : 0}`)
+              this.$refs.essay.style.paddingTop = `${this.header.clientHeight}px`
+            })
+            this.headerResizeObserver.observe(this.header)
+          }
+        },
         async loadEssay(path, replace) {
 
           // Load essay HTML, use local cached version if available
@@ -345,6 +375,7 @@ export default {
           if (!this.header) {
             this.header = document.getElementById('header')
             if (this.header && this.$refs.essay) {
+              if (this.isMobile) this.addHeaderSizeObserver()
               if ('ontouchstart' in window) {
                 this.header.addEventListener('touchstart', (e) => { this.lastTouchY = e.touches[0].screenY })
                 this.$refs.essay.addEventListener('touchstart', (e) => { this.lastTouchY = e.touches[0].screenY })
@@ -362,15 +393,21 @@ export default {
               this.footerHeight = this.footer.clientHeight
             }
           }
-          this.viewerHeight = this.calcViewerHeight()
+          //this.viewerHeight = this.calcViewerHeight()
           if (!this.header || !this.footer) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
-          let height = this.$refs.app.clientHeight
-          if (this.$refs.header) height -= this.$refs.header.clientHeight
-          if (this.$refs.footer) height -= this.$refs.footer.clientHeight
-          console.log(`calculated=${height} app=${this.$refs.app.clientHeight} header=${this.$refs.header ? this.$refs.header.clientHeight : 0} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : 0}`)
-          return this.layout === 'horizontal' ? height/2 : height
+          let height
+          if (this.isMobile) {
+            height = window.innerHeight / 2
+          } else {
+            height = this.$refs.app.clientHeight
+            if (this.$refs.header) height -= this.$refs.header.clientHeight
+            if (this.$refs.footer) height -= this.$refs.footer.clientHeight
+            console.log(`calculated=${height} isMobile=${this.isMobile} app=${this.$refs.app.clientHeight} header=${this.$refs.header ? this.$refs.header.clientHeight : 0} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : 0}`)
+            height = this.layout === 'horizontal' ? height/2 : height
+          }
+          return height
         },
         setHoverItem(itemID) {
           this.hoverItemID = itemID
@@ -389,6 +426,7 @@ export default {
           this.setViewerIsOpen(layout === 'vertical')
         },
         setViewerIsOpen(isOpen) {
+          console.log('setViewerIsOpen', isOpen)
           this.$store.dispatch('setViewerIsOpen', isOpen)
         },
         collapseHeader() {
@@ -478,7 +516,7 @@ export default {
         },
         layout: {
           handler: function () {
-            this.viewerIsOpen = this.layout === 'vertical'
+            this.setViewerIsOpen(this.layout === 'vertical')
           },
           immediate: true
         },
@@ -491,6 +529,20 @@ export default {
         headerComponent() {
           this.header = null
           this.$nextTick(() => this.waitForHeaderFooter())
+        },
+        isMobile: {
+          handler: function (isMobile) {
+            console.log(`viewerIsOpen=${this.viewerIsOpen} isMobile=${isMobile} viewer=${this.$refs.viewer !== undefined}`)
+            if (isMobile && this.$refs.viewer) this.$refs.viewer.style.display = this.viewerIsOpen ? '' : 'none'
+          },
+          immediate: true
+        },
+        viewerIsOpen: {
+          handler: function (isOpen) {
+            console.log(`viewerIsOpen=${isOpen} isMobile=${this.isMobile} viewer=${this.$refs.viewer !== undefined}`)
+            if (this.isMobile && this.$refs.viewer) this.$refs.viewer.style.display = isOpen ? '' : 'none'
+          },
+          immediate: true
         }
       }
 }
@@ -499,37 +551,43 @@ export default {
 <style scoped>
 
 
-  #visual-essay {
-    display: grid;
-    height: 100vh;
-    width: 100%;
-    grid-template-columns: auto auto;
-    grid-template-rows: auto 1fr auto auto;
-    grid-template-areas: 
-      "header"
-      "essay"  
-      "viewer"
-      "footer";
-  }
+  /* desktop/laptop */
+  @media only screen and (min-width: 1000px) {
 
-  #visual-essay.vertical {
-    grid-template-columns: 50% 50%;
-    grid-template-rows: auto 1fr auto;
-    grid-template-areas: 
-      "header header"
-      "essay  viewer"
-      "footer footer";
-    position: absolute;
-  }
-
-  @media only screen and (max-width: 1000px) {
     #visual-essay,
     #visual-essay.vertical {
+      display: grid;
+      height: 100vh;
       width: 100%;
-      grid-template-columns: 100vw;
-      grid-template-rows: 100vh;
-      /* grid-template-areas: "header" "essay" "viewer" "footer"; */
-      grid-template-areas: "essay";
+      grid-template-columns: 50% 50%;
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas: 
+        "header header"
+        "essay  viewer"
+        "footer footer";
+      position: absolute;
+    }
+
+  }
+
+  /* smartphone */
+  @media only screen and (max-width: 1000px) {
+
+    #visual-essay {
+      height: 100%;
+    }
+
+    .header {
+      position: fixed !important;
+      top: 0;
+      width: 100%;
+    }
+
+    .viewer {
+      position: fixed !important;
+      top: 50%;
+      width: 100%;
+      height: 50%;
     }
   }
 
@@ -544,6 +602,7 @@ export default {
     grid-area: viewer;
     justify-self: stretch;
     background: #333;
+    z-index: 2;
   }
   .footer {
     grid-area: footer;
@@ -565,5 +624,21 @@ export default {
     transition: opacity 0.5s linear;
     transition: visibility 0s 1s, opacity 1s linear;
     */
+  }
+  
+  .floating-action-button {
+    position: fixed;
+    bottom: 60px;
+    right: 8px;
+    background-color: black;
+    border-radius: 40px;
+    display: block;
+    width: 40px;
+    text-align: center;
+    height: 40px;
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    border: 0;
   }
 </style>

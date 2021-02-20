@@ -82,6 +82,6 @@ module.exports = {
 <style scoped>
   body {
     margin: 0;
-    overflow: hidden;
+    /* overflow: hidden; */
   }
 </style>
