@@ -360,15 +360,17 @@ export default {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           }
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
-          if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
-              (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
-            let newHeaderHeight = this.header.clientHeight + delta
-            if (scrollDir === 'shrink' && newHeaderHeight < this.headerMinHeight) newHeaderHeight = this.headerMinHeight
-            if (scrollDir === 'expand' && newHeaderHeight > this.headerMaxHeight) newHeaderHeight = this.headerMaxHeight
-            this.header.style.height = `${newHeaderHeight}px`
-            this.headerHeight = newHeaderHeight
-            e.preventDefault()
-            e.stopPropagation()
+          if (scrollDir === 'shrink' || window.scrollY === 0) {
+            if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
+                (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
+              let newHeaderHeight = this.header.clientHeight + delta
+              if (scrollDir === 'shrink' && newHeaderHeight < this.headerMinHeight) newHeaderHeight = this.headerMinHeight
+              if (scrollDir === 'expand' && newHeaderHeight > this.headerMaxHeight) newHeaderHeight = this.headerMaxHeight
+              this.header.style.height = `${newHeaderHeight}px`
+              this.headerHeight = newHeaderHeight
+              e.preventDefault()
+              e.stopPropagation()
+            }
           }
         },
         waitForHeaderFooter() {
