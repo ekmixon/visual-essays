@@ -353,7 +353,7 @@ export default {
           // console.log('resizeHeader')
           let delta
           if (e.touches) {
-            delta = (e.touches[0].screenY - this.lastTouchY) / 20
+            delta = (e.touches[0].screenY - this.lastTouchY)
           } else {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           }
