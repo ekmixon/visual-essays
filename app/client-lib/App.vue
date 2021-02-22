@@ -43,7 +43,7 @@
         @collapse-header="collapseHeader"
       ></component>
     </div>
-    <div v-if="html && viewerIsOpen" ref="viewer" class="viewer">
+    <div v-if="html" ref="viewer" class="viewer" :style="`top:${viewerIsOpen ? 46 : 96}%;`">
       <component v-bind:is="viewerComponent"
         :width="viewerWidth"
         :height="viewerHeight"
@@ -71,13 +71,15 @@
     <div v-if="footerEnabled && siteInfo" ref="footer" id="siteFooter" class="footer">
       <component :is="footerComponent" :site-config="siteInfo"></component>
     </div>
+    <!--
+    <button v-if="isMobile && layout === 'horizontal'" class="floating-action-button" @click="setViewerIsOpen(true)">
+      <i class="fal fa-image"></i>
+    </button>
+    -->
     <component v-bind:is="entityInfoboxModalComponent"
       :selected-item="selectedItemID"
       @set-selected-item="setSelectedItem"
     ></component>
-      <button v-if="isMobile && layout === 'horizontal'" class="floating-action-button" @click="setViewerIsOpen(true)">
-        <i class="fal fa-image"></i>
-      </button>
   </div>
 </template>
 
@@ -537,14 +539,14 @@ export default {
           handler: function (isMobile) {
             console.log(`viewerIsOpen=${this.viewerIsOpen} isMobile=${isMobile} viewer=${this.$refs.viewer !== undefined}`)
             console.log(this.$refs.viewer)
-            if (isMobile && this.$refs.viewer) this.$refs.viewer.style.display = this.viewerIsOpen ? '' : 'none'
+            //if (isMobile && this.$refs.viewer) this.$refs.viewer.style.display = this.viewerIsOpen ? '' : 'none'
           },
           immediate: true
         },
         viewerIsOpen: {
           handler: function (isOpen) {
             console.log(`viewerIsOpen=${isOpen} isMobile=${this.isMobile} viewer=${this.$refs.viewer !== undefined}`)
-            if (this.isMobile && this.$refs.viewer) this.$refs.viewer.style.display = isOpen ? '' : 'none'
+            //if (this.isMobile && this.$refs.viewer) this.$refs.viewer.style.display = isOpen ? '' : 'none'
             console.log(this.$refs.viewer)
             this.updateViewerSize()
 
@@ -604,10 +606,10 @@ export default {
 
     .viewer {
       position: fixed !important;
-      top: 50%;
       width: 100%;
       height: 50%;
       z-index: 2;
+      transition: top 0.5s;
     }
   }
 

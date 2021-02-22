@@ -9,8 +9,8 @@
         <i :class="groups[tab].icon" class="fal"></i>
       </span>
     </div>
-    <div v-if="layout != 'vertical'" ref="tabs" class="tab">
-      <button @click="closeViewer"><i class="fal fa-times"></i></button>
+    <div v-if="layout != 'vertical'" ref="tabs" class="tab" @click="setViewerIsOpen(!viewerIsOpen)">
+      <!-- <button @click="setViewerIsOpen(false)"><i class="fal fa-times"></i></button> -->
       <button v-for="tab in tabs" :key="`tab-${tab}`"
         :data-viewer-name="tab"
         :class="{active: activeTab === tab}"
@@ -109,8 +109,8 @@
         }
         if (target.dataset.tab) this.activeTab = target.dataset.tab
       },
-      closeViewer() {
-        this.$emit('set-viewer-is-open', false)
+      setViewerIsOpen(isOpen) {
+        this.$emit('set-viewer-is-open', isOpen)
       },
       setHoverItem(itemID) {
         this.$emit('set-hover-item', itemID)
