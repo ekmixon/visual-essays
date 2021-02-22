@@ -492,24 +492,26 @@ export default {
           })
         },
         updateViewerSize() {
-          let headerHeight = this.$refs.header ? this.$refs.header.clientHeight : null
-          if (headerHeight && headerHeight !== this.headerPrior ||
-              this.$refs.app.clientHeight !== this.heightPrior ||
-              this.$refs.app.clientWidth !== this.widthPrior) {
+          if (this.$refs.header) {
+            let headerHeight = this.$refs.header ? this.$refs.header.clientHeight : null
+            if (headerHeight && headerHeight !== this.headerPrior ||
+                this.$refs.app.clientHeight !== this.heightPrior ||
+                this.$refs.app.clientWidth !== this.widthPrior) {
             // console.log(`updateViewerSize: height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${headerHeight} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
             // this.viewerHeight = this.$refs.app.clientHeight - (this.$refs.header ? this.$refs.header.clientHeight : 0) - this.$refs.footer.clientHeight
-            this.viewerHeight = this.calcViewerHeight()
-            this.viewerWidth = this.layout[0] === 'v' ? this.$refs.app.clientWidth / 2 : this.$refs.app.clientWidth
-            this.headerPrior = headerHeight
-            this.heightPrior = this.$refs.app.clientHeight
-            this.widthPrior = this.$refs.app.clientWidth
+              this.viewerHeight = this.calcViewerHeight()
+              this.headerPrior = headerHeight
+              this.heightPrior = this.$refs.app.clientHeight
+            }
           }
+          this.viewerWidth = this.layout[0] === 'v' ? window.innerWidth / 2 : window.innerWidth
+          this.widthPrior = window.innerWidth
         }
       },
       updated() { this.updateViewerSize() },
       watch: {
         viewerWidth() {
-          //console.log(`App.viewerWidth: width=${this.viewerWidth} height=${this.viewerHeight}`)
+          console.log(`App.viewerWidth: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         viewerHeight() {
           // console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
@@ -517,8 +519,9 @@ export default {
         layout: {
           handler: function () {
             this.setViewerIsOpen(this.layout === 'vertical')
+            this.updateViewerSize()
           },
-          immediate: true
+          immediate: false
         },
         html() {
           if (this.html && this.hash && this.header) this.$nextTick(() => {this.anchor = this.hash; this.hash = undefined})
@@ -543,6 +546,8 @@ export default {
             console.log(`viewerIsOpen=${isOpen} isMobile=${this.isMobile} viewer=${this.$refs.viewer !== undefined}`)
             if (this.isMobile && this.$refs.viewer) this.$refs.viewer.style.display = isOpen ? '' : 'none'
             console.log(this.$refs.viewer)
+            this.updateViewerSize()
+
           },
           immediate: true
         }
@@ -602,6 +607,7 @@ export default {
       top: 50%;
       width: 100%;
       height: 50%;
+      z-index: 2;
     }
   }
 
@@ -616,7 +622,7 @@ export default {
     grid-area: viewer;
     justify-self: stretch;
     background: #333;
-    z-index: 2;
+    z-index: 0;
   }
   .footer {
     grid-area: footer;

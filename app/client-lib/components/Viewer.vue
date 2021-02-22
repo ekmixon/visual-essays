@@ -80,9 +80,7 @@
       position: 'relative',
       activeElement: undefined,
       actions: {},
-      viewerHeight: 0,
-      viewerWidth: 0
-      // viewerIsOpen: false
+      viewerHeight: 0
     }),
     computed: {
       primary() {return this.itemsInActiveElements.find(item => item.primary === 'true' || item.tag === 'primary') },
@@ -99,7 +97,7 @@
       }
     },
     mounted() {
-      console.log(`viewer: viewerIsOpen=${this.viewerIsOpen} activeTab=${this.activeTab} actions=${this.actions[this.activeTab]} width=${this.width} viewerWidth=${this.viewerWidth} height=${this.height} viewerHeight=${this.viewerHeight}`)
+      console.log(`viewer: viewerIsOpen=${this.viewerIsOpen} activeTab=${this.activeTab} actions=${this.actions[this.activeTab]} width=${this.width} height=${this.height}`)
       this.activeElementChange()
     },
     methods: {
@@ -226,12 +224,6 @@
       },
         immediate: true
       },
-      height() {
-        this.viewerHeight = this.height - (this.$refs.tabs ? this.$refs.tabs.clientHeight : 0)
-        console.log(`Viewer.height=${this.viewerHeight}`)
-        // this.viewerHeight = this.height
-      },
-      width() { this.viewerWidth = this.width },
       groups: {
         handler: function () {
           const availableGroups = []
@@ -283,26 +275,10 @@
         },
         immediate: false
       },
-      /*
-      selectedParagraphID: {
-        handler: function () {
-          if (this.selectedParagraphID) {
-            this.$store.dispatch('setViewerIsOpen', true)
-            this.$store.dispatch('setSelectedParagraphID')
-          }
-        },
-        immediate: false
-      },
-      */
       activeTab: {
         handler: function () {
           this.$nextTick(() => {
-            //console.log(`activeTab=${this.activeTab}`)
             this.activeElementChange()
-            //console.log(this.groups[this.activeTab])
-            //this.viewerHeight = this.height - (this.$refs.tabs ? this.$refs.tabs.clientHeight : 0)
-            //this.viewerWidth = this.width
-            //console.log(this.viewerWidth, this.height, this.viewerHeight, this.$refs.tabs)
           })
         },
         immediate: false

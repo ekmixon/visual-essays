@@ -497,14 +497,14 @@
   #menu {
     position: absolute;
     width: 230px;
-    margin: -100px 0 0 -50px;
+    margin: -100px 0 0 -265px;
     padding: 120px 50px 10px 45px;
     background: #ededed;
     list-style-type: none;
     -webkit-font-smoothing: antialiased;
     /* to stop flickering of text in safari */
     transform-origin: 0% 0%;
-    transform: translate(-100%, 0);
+    transform: translate(100%, 0);
     transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   }
@@ -537,9 +537,9 @@
 
   #menuToggle {
     display: block;
-    position: relative;
+    position: absolute;
     top: 30px;
-    /*left: 30px;*/
+    right: 30px;
     margin-left: 30px;
     z-index: 1;
     -webkit-user-select: none;
