@@ -22,18 +22,33 @@
         .title-header-bg {
             background-color: black;
             height: 52px;
+            vertical-align: top;
+            /*place-items: center;
+            resize: horizontal;*/
         }
 
         .image-title {
             display: inline-block;
             color: white;
-            font-size: 24px;
+            font-size: 1.3rem;
             font-weight: bold;
-            margin: 8px 0 8px 16px;
+            margin: 10px 0 0px 16px;
+            
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+
+        .metadata-tooltip {
+          margin-top: -20px;
+          margin-left: 10px;
+          display: inline-block;
         }
 
         .show-annotation {
             margin: 8px 8px;
+            padding: 10px;
             float: right;
         }
 
@@ -50,7 +65,7 @@
 
         #top-overlay {
             width: 400px;
-            height: 100px;
+            height: auto;
             padding: 6px;
             margin: 40px 0 0 28px;
             font-size: 1.1em;
@@ -137,23 +152,26 @@
 
             <span v-html="label" class="image-title"></span>
 
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  icon
-                  color="#ffffff;"
-                  dark
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                <v-icon>fas fa-info-circle fa-lg</v-icon>
-                </v-btn>
-              </template>
-              <span v-if="manifest">
-                Attribution:
-                {{this.manifest.attribution}}
-              </span>
-            </v-tooltip>
+            
+              <v-tooltip bottom style="display: inline-block;">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    icon
+                    color="#ffffff;"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                    class="metadata-tooltip"
+                  >
+                  <v-icon>fas fa-info-circle fa-lg</v-icon>
+                  </v-btn>
+                </template>
+                <span v-if="manifest">
+                  Attribution:
+                  {{this.manifest.attribution}}
+                </span>
+              </v-tooltip>
+            
 
             <v-btn
                     class="show-annotation"
