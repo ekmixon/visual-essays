@@ -556,7 +556,6 @@ export default {
   /* desktop/laptop */
   @media only screen and (min-width: 1000px) {
 
-    #visual-essay,
     #visual-essay.vertical {
       display: grid;
       height: 100vh;

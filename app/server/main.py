@@ -515,6 +515,8 @@ def thumbnail():
         url = qargs.pop('url')
         width, height = [int(v) for v in qargs.pop('size', '400x260').lower().replace('x', ' ').replace(',', ' ').split()]
         quality = int(qargs.pop('quality', 50))
+        rotate = int(qargs.pop('rotate')) if 'rotate' in qargs else None
+        offset = int(qargs.pop('offset')) if 'offset' in qargs else None
         refresh = qargs.pop('refresh', 'false') in ('true', '')
         if qargs:
             url = f'{url}{"?" if "?" not in url else "&"}{urlencode(qargs)}'
@@ -530,26 +532,28 @@ def thumbnail():
                 im = Image.open(r.raw)
                 im_format = im.format
                 aspect = im.width / im.height
-                logger.info(f'url={url} format={im_format} width={im.width} height={im.height} aspect={aspect}')
+                logger.info(f'url={url} format={im_format} width={im.width} height={im.height} rotate={rotate} aspect={aspect}')
 
                 if width > height:
                     if im.width > im.height:
                         im.thumbnail([width, width])
-                        offset = math.ceil((im.height-height)/2)
+                        offset = offset if offset is not None else math.ceil((im.height-height)/2)
                         im = im.crop((0, offset, width, offset+height))
                     else:
                         im.thumbnail([math.ceil(width/aspect), math.ceil(width/aspect)])
-                        offset = math.ceil((im.height-height)/2)
+                        offset = offset if offset is not None else math.ceil((im.height-height)/2)
                         im = im.crop((0, offset, width, offset+height))
                 else:
                     if im.width > im.height:
                         im.thumbnail([math.ceil(height*aspect), math.ceil(height*aspect)])
-                        offset = math.ceil((im.width-width)/2)
+                        offset = offset if offset is not None else math.ceil((im.width-width)/2)
                         im = im.crop((offset, 0, offset+width, height))
                     else:
                         im.thumbnail([math.ceil(height), math.ceil(height)])
-                        offset = math.ceil((im.width-width)/2)
+                        offset = offset if offset is not None else math.ceil((im.width-width)/2)
                         im = im.crop((offset, 0, offset+width, height))
+                if rotate:
+                    im = im.rotate(rotate)
                 imgByteArr = BytesIO()
                 logger.info(f'format={im_format}')
                 im.save(imgByteArr, format=im_format, quality=quality)
