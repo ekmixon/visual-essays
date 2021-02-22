@@ -43,7 +43,7 @@
         @collapse-header="collapseHeader"
       ></component>
     </div>
-    <div v-if="html && viewerIsOpen" ref="viewer" class="viewer hidden">
+    <div v-if="html && viewerIsOpen" ref="viewer" class="viewer">
       <component v-bind:is="viewerComponent"
         :width="viewerWidth"
         :height="viewerHeight"
@@ -277,10 +277,10 @@ export default {
           this.$store.dispatch('setEssayHTML', essayElem.innerHTML)
           this.$store.dispatch('setItems', items)
           this.$store.dispatch('setEssayConfig', essayConfig)
-          let layout = 'horizontal'
+          let layout = 'default'
           if (essayConfig.layout === 'vertical' || essayConfig.layout === 'vtl') {
-            if (!this.isMobile) layout = 'vertical'
-          } else if (essayConfig.layout[0] !== 'h') {
+            layout = this.isMobile ? 'horizontal' : 'vertical' 
+          } else if (essayConfig.layout && essayConfig.layout[0] !== 'h') {
             layout = essayConfig.layout
           }
           console.log(`essayConfig.layout=${essayConfig.layout} isMobile=${this.isMobile} layout=${layout}`)
@@ -353,7 +353,7 @@ export default {
           // console.log('resizeHeader')
           let delta
           if (e.touches) {
-            delta = (e.touches[0].screenY - this.lastTouchY)
+            delta = (e.touches[0].screenY - this.lastTouchY) / 10
           } else {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           }
@@ -555,6 +555,19 @@ export default {
 
   /* desktop/laptop */
   @media only screen and (min-width: 1000px) {
+
+    #visual-essay.index {
+      display: grid;
+      height: 100vh;
+      width: 100%;
+      grid-template-columns: auto;
+      grid-template-rows: auto 1fr auto;
+      grid-template-areas: 
+        "header"
+        "essay "
+        "footer";
+      position: absolute;
+    }
 
     #visual-essay.vertical {
       display: grid;
