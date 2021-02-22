@@ -75,8 +75,8 @@
       :selected-item="selectedItemID"
       @set-selected-item="setSelectedItem"
     ></component>
-      <button v-if="isMobile" class="floating-action-button" @click="setViewerIsOpen(true)">
-        <i class="fal fa-times"></i>
+      <button v-if="isMobile && layout === 'horizontal'" class="floating-action-button" @click="setViewerIsOpen(true)">
+        <i class="fal fa-image"></i>
       </button>
   </div>
 </template>
@@ -630,17 +630,19 @@ export default {
   
   .floating-action-button {
     position: fixed;
-    bottom: 60px;
-    right: 8px;
-    background-color: black;
+    bottom: 30px;
+    right: 3px;
+    background-color: transparent;
+    /*
     border-radius: 40px;
     display: block;
     width: 40px;
     text-align: center;
     height: 40px;
-    font-size: 28px;
-    font-weight: bold;
-    color: white;
+    */
+    font-size: 32px;
     border: 0;
+    font-weight: bold;
+    color: #219653;
   }
 </style>
