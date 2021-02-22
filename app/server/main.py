@@ -531,8 +531,12 @@ def thumbnail():
                 r.raw.decode_content = True
                 im = Image.open(r.raw)
                 im_format = im.format
+                if rotate:
+                    im = im.rotate(rotate, expand=True)
+
                 aspect = im.width / im.height
                 logger.info(f'url={url} format={im_format} width={im.width} height={im.height} rotate={rotate} aspect={aspect}')
+
 
                 if width > height:
                     if im.width > im.height:
@@ -552,8 +556,7 @@ def thumbnail():
                         im.thumbnail([math.ceil(height), math.ceil(height)])
                         offset = offset if offset is not None else math.ceil((im.width-width)/2)
                         im = im.crop((offset, 0, offset+width, height))
-                if rotate:
-                    im = im.rotate(rotate)
+
                 imgByteArr = BytesIO()
                 logger.info(f'format={im_format}')
                 im.save(imgByteArr, format=im_format, quality=quality)
