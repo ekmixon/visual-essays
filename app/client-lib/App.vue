@@ -20,7 +20,7 @@
         @open-search-tool="openSearchTool"
       ></component>
     </div>
-    <div ref="essay" id="scrollableContent" class="essay hidden">
+    <div ref="essay" id="scrollableContent" class="essay">
       <component v-if="html" v-bind:is="contentComponent"
         :html="html"
         :layout="layout"
@@ -43,8 +43,8 @@
         @collapse-header="collapseHeader"
       ></component>
     </div>
-    <div ref="viewer" class="viewer hidden">
-      <component v-if="html && viewerIsOpen" v-bind:is="viewerComponent"
+    <div v-if="html && viewerIsOpen" ref="viewer" class="viewer hidden">
+      <component v-bind:is="viewerComponent"
         :width="viewerWidth"
         :height="viewerHeight"
         :hover-item="hoverItemID"
@@ -222,7 +222,7 @@ export default {
               this.isMobile = isMobile
             }
           }
-          console.log(`resizeObserver: isMobile=${this.isMobile} viewerHeight=${this.viewerHeight} height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
+          // console.log(`resizeObserver: isMobile=${this.isMobile} viewerHeight=${this.viewerHeight} height=${this.$refs.app.clientHeight} width=${this.$refs.app.clientWidth} header=${this.$refs.header ? this.$refs.header.clientHeight : null} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : null}`)
         })
         resizeObserver.observe(this.$refs.app)
         
@@ -233,10 +233,9 @@ export default {
       },
       methods: {
         addHeaderSizeObserver() {
-          console.log('addHeaderSizeObserver')
           if (this.header && !this.headerResizeObserver) {
             this.headerResizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
-              console.log(`headerResizeObserver: isMobile=${this.isMobile} headerHeight=${this.header.clientHeight} essayTopPadding=${this.$refs.essay ? this.$refs.essay.style.paddingTop : 0}`)
+              // console.log(`headerResizeObserver: isMobile=${this.isMobile} headerHeight=${this.header.clientHeight} essayTopPadding=${this.$refs.essay ? this.$refs.essay.style.paddingTop : 0}`)
               this.$refs.essay.style.paddingTop = `${this.header.clientHeight}px`
             })
             this.headerResizeObserver.observe(this.header)
@@ -279,13 +278,12 @@ export default {
           this.$store.dispatch('setItems', items)
           this.$store.dispatch('setEssayConfig', essayConfig)
           let layout = 'horizontal'
-          let matchMedia = window.matchMedia('only screen and (min-width: 1000px)').matches
           if (essayConfig.layout === 'vertical' || essayConfig.layout === 'vtl') {
-            if (matchMedia) layout = 'vertical'
+            if (!this.isMobile) layout = 'vertical'
           } else if (essayConfig.layout[0] !== 'h') {
             layout = essayConfig.layout
           }
-          console.log(`essayConfig.layout=${essayConfig.layout} matchMedia=${matchMedia} layout=${layout}`)
+          console.log(`essayConfig.layout=${essayConfig.layout} isMobile=${this.isMobile} layout=${layout}`)
           this.$store.dispatch('setLayout', layout)
           this.$nextTick(() => {this.convertLinks()})
         },
@@ -406,7 +404,7 @@ export default {
             height = this.$refs.app.clientHeight
             if (this.$refs.header) height -= this.$refs.header.clientHeight
             if (this.$refs.footer) height -= this.$refs.footer.clientHeight
-            console.log(`calculated=${height} isMobile=${this.isMobile} app=${this.$refs.app.clientHeight} header=${this.$refs.header ? this.$refs.header.clientHeight : 0} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : 0}`)
+            // console.log(`calculated=${height} isMobile=${this.isMobile} app=${this.$refs.app.clientHeight} header=${this.$refs.header ? this.$refs.header.clientHeight : 0} footer=${this.$refs.footer ? this.$refs.footer.clientHeight : 0}`)
             height = this.layout === 'horizontal' ? height/2 : height
           }
           return height
@@ -514,7 +512,7 @@ export default {
           //console.log(`App.viewerWidth: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         viewerHeight() {
-          console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
+          // console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         layout: {
           handler: function () {
@@ -535,6 +533,7 @@ export default {
         isMobile: {
           handler: function (isMobile) {
             console.log(`viewerIsOpen=${this.viewerIsOpen} isMobile=${isMobile} viewer=${this.$refs.viewer !== undefined}`)
+            console.log(this.$refs.viewer)
             if (isMobile && this.$refs.viewer) this.$refs.viewer.style.display = this.viewerIsOpen ? '' : 'none'
           },
           immediate: true
@@ -543,6 +542,7 @@ export default {
           handler: function (isOpen) {
             console.log(`viewerIsOpen=${isOpen} isMobile=${this.isMobile} viewer=${this.$refs.viewer !== undefined}`)
             if (this.isMobile && this.$refs.viewer) this.$refs.viewer.style.display = isOpen ? '' : 'none'
+            console.log(this.$refs.viewer)
           },
           immediate: true
         }
