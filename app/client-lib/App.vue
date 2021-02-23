@@ -687,7 +687,7 @@ body {
     
     position: fixed;
     right: 6px;
-    bottom: 60px;
+    bottom: 100px;
     z-index: 0;
     transition: all 0.1s ease-in-out;
   }
