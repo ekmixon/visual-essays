@@ -43,7 +43,7 @@
         @collapse-header="collapseHeader"
       ></component>
     </div>
-    <div v-if="html" ref="viewer" class="viewer" :style="`top:${viewerIsOpen ? 46 : 96}%;`">
+    <div v-if="html" ref="viewer" class="viewer" :style="`top:${viewerIsOpen ? 46 : 92}%;`">
       <component v-bind:is="viewerComponent"
         :width="viewerWidth"
         :height="viewerHeight"
