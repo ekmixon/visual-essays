@@ -496,9 +496,9 @@
   */
   #menu {
     position: absolute;
-    width: 230px;
-    margin: -100px 0 0 -265px;
-    padding: 120px 50px 10px 45px;
+    width: 200px;
+    margin: -118px 0 0 -160px;
+    padding: 120px 10px 10px 10px;
     background: #ededed;
     list-style-type: none;
     -webkit-font-smoothing: antialiased;
@@ -511,8 +511,8 @@
 
   #menu li {
     display: flex;
-    padding: 0.5em 0;
-    font-size: 1.2em;
+    /* padding: 0.5em 0; */
+    font-size: 1em;
   }
 
   #menu li:hover {

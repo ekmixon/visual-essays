@@ -9,14 +9,16 @@
         <i :class="groups[tab].icon" class="fal"></i>
       </span>
     </div>
-    <div v-if="layout != 'vertical'" ref="tabs" class="tab" @click="setViewerIsOpen(!viewerIsOpen)">
-      <!-- <button @click="setViewerIsOpen(false)"><i class="fal fa-times"></i></button> -->
+    <div v-if="layout != 'vertical'" ref="tabs" class="tab">
       <button v-for="tab in tabs" :key="`tab-${tab}`"
         :data-viewer-name="tab"
         :class="{active: activeTab === tab}"
         @click="activeTab = tab"
       >
         <i :class="groups[tab].icon" class="fal"></i>
+      </button>
+      <button v-if="viewerIsOpen" style="float:right;" @click="setViewerIsOpen(false)">
+        <i class="fal fa-times"></i>
       </button>
       <!-- <button>{{viewerLabel}}</button> -->
     </div>

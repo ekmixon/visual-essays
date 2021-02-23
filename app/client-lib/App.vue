@@ -43,7 +43,7 @@
         @collapse-header="collapseHeader"
       ></component>
     </div>
-    <div v-if="html" ref="viewer" class="viewer" :style="`top:${viewerIsOpen ? 46 : 92}%;`">
+    <div v-if="html" ref="viewer" class="viewer" :style="`top:${viewerIsOpen ? 46 : 96}%;`">
       <component v-bind:is="viewerComponent"
         :width="viewerWidth"
         :height="viewerHeight"
@@ -76,6 +76,7 @@
       <i class="fal fa-image"></i>
     </button>
     -->
+    <div class="fab1" @click="setViewerIsOpen(true)" ><i class="far fa-arrow-alt-square-up"></i></div>
     <component v-bind:is="entityInfoboxModalComponent"
       :selected-item="selectedItemID"
       @set-selected-item="setSelectedItem"
@@ -121,6 +122,16 @@ export default {
         headerPrior: 0,
         heightPrior: 0,
         widthPrior: 0,
+        fabActions: [
+          {
+              name: 'cache',
+              icon: 'cached'
+          },
+          {
+              name: 'alertMe',
+              icon: 'add_alert'
+          }
+      ]
       }),
       computed: {
         siteInfo() { return this.$store.getters.siteInfo || {} },
@@ -608,7 +619,7 @@ export default {
       position: fixed !important;
       width: 100%;
       height: 50%;
-      z-index: 2;
+      z-index: 0;
       transition: top 0.5s;
     }
   }
@@ -624,16 +635,22 @@ export default {
     grid-area: viewer;
     justify-self: stretch;
     background: #333;
-    z-index: 0;
+    z-index: 2;
   }
   .footer {
     grid-area: footer;
   }
 
-  #visual-essay.index .essay,
   #visual-essay.horizontal .essay {
+    padding: 0.5em;
+    font-size: 90%;
+    line-height: 1.2em !important;
+  }
+
+  #visual-essay.index .essay {
     padding: 2em;
   }
+
   .visible {
     visibility: visible;
     opacity: 1;
@@ -648,21 +665,29 @@ export default {
     */
   }
   
-  .floating-action-button {
-    position: fixed;
-    bottom: 30px;
-    right: 3px;
-    background-color: transparent;
-    /*
-    border-radius: 40px;
-    display: block;
+  .fab1 {
     width: 40px;
-    text-align: center;
     height: 40px;
-    */
-    font-size: 32px;
-    border: 0;
-    font-weight: bold;
-    color: #219653;
+    background-color: #219653;
+    opacity: 0.7;
+    border-radius: 50%;
+    box-shadow: 0 6px 10px 0 #666;
+    
+    font-size: 24px;
+    line-height: 42px;
+    color: white;
+    text-align: center;
+    
+    position: fixed;
+    right: 6px;
+    bottom: 60px;
+    z-index: 0;
+    transition: all 0.1s ease-in-out;
   }
+
+  .fab1:hover {
+    box-shadow: 0 6px 14px 0 #666;
+    transform: scale(1.1);
+  }
+
 </style>
