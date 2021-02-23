@@ -127,7 +127,7 @@ def login_required(f):
     return decorated_function
 
 def _is_local(site):
-    return site.startswith('localhost') or site.endswith('gitpod.io')
+    return site.startswith('localhost') or site.startswith('192.168') or site.endswith('gitpod.io')
 
 def _is_ve_site(site):
     _site = site.split(':')[0]
@@ -168,7 +168,7 @@ def _get_site_info(href):
             'repo':    repo,
             'baseurl': f'/{acct}/{repo}'
         })
-    elif hostname != 'docs.visual-essays.app' and (hostname.startswith('localhost') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io')):
+    elif hostname != 'docs.visual-essays.app' and (hostname.startswith('localhost') or hostname.startswith('192.168') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io')):
         if len(path_elems) >= 2:
             resp = requests.get(f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}')
             if resp.status_code == 200:
@@ -331,7 +331,7 @@ def siteinfo(path=None):
     href = args.get('href')
     refresh = args.get('refresh', 'false') in ('', 'true')
     if refresh or href not in _site_info_cache:
-        if site.startswith('localhost') and CONTENT_ROOT:
+        if (site.startswith('localhost') or site.startswith('192.168')) and CONTENT_ROOT:
             local_config_path = os.path.join(CONTENT_ROOT, 'config.json')
             if os.path.exists(local_config_path):
                 site_info = json.load(open(local_config_path, 'r'))
@@ -495,14 +495,14 @@ def main(path=None):
     site, acct, repo, ref, path, qargs = _context(path)
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
-        if site.startswith('localhost') or site.endswith('gitpod.io'):
+        if site.startswith('localhost') or site.startswith('192.168') or site.endswith('gitpod.io'):
             html = re.sub(r'"/visual-essays/js/visual-essays', f'"/static/js/visual-essays', html)
             html = re.sub(r'"/visual-essays/app/client-lib/public/css/', f'"/static/app/client-lib/public/css/', html)
         if ENV == 'dev':
             if site.endswith('gitpod.io'):
                 html = re.sub(r'"/static/js/visual-essays.+"', f'"https://8088-{os.environ.get("GITPOD_WORKSPACE_URL").replace("https://","")}/js/visual-essays.js"', html)
             else:
-                html = re.sub(r'"/static/js/visual-essays.+"', f'"http://localhost:8088/js/visual-essays.js"', html)
+                html = re.sub(r'"/static/js/visual-essays.+"', f'"http://{site}:8088/js/visual-essays.js"', html)
         return html, 200
 
     return 'Not found', 404

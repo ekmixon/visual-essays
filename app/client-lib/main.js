@@ -86,6 +86,8 @@ if (loc.hostname.indexOf('.github.io') > 0) {
   service = `https://8080-${loc.host.slice(5)}`
   site = `${service}${loc.pathname}${loc.search ? loc.search : ''}`
   mode = 'dev'
+} else if (loc.hostname.indexOf('192.168') === 0) {
+  service = `http://${loc.hostname}:8080`
 }
 
 console.log(`service=${service} site=${site} mode=${mode}`)

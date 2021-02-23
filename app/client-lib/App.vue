@@ -76,7 +76,8 @@
       <i class="fal fa-image"></i>
     </button>
     -->
-    <div class="fab1" @click="setViewerIsOpen(true)" ><i class="far fa-arrow-alt-square-up"></i></div>
+    <div v-if="layout === 'horizontal'" class="fab1" @click="setViewerIsOpen(true)" ><i class="far fa-arrow-alt-square-up"></i></div>
+
     <component v-bind:is="entityInfoboxModalComponent"
       :selected-item="selectedItemID"
       @set-selected-item="setSelectedItem"
@@ -570,10 +571,15 @@ export default {
 
 <style scoped>
 
+body {
+  padding: 0 !important;
+  margin: 0 !important;
+}
 
   /* desktop/laptop */
   @media only screen and (min-width: 1000px) {
 
+    #visual-essay.default,
     #visual-essay.index {
       display: grid;
       height: 100vh;
@@ -647,6 +653,7 @@ export default {
     line-height: 1.2em !important;
   }
 
+  #visual-essay.default .essay,
   #visual-essay.index .essay {
     padding: 2em;
   }

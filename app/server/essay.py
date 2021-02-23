@@ -87,7 +87,7 @@ def _img_to_figure(soup):
 
 def convert_relative_links(soup, site, acct, repo, ref, path, root=None):
     path_elems = path[1:].split('/')
-    if site.startswith('localhost') and root is not None:
+    if (site.startswith('localhost') or site.startswith('192.168')) and root is not None:
         abs_baseurl = f'http://{site}/static'
     else:
         abs_baseurl = f'https://raw.githubusercontent.com/{acct}/{repo}/{ref}'
@@ -629,7 +629,7 @@ def parse(html, md_path, acct, repo):
     return str(soup)
 
 def _is_local(site):
-    is_local = site.startswith('localhost') or site.endswith('gitpod.io')
+    is_local = site.startswith('localhost') or site.startswith('192.168') or site.endswith('gitpod.io')
     logger.debug(f'is_local={is_local}')
     return is_local
 
