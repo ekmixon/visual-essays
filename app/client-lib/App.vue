@@ -102,7 +102,7 @@ export default {
         essayHeight: 0,
         essayWidth: 0,
         headerHeight: 400,
-        headerMinHeight: 104,
+        headerMinHeight: 100,
         headerMaxHeight: 400,
         header: null,
         essay: null,
@@ -655,7 +655,7 @@ body {
 
   #visual-essay.default .essay,
   #visual-essay.index .essay {
-    padding: 2em;
+    /*padding: 2em;*/
   }
 
   .visible {

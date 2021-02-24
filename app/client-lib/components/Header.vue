@@ -345,13 +345,13 @@
   .header {
     font-family: Roboto, sans-serif;
     font-size: 1rem;
-    min-height: 104px;
+    min-height: 100px;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
     position: relative;
     margin: 0;
-    color: #444;
+    color: rgba(0, 0, 0, 0.97);
   }
 
   .title-bar {
@@ -366,8 +366,8 @@
     background-color: rgba(0, 0, 0, .6);
     /*padding: 24px 0 0 70px;*/
     position: absolute;
-    top: calc(100% - 104px);
-    height:104px;
+    top: calc(100% - 100px);
+    height:100px;
     width: 100%;
     font-weight: bold;    
   }
@@ -375,14 +375,13 @@
   .title {
     grid-area: title;
     font-size: min(3vw, 2.2em);
-    margin: 0 0 0 22px;
-    padding: 22px 0 0 50px;
+    margin-left: 24px;
+    padding-top: 16px;
   }
   .author {
     grid-area: author;
     font-size: min(3vw, 1.3em);
-    margin: 0 0 0 22px;
-    padding: 0 0 6px 50px;
+    margin-left: 24px;
   }
   .citation {
     grid-area: citation;
@@ -414,6 +413,17 @@
 
   .citation .fa-sm {
     margin-bottom: 1px;
+  }
+
+  #menuToggle {
+    display: block;
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    margin-left: 30px;
+    z-index: 1;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   #menuToggle a {
@@ -448,7 +458,7 @@
     height: 4px;
     margin-bottom: 4px;
     position: relative;
-    background: #cdcdcd;
+    background: #ffffff;
     border-radius: 3px;
     z-index: 1;
     transform-origin: 4px 0px;
@@ -492,7 +502,7 @@
 
   /*
   * Make this absolute positioned
-  * at the top left of the screen
+  * at the top right of the screen
   */
   #menu {
     position: absolute;
@@ -533,17 +543,6 @@
   */
   #menuToggle input:checked ~ ul {
     transform: none;
-  }
-
-  #menuToggle {
-    display: block;
-    position: absolute;
-    top: 30px;
-    right: 30px;
-    margin-left: 30px;
-    z-index: 1;
-    -webkit-user-select: none;
-    user-select: none;
   }
 
   .app-version {
