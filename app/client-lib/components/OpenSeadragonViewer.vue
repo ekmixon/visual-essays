@@ -699,6 +699,16 @@ module.exports = {
         }
     
     },
+    setImageCatpion(){
+      if (this.manifests.length == 2){
+        if (this.sliderPct < 50){
+          this.imageInfo = this.parseManifest(0)
+        }
+        else if (this.sliderPct > 50){
+          this.imageInfo = this.parseManifest(1)
+        }
+      }
+    }
   },
   beforeDestroy() {
     this.actionSources.forEach(elem => elem.classList.remove('image-interaction'))
@@ -884,6 +894,11 @@ module.exports = {
       align-self: center;
       z-index: 2;
       margin-bottom: 10px;
+      outline: black;
+      opacity: 0.7;
+    }
+    .slider:hover {
+      opacity: 1;
     }
 
     .annotations {
@@ -1022,10 +1037,13 @@ module.exports = {
       height: 5px;
       border-radius: 5px;  
       background: #d3d3d3;
-      outline: none;
+      outline: black;
       opacity: 0.7;
       -webkit-transition: .2s;
       transition: opacity .2s;
+    }
+    .slider:hover {
+      opacity: 1;
     }
 
     .slider::-webkit-slider-thumb {
