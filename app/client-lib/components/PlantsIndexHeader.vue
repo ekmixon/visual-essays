@@ -205,7 +205,7 @@
   .header {
     font-family: Roboto, sans-serif;
     font-size: 1rem;
-    min-height: 100px;
+    /* min-height: 100px; */
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;

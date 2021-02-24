@@ -43,7 +43,7 @@
         @collapse-header="collapseHeader"
       ></component>
     </div>
-    <div v-if="html" ref="viewer" class="viewer" :style="`top:${viewerIsOpen ? 46 : 96}%;`">
+    <div v-if="layout === 'horizontal' || layout === 'vertical'" ref="viewer" class="viewer" :style="`top:${viewerIsOpen ? 46 : 96}%;`">
       <component v-bind:is="viewerComponent"
         :width="viewerWidth"
         :height="viewerHeight"
@@ -71,11 +71,9 @@
     <div v-if="footerEnabled && siteInfo" ref="footer" id="siteFooter" class="footer">
       <component :is="footerComponent" :site-config="siteInfo"></component>
     </div>
-    <!--
-    <button v-if="isMobile && layout === 'horizontal'" class="floating-action-button" @click="setViewerIsOpen(true)">
-      <i class="fal fa-image"></i>
-    </button>
-    -->
+
+    <!-- <div style="position:fixed; bottom:0; height:50px; width:100%; background-color:white;" v-text="msg"></div> -->
+  
     <div v-if="layout === 'horizontal'" class="fab1" @click="setViewerIsOpen(true)" ><i class="far fa-arrow-alt-square-up"></i></div>
 
     <component v-bind:is="entityInfoboxModalComponent"
@@ -102,8 +100,6 @@ export default {
         essayHeight: 0,
         essayWidth: 0,
         headerHeight: 400,
-        headerMinHeight: 100,
-        headerMaxHeight: 400,
         header: null,
         essay: null,
         footer: null,
@@ -118,6 +114,7 @@ export default {
         hash: undefined,
         anchor: undefined,
         externalWindow: undefined,
+        msg: '',
     
         isMobile: false,
         headerPrior: 0,
@@ -135,6 +132,8 @@ export default {
       ]
       }),
       computed: {
+        headerMaxHeight() { return this.isMobile ? 200 : 400 },
+        headerMinHeight() { return this.isMobile ? 40 : 100 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         acct() { return this.siteInfo.acct },
@@ -204,7 +203,6 @@ export default {
       },
       mounted() {
         console.log(window.location)
-        
         // this.$modal.show('viewer-modal')
         if (window.location.href.indexOf('#') > 0) {
           this.hash = window.location.href.split('#').pop()
@@ -364,7 +362,6 @@ export default {
           this.itemsInActiveElements = itemsInElements(activeElements, this.allItems)
         },
         resizeHeader(e) {
-          // console.log('resizeHeader')
           let delta
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 10
@@ -372,6 +369,8 @@ export default {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           }
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
+          this.msg = `resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`
+          console.log(this.msg)
           if (scrollDir === 'shrink' || window.scrollY === 0) {
             if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
                 (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
@@ -551,6 +550,7 @@ export default {
           handler: function (isMobile) {
             console.log(`viewerIsOpen=${this.viewerIsOpen} isMobile=${isMobile} viewer=${this.$refs.viewer !== undefined}`)
             console.log(this.$refs.viewer)
+            this.headerHeight = this.headerMaxHeight
             //if (isMobile && this.$refs.viewer) this.$refs.viewer.style.display = this.viewerIsOpen ? '' : 'none'
           },
           immediate: true
