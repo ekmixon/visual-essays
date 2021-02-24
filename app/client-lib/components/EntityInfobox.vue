@@ -1,12 +1,10 @@
 <template>
-  <div>
+  <div class="entity-infobox">
     <div class="entity-image-holder" v-if="imageSrc" :style="{backgroundSize: imageFit, backgroundImage: 'url(' + imageSrc + ')'}"></div>
-    <div class="entity-infobox">
       <h3 class="entity-title" primary-title v-html="title"></h3>
       <div class="subtitle">{{ description }}</div>
       <div class="entity-description" v-html="html"></div>
       <a class="entity-link" :href="entity.wikipedia_page" target="_blank">View Source</a>
-    </div>
   </div>
 </template>
 
@@ -16,7 +14,7 @@ module.exports = {
   name: 'entity-infobox',
   props: {
     eid: { type: String, default: undefined },
-    imageFit: { type: String, default: 'cover' }
+    imageFit: { type: String, default: 'contain' }
     /* imageFit:
        fill = stretched to fit box
        contain = maintain its aspect ratio, scaled fit within the element’s box, letterboxed if needed
@@ -38,7 +36,7 @@ module.exports = {
     imageSrc () { return this.thumbnail ?  this.thumbnail : this.entity.images ? this.entity.images[0] : null },
     html () { return this.entityInfo ?  this.entityInfo.extract_html : null },
     context() { return this.$store.getters.context },
-    apiBaseURL() { return window.location.origin }
+    apiBaseURL() { return this.$store.getters.serviceBase }
   },
   mounted() {
     this.getSummaryInfo()
@@ -88,11 +86,30 @@ module.exports = {
 }
 </script>
 
+<style>
+
+  .entity-description p {
+    margin: 0;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+  }
+</style>
+
 <style scoped>
 
   .entity-infobox {
+    display: grid;
+    height: 100%;
+    overflow-y: scroll;
+    grid-template-columns: auto;
+    grid-template-rows: auto auto auto 1fr auto;
+    grid-template-areas:
+      "image"
+      "title"
+      "subtitle "
+      "description"
+      "link";
     align-items: left;
-    margin: 1rem;
   }
 
   .entity-infobox .v-card__text {
@@ -102,35 +119,38 @@ module.exports = {
   }
 
   h3.entity-title {
+    grid-area: title;
     font-size: 1.5em;
-    margin: 0 0 0.5rem 0;
+    margin: 0.5rem;
   }
 
   .entity-image-holder {
+    grid-area: image;
     width: 100%;
     height: 300px;
     background-color: #7F828B;
   }
 
   .subtitle {
+    grid-area: subtitle;
     font-size: 1.1rem;
+    margin: 0.5rem;
   }
 
   .entity-description {
+    grid-area: description;
     margin: 16px 0;
     line-height: 1.3;
-    max-height: 380px;
-    overflow: scroll;
     font-size: 1.1rem;
-  }
-
-  .entity-description p {
-    margin: 0;
+    margin: 0.5rem;
   }
 
   .entity-link {
+    grid-area: link;
     font-size: 1.1rem;
     color: black !important;
     text-decoration: underline !important;
+    margin: 0.5rem;
   }
+
 </style>

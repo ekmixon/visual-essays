@@ -2,10 +2,11 @@
   <modal 
     class="modal"
     name="entity-infobox-modal" 
-    height="auto" 
-    :maxHeight="modalStyle"
+    height="500px" 
+    :maxHeight="maxHeight"
+    width="400px"
+    :maxWidth="maxWidth"
     :scrollable="true"
-    width="500px"
     :draggable="true"
     @closed="clearSelectedItem"
   >
@@ -27,9 +28,12 @@ module.exports = {
   },
   data: () => ({}),
   computed: {
-    modalStyle() {
-      var h = window.innerHeight - 100;
-      return h;
+    maxHeight() {
+      // return window.innerHeight - 100
+      return 500
+    },
+    maxWidth() {
+      return window.innerWidth - 50 
     },
   },
   methods: {
