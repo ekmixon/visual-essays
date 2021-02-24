@@ -1,69 +1,70 @@
 <template>
-  <div ref="header" id="header" :class="`header ${essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`">
-    <div id="do-labs"> 
-    A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i>
-    </div>
-    <div id="menuToggle" ref="menuToggle">
-        <input type="checkbox" />
-        <span></span>
-        <span></span>
-        <span></span>
-        <ul id="menu">
-          <li @click="nav('/')">
-            <i :class="`fas fa-home`"></i>Home
-          </li>
-          <template v-for="item in siteConfig.nav">
-            <li :key="item.path" @click="nav(item.path)">
-              <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
-            </li>
-          </template>
-          <li v-if="siteConfig.repo !== 've-docs'" @click="openDocsSite">
-            <i :class="`fas fa-question`"></i>Documentation
-          </li>
-          <li>
-            <a v-if="isAuthenticated" @click="logout">
-              <i :class="`fas fa-user`"></i>Logout
-            </a>
-            <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
-              <i :class="`fas fa-user`"></i>Login
-            </a>
-          </li>
-          <hr>
-          <li style="margin-top:10px;" @click="viewMarkdown">
-            <i class="fas fa-file-code"></i>View page markdown
-          </li>
-          <li v-if="isAuthenticated" @click="editMarkdown('default')">
-            <i class="fas fa-edit"></i>Edit page
-          </li>
-          <!--
-          <li v-if="isAuthenticated" @click="editMarkdown('custom')">
-            <i class="fas fa-edit"></i>Edit page (Custom)
-          </li>
-          -->
-          <li v-if="isAuthenticated" @click="gotoGithub">
-            <i class="fab fa-github"></i>Github repository
-          </li>
-          <li style="margin-top:10px; padding:0;">
-            <div class="app-version">App: {{appVersion}}</div>
-          </li>
-          <li style="padding:0;">
-            <div class="app-version">Content: {{contentRef}}</div>
-          </li>
-        </ul>
-    </div>
-    
-    <div id="search" ref="search"> <i class="fal fa-search" style="font-size:32px; color:white;"></i> </div>
+  <div>
+  <div id="do-labs"> A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i></div>
 
-    <div id="logo" ref="logo"> <img src="https://jstor-labs.github.io/plant-humanities/images/ph-logo.png" height="50px">  </div>
-    <div id="brand" ref="brand"> 
+  <div ref="header" id="header" :class="`header ${essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`">
+    <div class="homepage-header">
+      <div id="logo" ref="logo"> <img src="https://jstor-labs.github.io/plant-humanities/images/ph-logo.png">  </div>
+      <div id="brand" ref="brand">
         <span class="brand-name">Plant Humanities</span> <br/>
-        <span class="tagline" ref="tagline">Explore the cultural history of plants and their influence on human societies. </span>
+        <p class="tagline" ref="tagline">Explore the cultural history of plants and their influence on human societies. </p>
+      </div>
+        <div id="menuToggle" ref="menuToggle">
+          <input type="checkbox" />
+          <span></span>
+          <span></span>
+          <span></span>
+          <ul id="menu">
+            <li @click="nav('/')">
+              <i :class="`fas fa-home`"></i>Home
+            </li>
+            <template v-for="item in siteConfig.nav">
+              <li :key="item.path" @click="nav(item.path)">
+                <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
+              </li>
+            </template>
+            <li v-if="siteConfig.repo !== 've-docs'" @click="openDocsSite">
+              <i :class="`fas fa-question`"></i>Documentation
+            </li>
+            <li>
+              <a v-if="isAuthenticated" @click="logout">
+                <i :class="`fas fa-user`"></i>Logout
+              </a>
+              <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
+                <i :class="`fas fa-user`"></i>Login
+              </a>
+            </li>
+            <hr>
+            <li style="margin-top:10px;" @click="viewMarkdown">
+              <i class="fas fa-file-code"></i>View page markdown
+            </li>
+            <li v-if="isAuthenticated" @click="editMarkdown('default')">
+              <i class="fas fa-edit"></i>Edit page
+            </li>
+            <!--
+            <li v-if="isAuthenticated" @click="editMarkdown('custom')">
+              <i class="fas fa-edit"></i>Edit page (Custom)
+            </li>
+            -->
+            <li v-if="isAuthenticated" @click="gotoGithub">
+              <i class="fab fa-github"></i>Github repository
+            </li>
+            <li style="margin-top:10px; padding:0;">
+              <div class="app-version">App: {{appVersion}}</div>
+            </li>
+            <li style="padding:0;">
+              <div class="app-version">Content: {{contentRef}}</div>
+            </li>
+          </ul>
+        </div>
+
     </div>
-    
+
     <div class="title-bar">
       <div class="title" v-html="title"></div>
       <div class="author" v-html="author"></div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -177,60 +178,12 @@
       openInfoboxModal() {
         this.closeDrawer()
         this.$emit('open-infobox-modal')
-      },
-      updateHeader() {
-        /* Ron, I assume the 400 I've hardcoded here (and lots of other numbers) need to come from somewhere else 
-        --Jessica*/
-          
-           this.$nextTick(() => {
-                    
-            //let attributionY = (400 - this.height) * -1 
-            //this.$refs.header.style.top = ((attributionY >= -43) ? `${attributionY}px`: '-43px' ) //move "brought to you by" offscreen
-            
-            let percentScrolled = (400 - this.headerHeight) / 296 
-            
-            //make icons shorter
-            let iconHeight = 21 + ((1 - percentScrolled) * 11) 
-            this.$refs.search.style.height = `${iconHeight}px`
-            this.$refs.logo.style.height = `${iconHeight}px`
-            this.$refs.menuToggle.style.height = `${iconHeight}px`
-
-            //move logo right and make it wider
-            let logoMaxWidth = window.innerWidth - 80;
-            let logoWidth = percentScrolled * logoMaxWidth
-            if (logoWidth >= 40) {
-                this.$refs.logo.style.width = `${logoWidth}px`
-            } else { this.$refs.logo.style.width = '40px' }
-            let logoX = 90 + (90 * percentScrolled)
-            this.$refs.logo.style.left= `${logoX}px`
-
-    
-            //move search up and right
-            let searchX = 90 * percentScrolled
-            this.$refs.search.style.left = `${searchX}px`
-            let searchY =  125 - (82 * percentScrolled)
-            this.$refs.search.style.top = `${searchY}px`
-
-
-            //move branding
-            let brandX = percentScrolled * 160 + 90;
-            this.$refs.brand.style.left = `${brandX}px`
-            let brandY = 110 - percentScrolled * 80 
-            this.$refs.brand.style.top = `${brandY}px`
-
-            this.$refs.tagline.style.opacity = `${1-percentScrolled*2}` //have it fade out halfway through
-        
-
-        })
       }
     },
     beforeDestroy() {
       if (this.observer) this.observer.disconnect()
     },
     watch: {
-      headerHeight() {
-        this.updateHeader()
-      },
       href() { 
         console.log('header.href', this.href)
       }
@@ -252,14 +205,13 @@
   .header {
     font-family: Roboto, sans-serif;
     font-size: 1rem;
-    min-height: 104px;
+    min-height: 100px;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
     position: relative;
     margin: 0;
-    background-color: white;
-    color: #444;
+    color: rgba(0, 0, 0, 0.99);
   }
 
   .title-bar {
@@ -274,8 +226,8 @@
     background-color: rgba(0, 0, 0, .6);
     /*padding: 24px 0 0 70px;*/
     position: absolute;
-    top: calc(100% - 104px);
-    height: 104px;
+    top: calc(100% - 100px);
+    height: 100px;
     width: 100%;
     font-weight: bold;    
   }
@@ -303,44 +255,36 @@
       padding: 14px;
       color: white;
       text-align: center;
-      
   }
 
-  #search {
-      width: 40px;
-      height: 32px;
-      padding: 25px;
-      background-color: #8E8E8E;
-      position: absolute;
+  .homepage-header {
+    padding: 0 1rem;
+    background-color: #219653;
+    height: 100px !important;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: 80px auto 100px;
   }
 
   #logo {
-      width: 40px;
-      height: 32px;
-      padding: 25px;
-      background-color: #219653;
-      position: absolute;
-      top: 43px;
-      left: 90px;
+    padding: 16px;
+    grid-column-start: 1;
   }
 
+  #logo img {
+    vertical-align: unset;
+  }
 
   #brand {
-    display: inline-block;
-    position:absolute;
-    top: 110px;
-    left: 90px;
-    padding: 20px;
-    
+    grid-column-start: 2;
+    margin-left: 1rem;
   }
 
   .brand-name {
     font-family: 'Playfair Display', Serif;
     font-size: 3rem;
     color: white;
-    font-weight: bold;
-    line-height: 1;
-    margin-bottom: 0;
+    line-height: 1.3;
   }
 
   .tagline {
@@ -348,20 +292,34 @@
       color: white;
       font-family: Roboto, Sans-serif;
       font-weight: 300;
+      margin: 0;
+    line-height: 1;
   }
 
   .app-version {
     font-size: 0.9rem;
   }
 
+  #menuToggle {
+    grid-column-start: 3;
+    display: block;
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    margin-left: 30px;
+    z-index: 1;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   #menuToggle a {
     text-decoration: none;
-    color: #000;
+    color: #232323;
     transition: color 0.3s ease;
   }
 
   #menuToggle a:hover {
-    color: #219653;
+    color: tomato;
   }
 
   #menuToggle input {
@@ -369,8 +327,8 @@
     width: 40px;
     height: 32px;
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: -7px;
+    left: -5px;
     cursor: pointer;
     opacity: 0; /* hide this */
     z-index: 2; /* and place it over the hamburger */
@@ -386,13 +344,13 @@
     height: 4px;
     margin-bottom: 4px;
     position: relative;
-    background-color: white;
+    background: #ffffff;
     border-radius: 3px;
     z-index: 1;
     transform-origin: 4px 0px;
     transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0),
-                background 0.5s cubic-bezier(0.77,0.2,0.05,1.0),
-                opacity 0.55s ease;
+    background 0.5s cubic-bezier(0.77,0.2,0.05,1.0),
+    opacity 0.55s ease;
   }
 
   #menuToggle span:first-child {
@@ -430,27 +388,27 @@
 
   /*
   * Make this absolute positioned
-  * at the top left of the screen
+  * at the top right of the screen
   */
   #menu {
-    width: 230px;
-    margin: -100px 0 0 -50px;
-    padding: 120px 50px 10px 45px;
+    position: absolute;
+    width: 200px;
+    margin: -118px 0 0 -160px;
+    padding: 120px 10px 10px 10px;
     background: #ededed;
     list-style-type: none;
     -webkit-font-smoothing: antialiased;
     /* to stop flickering of text in safari */
     transform-origin: 0% 0%;
-    transform: translate(-100%, 0);
+    transform: translate(100%, 0);
     transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   }
 
-
   #menu li {
     display: flex;
-    padding: 0.5em 0;
-    font-size: 1.2em;
+    /* padding: 0.5em 0; */
+    font-size: 1em;
   }
 
   #menu li:hover {
@@ -461,7 +419,7 @@
   #menu li svg {
     min-width: 1.5em;
     margin-right: 10px;
-    margin-top: 8px;
+    margin-top: 6px;
     /* font-weight: bold; */
     font-size: 1em;
   }
@@ -473,16 +431,78 @@
     transform: none;
   }
 
-  #menuToggle {
-    display: block;
-    position: relative;
-    background-color: #323232;
-    width: 40px;
-    height: 32px;
-    padding: 27px 25px 23px 25px;
-    z-index: 1;
-    -webkit-user-select: none;
-    user-select: none;
+
+  @media (max-width: 920px) {
+    .homepage-header {
+      grid-template-columns: 80px auto 80px;
+      height: 9vw !important;
+    }
+
+    .brand-name {
+      font-size: 3.5vw;
+      line-height: 5vw;
+    }
+
+    .tagline {
+      font-size: 2vw;
+      line-height: 2vw;
+    }
   }
-  
+
+  @media (max-width: 740px) {
+    #do-labs{
+      padding: 2vw;
+    }
+
+    .homepage-header {
+      grid-template-columns: 8vw auto 8vw;
+      padding: 1vw;
+    }
+
+    .brand-name {
+      font-size: 4vw;
+      line-height: 5vw;
+    }
+
+    .tagline {
+      font-size: 2.2vw;
+      line-height: 3vw;
+    }
+
+    #logo {
+      padding:4px;
+    }
+
+    #brand {
+      margin-left: 8px;
+      margin-right: 16px;
+    }
+
+    #menuToggle {
+      top: 20px;
+      right: 20px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .homepage-header {
+      grid-template-columns: 8vw auto 8vw;
+    }
+
+    .brand-name {
+      font-size: 5vw;
+      line-height: 5vw;
+    }
+
+    .tagline {
+      font-size: 2.2vw;
+    }
+
+    #menuToggle {
+      top: 10px;
+      right: 10px;
+    }
+
+  }
+
 </style>
