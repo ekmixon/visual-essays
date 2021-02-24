@@ -52,12 +52,16 @@
     </nav>
 
     <div class="title-bar">
-      <div class="title" v-html="title"></div>
-      <div class="author" v-html="author"></div>
-      <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">
-        <i class="fas fa-sm fa-quote-left"></i> Cite this essay</div>
-      <div v-if="aboutQid" class="search" @click="openSearchTool">
-        <i class="fas fa-sm fa-search"></i> More resources</div>
+      <div class="metadata-group">
+        <div class="title" v-html="title"></div>
+        <div class="author" v-html="author"></div>
+      </div>
+      <div class="essay-action-group">
+        <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">
+          <i class="fas fa-sm fa-quote-left"></i> Cite this essay</div>
+        <div v-if="aboutQid" class="search" @click="openSearchTool">
+          <i class="fas fa-sm fa-search"></i> More resources</div>
+      </div>
     </div>
 
     <modal 
@@ -356,12 +360,7 @@
 
   .title-bar {
     display: grid;
-    align-items: stretch;
-    grid-template-columns: 3r 1fr;
-    grid-template-rows: 1fr 1fr;
-    grid-template-areas: 
-      "title search"
-      "author citation";
+    grid-template-columns: auto 200px 100px;
     color: white;
     background-color: rgba(0, 0, 0, .6);
     /*padding: 24px 0 0 70px;*/
@@ -372,19 +371,26 @@
     font-weight: bold;    
   }
 
+  .metadata-group {
+    grid-column-start: 1;
+  }
+
+  .essay-action-group {
+    grid-column-start: 2;
+    padding: 10px 0;
+  }
+
   .title {
-    grid-area: title;
     font-size: min(3vw, 2.2em);
     margin-left: 24px;
     padding-top: 16px;
   }
   .author {
-    grid-area: author;
     font-size: min(3vw, 1.3em);
     margin-left: 24px;
+    font-weight: normal;
   }
   .citation {
-    grid-area: citation;
     margin-left: auto;
     margin-right: 1.3vw;
     font-size: 14px;
@@ -397,10 +403,9 @@
     cursor: pointer;
   }
   .search {
-    grid-area: search;
     margin-left: auto;
     margin-right: 1.3vw;
-    margin-top: 2vh;
+    margin-top: 0.6vh;
     font-size: 14px;
     color: white;
     background-color: #219653;
@@ -612,6 +617,22 @@
 
   .tippy-content {
     font-family: Roboto !important;
+  }
+
+  @media (max-width: 1000px){
+    .citation, .search {
+      display: none ;
+    }
+    .title-bar {
+      grid-template-columns: auto 100px;
+    }
+    .title {
+      margin-left: 16px;
+      margin-bottom: 8px;
+    }
+    .author {
+      margin-left: 16px;
+    }
   }
 
 </style>
