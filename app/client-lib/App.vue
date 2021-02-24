@@ -71,10 +71,14 @@
     <div v-if="footerEnabled && siteInfo" ref="footer" id="siteFooter" class="footer">
       <component :is="footerComponent" :site-config="siteInfo"></component>
     </div>
-
-    <!-- <div style="position:fixed; bottom:0; height:50px; width:100%; background-color:white;" v-text="msg"></div> -->
-  
-    <div v-if="layout === 'horizontal'" class="fab1" @click="setViewerIsOpen(true)" ><i class="far fa-arrow-alt-square-up"></i></div>
+    <!--
+    <button v-if="isMobile && layout === 'horizontal'" class="floating-action-button" @click="setViewerIsOpen(true)">
+      <i class="fal fa-image"></i>
+    </button>
+    -->
+    <div v-if="layout === 'horizontal'" class="fab1" @click="setViewerIsOpen(true)" >
+      <i class="far fa-images"></i> Open visualization
+    </div>
 
     <component v-bind:is="entityInfoboxModalComponent"
       :selected-item="selectedItemID"
@@ -673,23 +677,24 @@ body {
   }
   
   .fab1 {
-    width: 40px;
-    height: 40px;
+    width: 160px;
+    height: 45px;
     background-color: #219653;
-    opacity: 0.7;
-    border-radius: 50%;
-    box-shadow: 0 6px 10px 0 #666;
-    
-    font-size: 24px;
-    line-height: 42px;
+    border-radius: 8px 0 0 8px;
+    box-shadow: 0 1px 10px 0 rgb(0, 0, 0, 0.7);
+    font-size: 14px;
+    line-height: 45px ;
     color: white;
     text-align: center;
-    
     position: fixed;
-    right: 6px;
-    bottom: 100px;
+    right: 0;
+    bottom: 60px;
     z-index: 0;
     transition: all 0.1s ease-in-out;
+  }
+
+  .fab1 svg {
+    font-size: 18px;
   }
 
   .fab1:hover {
