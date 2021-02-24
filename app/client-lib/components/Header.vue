@@ -288,24 +288,69 @@
       },
       formatCitations(){
         // TODO: Update this to handle multiple authors provided in any combination of "author" or "author name string" properties
+        let authors = [];
+        if (this.claimsInfo.author){
+          this.claimsInfo.author.forEach(function(author){
+            if (author.value.value) { authors.push(author.value.value) }
+          })
+        }
+        if (this.claimsInfo['author name string']){
+          this.claimsInfo['author name string'].forEach(function(author){
+            if (author.value) { authors.push(author.value) }
+          })
+        }
+      
+        console.log('authors', authors)
+        /*
         let author = this.claimsInfo.author
           ? this.claimsInfo.author[0].value.value
           : this.claimsInfo['author name string'][0].value
+        */
 
         let title = this.claimsInfo['title'][0]['value']['text']
         let sponsor = this.claimsInfo['sponsor'][0]['value']['value']
         let publish_date = '2021'
         let access_date = new Date()
         let url = this.claimsInfo['full work available at'][0]['value']
-        //mla        
-        this.mla = author.split(' ').pop() + ', ' + author.split(' ')[0] + '. <i>'+title+'</i>. ' + sponsor + ', ' + publish_date + '. '
+        
+        //format authors
+        let mlaAuthor = '';
+        let apaAuthor = '';
+        let chicagoAuthor = '';
+
+        if (authors.length > 0){
+          console.log('here', authors.length)
+          let splitAuthor = authors[0].split(' ');
+          mlaAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor.slice(0, splitAuthor.length-1).join(' ')
+          apaAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor[0].charAt(0)
+          chicagoAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor.slice(0, splitAuthor.length-1).join(' ')
+
+          if (authors.length > 1){
+            console.log('more than one author')
+            for (var i = 1; i < authors.length; i++){
+              mlaAuthor += ', and ' + authors[i]
+              apaAuthor += ', & ' + authors[i].split(' ').pop()+ ', ' + authors[0].split(' ')[0].charAt(0)
+              chicagoAuthor += ', and ' + authors[i]
+            }
+          }
+          
+          mlaAuthor += '. '
+          apaAuthor += '. '
+          chicagoAuthor += '. '
+
+          console.log('mlaAuthor in here', mlaAuthor)
+        }
+
+        console.log('all', mlaAuthor, apaAuthor, chicagoAuthor)
+        //mla
+        this.mla = mlaAuthor + '<i>' + title + '</i>. ' + sponsor + ', ' + publish_date + '. '
         this.mla += url + '. Accessed ' + access_date.getDate() + ' ' + access_date.toLocaleString('default', { month: 'short' }) + '. ' + access_date.getFullYear()+ '.' 
 
         //apa
-        this.apa = author.split(' ').pop() + ', ' + author.split(' ')[0].charAt(0) + '. ('+ publish_date + '). ' + '<i>'+title+'</i>. ' + sponsor + '.'
+        this.apa = apaAuthor + '('+ publish_date + '). ' + '<i>'+title+'</i>. ' + sponsor + '.'
 
         //chicago
-        this.chicago = author.split(' ').pop() + ', ' + author.split(' ')[0] + '. <i>'+title+'</i>. ' + sponsor + ', '
+        this.chicago = chicagoAuthor + '<i>'+title+'</i>. ' + sponsor + ', '
         this.chicago += publish_date + '. Accessed ' + access_date.toLocaleString('default', { month: 'long' }) + ' ' + access_date.getDate() + ', ' + access_date.getFullYear()+ '.'
       },
       copyTextToClipboard(e) {
