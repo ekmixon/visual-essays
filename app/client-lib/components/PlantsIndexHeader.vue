@@ -4,10 +4,10 @@
 
   <div ref="header" id="header" :class="`header ${essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`">
     <div class="homepage-header">
-      <div id="logo" ref="logo"> <img src="https://jstor-labs.github.io/plant-humanities/images/ph-logo.png">  </div>
+      <div id="logo" ref="logo"> <img src="https://jstor-labs.github.io/plant-humanities/images/phl-website-png-logo.png">  </div>
       <div id="brand" ref="brand">
         <span class="brand-name">Plant Humanities</span> <br/>
-        <p class="tagline" ref="tagline">Explore the cultural history of plants and their influence on human societies. </p>
+        <p class="tagline" ref="tagline">Explore the cutural histories of plants and their influence on human societies. </p>
       </div>
         <div id="menuToggle" ref="menuToggle">
           <input type="checkbox" />
@@ -267,7 +267,7 @@
   }
 
   #logo {
-    padding: 16px;
+    padding: 8px;
     grid-column-start: 1;
   }
 
