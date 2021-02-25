@@ -570,6 +570,7 @@
   * at the top right of the screen
   */
   #menu {
+    display: none;
     position: absolute;
     width: 200px;
     margin: -118px 0 0 -160px;
@@ -607,6 +608,7 @@
   * And let's slide it in from the left
   */
   #menuToggle input:checked ~ ul {
+    display: block;
     transform: none;
   }
 
