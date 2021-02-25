@@ -137,7 +137,7 @@ export default {
       }),
       computed: {
         headerMaxHeight() { return this.isMobile ? 200 : 400 },
-        headerMinHeight() { return this.isMobile ? 40 : 100 },
+        headerMinHeight() { return this.isMobile ? 50 : 100 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         acct() { return this.siteInfo.acct },
@@ -697,7 +697,7 @@ body {
     text-align: center;
     position: fixed;
     right: 0;
-    bottom: 60px;
+    bottom: 100px;
     z-index: 0;
     transition: all 0.1s ease-in-out;
   }

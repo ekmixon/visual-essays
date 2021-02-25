@@ -354,6 +354,7 @@
 
   /* Style the tab */
   .tab {
+    padding-left: 24px;
     overflow: hidden;
     border: 1px solid #ccc;
     background-color: #f1f1f1;
