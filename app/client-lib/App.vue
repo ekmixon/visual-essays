@@ -20,7 +20,7 @@
         @open-search-tool="openSearchTool"
       ></component>
     </div>
-    <div ref="essay" id="scrollableContent" class="essay">
+    <div ref="essay" id="scrollableContent" class="essay" @scroll="resizeHeader">
       <component v-if="html" v-bind:is="contentComponent"
         :html="html"
         :layout="layout"
@@ -108,6 +108,7 @@ export default {
         essay: null,
         footer: null,
         lastTouchY: undefined,
+        lastScrollY: 0,
         hoverItemID: null,
         selectedItemID: null,
         essayBase: undefined,
@@ -118,7 +119,6 @@ export default {
         hash: undefined,
         anchor: undefined,
         externalWindow: undefined,
-        msg: '',
     
         isMobile: false,
         headerPrior: 0,
@@ -137,7 +137,7 @@ export default {
       }),
       computed: {
         headerMaxHeight() { return this.isMobile ? 200 : 400 },
-        headerMinHeight() { return this.isMobile ? 40 : 100 },
+        headerMinHeight() { return this.isMobile ? 40 : 104 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         acct() { return this.siteInfo.acct },
@@ -251,7 +251,7 @@ export default {
         addHeaderSizeObserver() {
           if (this.header && !this.headerResizeObserver) {
             this.headerResizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
-              // console.log(`headerResizeObserver: isMobile=${this.isMobile} headerHeight=${this.header.clientHeight} essayTopPadding=${this.$refs.essay ? this.$refs.essay.style.paddingTop : 0}`)
+              console.log(`headerResizeObserver: isMobile=${this.isMobile} headerHeight=${this.header.clientHeight} essayTopPadding=${this.$refs.essay ? this.$refs.essay.style.paddingTop : 0}`)
               this.$refs.essay.style.paddingTop = `${this.header.clientHeight}px`
             })
             this.headerResizeObserver.observe(this.header)
@@ -369,13 +369,16 @@ export default {
           let delta
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 10
-          } else {
+          } else if (e.wheelDeltaY) {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
+          } else if (e.type === 'scroll') {
+            delta = this.lastScrollY < e.srcElement.scrollTop ? -5 : 0
+            this.lastScrollY = e.srcElement.scrollTop
           }
+
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
-          this.msg = `resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`
-          console.log(this.msg)
-          if (scrollDir === 'shrink' || window.scrollY === 0) {
+          console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
+          if (delta && scrollDir === 'shrink' || window.scrollY === 0) {
             if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
                 (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
               let newHeaderHeight = this.header.clientHeight + delta

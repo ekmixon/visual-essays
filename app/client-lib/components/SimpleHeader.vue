@@ -1,12 +1,12 @@
 <template>
   <div ref="header" id="header" class="header" :style="`height:${height}; background-image: url(${banner})`">
     <nav>
-      <div id="menuToggle" @click="menuDisplay = !menuDisplay">
+      <div id="menuToggle">
         <input type="checkbox" />
         <span></span>
         <span></span>
         <span></span>
-        <ul id="menu" :style="`display:${menuDisplay ? 'unset' : 'none'}`">
+        <ul id="menu">
           <li @click="nav('/')">
             <i :class="`fas fa-home`"></i>Home
           </li>
@@ -52,16 +52,12 @@
     </nav>
 
     <div class="title-bar">
-      <div class="metadata-group">
-        <div class="title" v-html="title"></div>
-        <div class="author" v-html="author"></div>
-      </div>
-      <div class="essay-action-group">
-        <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">
-          <i class="fas fa-sm fa-quote-left"></i> Cite this essay</div>
-        <div v-if="aboutQid" class="search" @click="openSearchTool">
-          <i class="fas fa-sm fa-search"></i> More resources</div>
-      </div>
+      <div class="title" v-html="title"></div>
+      <div class="author" v-html="author"></div>
+      <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">
+        <i class="fas fa-sm fa-quote-left"></i> Cite this essay</div>
+      <div v-if="aboutQid" class="search" @click="openSearchTool">
+        <i class="fas fa-sm fa-search"></i> More resources</div>
     </div>
 
     <modal 
@@ -125,7 +121,6 @@
       href: { type: String, default: '' }
     },    
     data: () => ({
-      menuDisplay: false,
       headerWidth: null,
       headerHeight: null,
       observer: null,
@@ -141,7 +136,7 @@
       aboutQid() { return this.essayConfig.loaded ? this.essayConfig.about : null },
       essayConfigLoaded() { return this.essayConfig !== null },
       banner() { return this.essayConfigLoaded ? (this.essayConfig.banner || this.siteConfig.banner) : null },
-      bannerHeight() { return this.essayConfig && this.essayConfig.bannerHeight || this.siteConfig.bannerHeight || 200 },
+      bannerHeight() { return this.essayConfig && this.essayConfig.bannerHeight || this.siteConfig.bannerHeight || 400 },
       title() { return this.essayConfigLoaded ? (this.essayConfig.title || this.siteConfig.title) : null },
       author() { return (this.essayConfigLoaded && this.essayConfig.author) || '&nbsp;' },
       numMaps() { return (this.essayConfigLoaded && this.essayConfig['num-maps']) },
@@ -182,9 +177,6 @@
 
     },
     methods: {
-      toggleMenu() {
-
-      },
       initObserver() {
         const header = this.$refs.header, vm = this, config = { attributes: true }
 
@@ -295,70 +287,21 @@
           })
       },
       formatCitations(){
-        // TODO: Update this to handle multiple authors provided in any combination of "author" or "author name string" properties
-        let authors = [];
-        if (this.claimsInfo.author){
-          this.claimsInfo.author.forEach(function(author){
-            if (author.value.value) { authors.push(author.value.value) }
-          })
-        }
-        if (this.claimsInfo['author name string']){
-          this.claimsInfo['author name string'].forEach(function(author){
-            if (author.value) { authors.push(author.value) }
-          })
-        }
-      
-        console.log('authors', authors)
-        /*
-        let author = this.claimsInfo.author
-          ? this.claimsInfo.author[0].value.value
-          : this.claimsInfo['author name string'][0].value
-        */
-
+        let author = this.claimsInfo['author name string'][0]['value']
         let title = this.claimsInfo['title'][0]['value']['text']
         let sponsor = this.claimsInfo['sponsor'][0]['value']['value']
         let publish_date = '2021'
         let access_date = new Date()
         let url = this.claimsInfo['full work available at'][0]['value']
-        
-        //format authors
-        let mlaAuthor = '';
-        let apaAuthor = '';
-        let chicagoAuthor = '';
-
-        if (authors.length > 0){
-          console.log('here', authors.length)
-          let splitAuthor = authors[0].split(' ');
-          mlaAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor.slice(0, splitAuthor.length-1).join(' ')
-          apaAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor[0].charAt(0)
-          chicagoAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor.slice(0, splitAuthor.length-1).join(' ')
-
-          if (authors.length > 1){
-            console.log('more than one author')
-            for (var i = 1; i < authors.length; i++){
-              mlaAuthor += ', and ' + authors[i]
-              apaAuthor += ', & ' + authors[i].split(' ').pop()+ ', ' + authors[0].split(' ')[0].charAt(0)
-              chicagoAuthor += ', and ' + authors[i]
-            }
-          }
-          
-          mlaAuthor += '. '
-          apaAuthor += '. '
-          chicagoAuthor += '. '
-
-          console.log('mlaAuthor in here', mlaAuthor)
-        }
-
-        console.log('all', mlaAuthor, apaAuthor, chicagoAuthor)
-        //mla
-        this.mla = mlaAuthor + '<i>' + title + '</i>. ' + sponsor + ', ' + publish_date + '. '
+        //mla        
+        this.mla = author.split(' ').pop() + ', ' + author.split(' ')[0] + '. <i>'+title+'</i>. ' + sponsor + ', ' + publish_date + '. '
         this.mla += url + '. Accessed ' + access_date.getDate() + ' ' + access_date.toLocaleString('default', { month: 'short' }) + '. ' + access_date.getFullYear()+ '.' 
 
         //apa
-        this.apa = apaAuthor + '('+ publish_date + '). ' + '<i>'+title+'</i>. ' + sponsor + '.'
+        this.apa = author.split(' ').pop() + ', ' + author.split(' ')[0].charAt(0) + '. ('+ publish_date + '). ' + '<i>'+title+'</i>. ' + sponsor + '.'
 
         //chicago
-        this.chicago = chicagoAuthor + '<i>'+title+'</i>. ' + sponsor + ', '
+        this.chicago = author.split(' ').pop() + ', ' + author.split(' ')[0] + '. <i>'+title+'</i>. ' + sponsor + ', '
         this.chicago += publish_date + '. Accessed ' + access_date.toLocaleString('default', { month: 'long' }) + ' ' + access_date.getDate() + ', ' + access_date.getFullYear()+ '.'
       },
       copyTextToClipboard(e) {
@@ -402,48 +345,47 @@
   .header {
     font-family: Roboto, sans-serif;
     font-size: 1rem;
-    /* min-height: 100px; */
+    min-height: 104px;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
     position: relative;
     margin: 0;
-    color: rgba(0, 0, 0, 0.97);
+    color: #444;
   }
 
   .title-bar {
     display: grid;
-    grid-template-columns: auto 200px 100px;
+    align-items: stretch;
+    grid-template-columns: 3r 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas: 
+      "title search"
+      "author citation";
     color: white;
     background-color: rgba(0, 0, 0, .6);
     /*padding: 24px 0 0 70px;*/
     position: absolute;
-    top: calc(100% - 100px);
-    height:100px;
+    top: calc(100% - 104px);
+    height:104px;
     width: 100%;
     font-weight: bold;    
   }
 
-  .metadata-group {
-    grid-column-start: 1;
-  }
-
-  .essay-action-group {
-    grid-column-start: 2;
-    padding: 10px 0;
-  }
-
   .title {
+    grid-area: title;
     font-size: min(3vw, 2.2em);
-    margin-left: 24px;
-    padding-top: 16px;
+    margin: 0 0 0 22px;
+    padding: 22px 0 0 50px;
   }
   .author {
+    grid-area: author;
     font-size: min(3vw, 1.3em);
-    margin-left: 24px;
-    font-weight: normal;
+    margin: 0 0 0 22px;
+    padding: 0 0 6px 50px;
   }
   .citation {
+    grid-area: citation;
     margin-left: auto;
     margin-right: 1.3vw;
     font-size: 14px;
@@ -456,9 +398,10 @@
     cursor: pointer;
   }
   .search {
+    grid-area: search;
     margin-left: auto;
     margin-right: 1.3vw;
-    margin-top: 0.6vh;
+    margin-top: 2vh;
     font-size: 14px;
     color: white;
     background-color: #219653;
@@ -471,17 +414,6 @@
 
   .citation .fa-sm {
     margin-bottom: 1px;
-  }
-
-  #menuToggle {
-    display: block;
-    position: absolute;
-    top: 30px;
-    right: 30px;
-    margin-left: 30px;
-    z-index: 1;
-    -webkit-user-select: none;
-    user-select: none;
   }
 
   #menuToggle a {
@@ -516,7 +448,7 @@
     height: 4px;
     margin-bottom: 4px;
     position: relative;
-    background: #ffffff;
+    background: #cdcdcd;
     border-radius: 3px;
     z-index: 1;
     transform-origin: 4px 0px;
@@ -560,27 +492,27 @@
 
   /*
   * Make this absolute positioned
-  * at the top right of the screen
+  * at the top left of the screen
   */
   #menu {
     position: absolute;
-    width: 200px;
-    margin: -118px 0 0 -160px;
-    padding: 120px 10px 10px 10px;
+    width: 230px;
+    margin: -100px 0 0 -50px;
+    padding: 120px 50px 10px 45px;
     background: #ededed;
     list-style-type: none;
     -webkit-font-smoothing: antialiased;
     /* to stop flickering of text in safari */
     transform-origin: 0% 0%;
-    transform: translate(100%, 0);
+    transform: translate(-100%, 0);
     transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   }
 
   #menu li {
     display: flex;
-    /* padding: 0.5em 0; */
-    font-size: 1em;
+    padding: 0.5em 0;
+    font-size: 1.2em;
   }
 
   #menu li:hover {
@@ -601,6 +533,17 @@
   */
   #menuToggle input:checked ~ ul {
     transform: none;
+  }
+
+  #menuToggle {
+    display: block;
+    position: relative;
+    top: 30px;
+    /*left: 30px;*/
+    margin-left: 30px;
+    z-index: 1;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .app-version {
@@ -670,22 +613,6 @@
 
   .tippy-content {
     font-family: Roboto !important;
-  }
-
-  @media (max-width: 1000px){
-    .citation, .search {
-      display: none ;
-    }
-    .title-bar {
-      grid-template-columns: auto 100px;
-    }
-    .title {
-      margin-left: 16px;
-      margin-bottom: 8px;
-    }
-    .author {
-      margin-left: 16px;
-    }
   }
 
 </style>

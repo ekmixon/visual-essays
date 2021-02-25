@@ -20,6 +20,7 @@ import EntityInfoboxModal from './components/EntityInfoboxModal.vue'
 import ViewerPanel from './components/ViewerPanel.vue'
 import Essay from './components/Essay.vue'
 import Header from './components/Header.vue'
+// import SimpleHeader from './components/SimpleHeader.vue'
 import EssayIndex from './components/EssayIndex.vue'
 import GraphicViewer from './components/GraphicViewer.vue'
 import IIIFSideBySide from './components/IIIFSideBySide.vue'
@@ -47,6 +48,7 @@ const baseComponentIndex = [
   { name: 'entityInfoboxModal', src: '/components/EntityInfoboxModal.vue', component: EntityInfoboxModal},
   { name: 'viewerPanel', src: '/components/ViewerPanel.vue', component: ViewerPanel},
   { name: 'essay', src: '/components/Essay.vue', component: Essay, type: 'content', layouts: ['default', 'vertical', 'horizontal']},
+  // { name: 'simpleHeader', src: '/components/SimpleHeader.vue', component: SimpleHeader, type: 'header', layouts: ['simple', 'default', 'index', 'vertical', 'horizontal']},
   { name: 'essayHeader', src: '/components/Header.vue', component: Header, type: 'header', layouts: ['default', 'vertical', 'horizontal']},
   { name: 'essayIndex', src: '/components/EssayIndex.vue', component: EssayIndex, type: 'content', layouts: ['index']},
   { name: 'iiifSideBySide', src: '/components/IIIFSideBySide.vue', component: IIIFSideBySide, selectors: ['tag:iiif-compare'], icon: 'fa-file-image', label: 'Image compare'},
