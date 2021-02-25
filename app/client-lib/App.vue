@@ -20,7 +20,7 @@
         @open-search-tool="openSearchTool"
       ></component>
     </div>
-    <div ref="essay" id="scrollableContent" class="essay">
+    <div ref="essay" id="scrollableContent" class="essay" @scroll="resizeHeader">
       <component v-if="html" v-bind:is="contentComponent"
         :html="html"
         :layout="layout"
@@ -43,7 +43,7 @@
         @collapse-header="collapseHeader"
       ></component>
     </div>
-    <div v-if="html" ref="viewer" class="viewer" :style="`top:${viewerIsOpen ? 46 : 100}%;`">
+    <div v-if="layout === 'horizontal' || layout === 'vertical'" ref="viewer" class="viewer" :style="`top:${viewerIsOpen ? 46 : 96}%;`">
       <component v-bind:is="viewerComponent"
         :width="viewerWidth"
         :height="viewerHeight"
@@ -68,7 +68,7 @@
         @toggle-viewer="toggleOption('viewerIsOpen')"
       ></component>
     </div>
-    <div v-if="footerEnabled && siteInfo" ref="footer" id="siteFooter" class="footer">
+    <div v-if="footerEnabled && siteInfo" class="footer">
       <component :is="footerComponent" :site-config="siteInfo"></component>
     </div>
     <!--
@@ -97,19 +97,18 @@ export default {
         activeElements: [],
         itemsInActiveElements: [],
         headerEnabled: true,
-        footerEnabled: true,
+        footerEnabled: false,
         footerHeight: 0,
         viewerHeight: 500,
         viewerWidth: 500,
         essayHeight: 0,
         essayWidth: 0,
         headerHeight: 400,
-        headerMinHeight: 100,
-        headerMaxHeight: 400,
         header: null,
         essay: null,
         footer: null,
         lastTouchY: undefined,
+        lastScrollY: 0,
         hoverItemID: null,
         selectedItemID: null,
         essayBase: undefined,
@@ -137,6 +136,8 @@ export default {
       ]
       }),
       computed: {
+        headerMaxHeight() { return this.isMobile ? 200 : 400 },
+        headerMinHeight() { return this.isMobile ? 40 : 100 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         acct() { return this.siteInfo.acct },
@@ -206,7 +207,6 @@ export default {
       },
       mounted() {
         console.log(window.location)
-        
         // this.$modal.show('viewer-modal')
         if (window.location.href.indexOf('#') > 0) {
           this.hash = window.location.href.split('#').pop()
@@ -258,7 +258,8 @@ export default {
           }
         },
         async loadEssay(path, replace) {
-
+          this.footerEnabled = false
+          this.headerHeight = window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
           // Load essay HTML, use local cached version if available
           let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}?ref=${this.ref}`
           console.log(`loadEssay: path=${path} url=${essayUrl}`)
@@ -366,15 +367,19 @@ export default {
           this.itemsInActiveElements = itemsInElements(activeElements, this.allItems)
         },
         resizeHeader(e) {
-          // console.log('resizeHeader')
           let delta
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 10
-          } else {
+          } else if (e.wheelDeltaY) {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
+          } else if (e.type === 'scroll') {
+            delta = this.lastScrollY < e.srcElement.scrollTop ? -5 : 0
+            this.lastScrollY = e.srcElement.scrollTop
           }
+
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
-          if (scrollDir === 'shrink' || window.scrollY === 0) {
+          // console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
+          if (delta && scrollDir === 'shrink' || window.scrollY === 0) {
             if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
                 (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
               let newHeaderHeight = this.header.clientHeight + delta
@@ -409,7 +414,8 @@ export default {
               this.footerHeight = this.footer.clientHeight
             }
           }
-          //this.viewerHeight = this.calcViewerHeight()
+          this.viewerHeight = this.calcViewerHeight()
+          if (this.header && window.innerHeight < 1000) this.collapseHeader()
           if (!this.header || !this.footer) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
@@ -475,7 +481,7 @@ export default {
           this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
         },
         openSearchTool(qid) {
-          this.openWindow(`https://lodsearch.net?eid=${qid}`, null)
+          this.openWindow(`https://lodsearch.net?eid=${qid}`, `toolbar=yes,location=yes,left=0,top=0,width=1001,height=1200,scrollbars=yes,status=yes`)
         },
         openWindow(url, options) {
           console.log('openWindow', url)
@@ -533,9 +539,10 @@ export default {
           // console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         layout: {
-          handler: function () {
-            this.setViewerIsOpen(this.layout === 'vertical')
+          handler: function (layout) {
+            this.setViewerIsOpen(layout === 'vertical')
             this.updateViewerSize()
+            this.footerEnabled = layout === 'default' || layout === 'index'
           },
           immediate: false
         },
@@ -553,6 +560,7 @@ export default {
           handler: function (isMobile) {
             console.log(`viewerIsOpen=${this.viewerIsOpen} isMobile=${isMobile} viewer=${this.$refs.viewer !== undefined}`)
             console.log(this.$refs.viewer)
+            this.headerHeight = this.headerMaxHeight
             //if (isMobile && this.$refs.viewer) this.$refs.viewer.style.display = this.viewerIsOpen ? '' : 'none'
           },
           immediate: true
@@ -600,11 +608,10 @@ body {
       height: 100vh;
       width: 100%;
       grid-template-columns: 50% 50%;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto 1fr;
       grid-template-areas: 
         "header header"
-        "essay  viewer"
-        "footer footer";
+        "essay  viewer";
       position: absolute;
     }
 
@@ -634,6 +641,7 @@ body {
 
   .header {
     grid-area: header;
+    z-index: 3;
   }
   .essay {
     grid-area: essay;
