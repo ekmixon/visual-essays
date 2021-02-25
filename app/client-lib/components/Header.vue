@@ -138,7 +138,7 @@
     }),
     computed: {
       essayQid() { return this.essayConfigLoaded ? this.essayConfig.qid || this.essayConfig.eid : null },
-      aboutQid() { return this.essayConfig.loaded ? this.essayConfig.about : null },
+      aboutQid() { return this.essayConfigLoaded ? this.essayConfig.about : null },
       essayConfigLoaded() { return this.essayConfig !== null },
       banner() { return this.essayConfigLoaded ? (this.essayConfig.banner || this.siteConfig.banner) : null },
       bannerHeight() { return this.essayConfig && this.essayConfig.bannerHeight || this.siteConfig.bannerHeight || 200 },
@@ -380,10 +380,10 @@
     watch: {
       essayConfigLoaded: {
         handler: function () {
-          console.log('essayConfigLoaded')
+          console.log('essayConfigLoaded', this.essayConfig)
         },
         immediate: true
-      },
+      }
     }
   }
 </script>
