@@ -68,7 +68,7 @@
         @toggle-viewer="toggleOption('viewerIsOpen')"
       ></component>
     </div>
-    <div v-if="footerEnabled && siteInfo" ref="footer" id="siteFooter" class="footer">
+    <div v-if="footerEnabled && siteInfo && (layout === 'index' || layout === 'default')" ref="footer" id="siteFooter" class="footer">
       <component :is="footerComponent" :site-config="siteInfo"></component>
     </div>
     <!--
@@ -251,7 +251,7 @@ export default {
         addHeaderSizeObserver() {
           if (this.header && !this.headerResizeObserver) {
             this.headerResizeObserver = new ResizeObserver(entries => { // eslint-disable-line no-unused-vars
-              console.log(`headerResizeObserver: isMobile=${this.isMobile} headerHeight=${this.header.clientHeight} essayTopPadding=${this.$refs.essay ? this.$refs.essay.style.paddingTop : 0}`)
+              // console.log(`headerResizeObserver: isMobile=${this.isMobile} headerHeight=${this.header.clientHeight} essayTopPadding=${this.$refs.essay ? this.$refs.essay.style.paddingTop : 0}`)
               this.$refs.essay.style.paddingTop = `${this.header.clientHeight}px`
             })
             this.headerResizeObserver.observe(this.header)
@@ -377,7 +377,7 @@ export default {
           }
 
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
-          console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
+          // console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
           if (delta && scrollDir === 'shrink' || window.scrollY === 0) {
             if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
                 (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
@@ -413,7 +413,8 @@ export default {
               this.footerHeight = this.footer.clientHeight
             }
           }
-          //this.viewerHeight = this.calcViewerHeight()
+          this.viewerHeight = this.calcViewerHeight()
+          if (this.header && window.innerHeight < 1000) this.collapseHeader()
           if (!this.header || !this.footer) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
@@ -479,7 +480,7 @@ export default {
           this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
         },
         openSearchTool(qid) {
-          this.openWindow(`https://lodsearch.net?eid=${qid}`, null)
+          this.openWindow(`https://lodsearch.net?eid=${qid}`, `toolbar=yes,location=yes,left=0,top=0,width=1001,height=1200,scrollbars=yes,status=yes`)
         },
         openWindow(url, options) {
           console.log('openWindow', url)
@@ -605,11 +606,10 @@ body {
       height: 100vh;
       width: 100%;
       grid-template-columns: 50% 50%;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto 1fr;
       grid-template-areas: 
         "header header"
-        "essay  viewer"
-        "footer footer";
+        "essay  viewer";
       position: absolute;
     }
 
