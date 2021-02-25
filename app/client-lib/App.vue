@@ -68,7 +68,7 @@
         @toggle-viewer="toggleOption('viewerIsOpen')"
       ></component>
     </div>
-    <div v-if="footerEnabled && siteInfo && (layout === 'index' || layout === 'default')" ref="footer" id="siteFooter" class="footer">
+    <div v-if="footerEnabled && siteInfo" class="footer">
       <component :is="footerComponent" :site-config="siteInfo"></component>
     </div>
     <!--
@@ -97,7 +97,7 @@ export default {
         activeElements: [],
         itemsInActiveElements: [],
         headerEnabled: true,
-        footerEnabled: true,
+        footerEnabled: false,
         footerHeight: 0,
         viewerHeight: 500,
         viewerWidth: 500,
@@ -137,7 +137,7 @@ export default {
       }),
       computed: {
         headerMaxHeight() { return this.isMobile ? 200 : 400 },
-        headerMinHeight() { return this.isMobile ? 40 : 104 },
+        headerMinHeight() { return this.isMobile ? 40 : 100 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         acct() { return this.siteInfo.acct },
@@ -258,7 +258,7 @@ export default {
           }
         },
         async loadEssay(path, replace) {
-
+          this.footerEnabled = false
           // Load essay HTML, use local cached version if available
           let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}?ref=${this.ref}`
           console.log(`loadEssay: path=${path} url=${essayUrl}`)
@@ -538,9 +538,10 @@ export default {
           // console.log(`App.viewerHeight: width=${this.viewerWidth} height=${this.viewerHeight}`)
         },
         layout: {
-          handler: function () {
-            this.setViewerIsOpen(this.layout === 'vertical')
+          handler: function (layout) {
+            this.setViewerIsOpen(layout === 'vertical')
             this.updateViewerSize()
+            this.footerEnabled = layout === 'default' || layout === 'index'
           },
           immediate: false
         },
