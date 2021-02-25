@@ -259,7 +259,7 @@ export default {
         },
         async loadEssay(path, replace) {
           this.footerEnabled = false
-          this.headerHeight = window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
+          this.headerHeight = !this.isMobile && window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
           // Load essay HTML, use local cached version if available
           let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}?ref=${this.ref}`
           console.log(`loadEssay: path=${path} url=${essayUrl}`)
@@ -393,6 +393,7 @@ export default {
           }
         },
         waitForHeaderFooter() {
+          console.log('waitForHeaderFooter')
           if (!this.header) {
             this.header = document.getElementById('header')
             if (this.header && this.$refs.essay) {
@@ -415,8 +416,8 @@ export default {
             }
           }
           this.viewerHeight = this.calcViewerHeight()
-          if (this.header && window.innerHeight < 1000) this.collapseHeader()
-          if (!this.header || !this.footer) setTimeout(this.waitForHeaderFooter, 250)
+          if (!this.isMobile && this.header && window.innerHeight < 1000) this.collapseHeader()
+          if ((this.headerEnabled && !this.header) || (this.footerEnabled && !this.footer)) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
           let height
@@ -553,7 +554,9 @@ export default {
           if (this.html && this.hash && this.header) this.$nextTick(() => {this.anchor = this.hash; this.hash = undefined})
         },
         headerComponent() {
+          console.log('headerComponent')
           this.header = null
+          this.headerResizeObserver = null
           this.$nextTick(() => this.waitForHeaderFooter())
         },
         isMobile: {
