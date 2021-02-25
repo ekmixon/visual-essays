@@ -259,6 +259,7 @@ export default {
         },
         async loadEssay(path, replace) {
           this.footerEnabled = false
+          this.headerHeight = window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
           // Load essay HTML, use local cached version if available
           let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}?ref=${this.ref}`
           console.log(`loadEssay: path=${path} url=${essayUrl}`)
@@ -640,6 +641,7 @@ body {
 
   .header {
     grid-area: header;
+    z-index: 3;
   }
   .essay {
     grid-area: essay;
