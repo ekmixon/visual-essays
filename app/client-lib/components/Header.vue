@@ -422,11 +422,13 @@
     height:100px;
     width: 100%;
     font-weight: bold;
+    
       
   }
 
   .metadata-group {
     grid-column-start: 1;
+    
   }
 
   .essay-action-group {
@@ -438,15 +440,15 @@
     font-size: min(2.5vw, 2.2em);
     margin-left: 24px;
     padding-top: 16px;
-    float: left; white-space: nowrap;
+    display: inline-block;
+    white-space: nowrap;
     
   }
   .author {
     font-size: min(3vw, 1.3em);
     margin-left: 24px;
     font-weight: normal;
-    white-space: nowrap; 
-    float: left;  
+    
   }
   .citation {
     margin-left: auto;
