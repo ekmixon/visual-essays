@@ -617,34 +617,34 @@ module.exports = {
     },
     parseManifest(x){
       var html = "<table style='max-width:100%;table-layout: fixed;'><tbody style='background:none;font-size: 0.8rem;padding: 5px;'>";
-      let content = {}
+      let content = {};
+      let manifest = x;
 
       if (this.manifests.length != 0){
-        if (this.manifests[x]['attribution']) { content['attribution'] = this.manifests[x]['attribution'] }
-        if (this.manifests[x]['description']) { content['description'] = this.manifests[x]['description'] }
-        if (this.manifests[x]['label']) { content['label'] = this.manifests[x]['label'] }
-        if (this.manifests[x]['metadata']){
-          this.manifests[x]['metadata'].forEach(message => {
+        if (manifest['attribution']) { content['attribution'] = manifest['attribution'] }
+        if (manifest['description']) { content['description'] = manifest['description'] }
+        if (manifest['label']) { content['label'] = manifest['label'] }
+        if (manifest['metadata']){
+          manifest['metadata'].forEach(message => {
             if (!content[message['label']] && message['label'] != 'mode' && message['label'] != 'repo' && message['label'] != 'acct' && message['label'] != 'essay' && message['label'] != 'title_formatted'){
               content[message['label']] = message['value']
             }
           })
           //this.items[0]['metadata'].forEach(a => authors[parseInt(a.ordinal)-1] = a['label'])
         }
-        if (this.manifests[x]['sequences']){
-          if (this.manifests[x]['sequences'][0]['canvases'][0]){
-            if (this.manifests[x]['sequences'][0]['canvases'][0]['images']){
-              content['image format'] = this.manifests[x]['sequences'][0]['canvases'][0]['images'][0]['resource']['format']
-              content['image height'] = this.manifests[x]['sequences'][0]['canvases'][0]['images'][0]['resource']['height']
-              content['image width'] = this.manifests[x]['sequences'][0]['canvases'][0]['images'][0]['resource']['width']
+        if (manifest['sequences']){
+          if (manifest['sequences'][0]['canvases'][0]){
+            if (manifest['sequences'][0]['canvases'][0]['images']){
+              content['image format'] = manifest['sequences'][0]['canvases'][0]['images'][0]['resource']['format']
+              content['image height'] = manifest['sequences'][0]['canvases'][0]['images'][0]['resource']['height']
+              content['image width'] = manifest['sequences'][0]['canvases'][0]['images'][0]['resource']['width']
             }
           }
         }
-        if (this.manifests[x]['@id']) { content['IIIF id'] = this.manifests[0]['@id'] }
+        if (manifest['@id']) { content['IIIF id'] = manifest['@id'] }
 
         for(var key in content){
           
-
             html+= '<tr style="background:none; padding: 0px">';
             html+= '<td style="background:none; padding: 5px;max-width: 200px;overflow: auto;">' + key + '</td>';
             if (key == 'license' && this.license && this.licenseUrl){
@@ -665,15 +665,20 @@ module.exports = {
     displayInfoBox(){
       //this.imageInfo = this.parseManifest();
 
-      if (this.manifests.length == 2){
+      if (this.manifests.length == 2 && (this.mode === 'layers' || this.mode === 'curtain')){
         if (this.sliderPct < 50){
-          this.imageInfo = this.parseManifest(0)
+          this.imageInfo = this.parseManifest(this.manifests[0])
         }
         else if (this.sliderPct > 50){
-          this.imageInfo = this.parseManifest(1)
+          this.imageInfo = this.parseManifest(this.manifests[1])
         }
       } else {
-        this.imageInfo = this.parseManifest(0);
+        if (this.currentItem) {
+          this.imageInfo = this.parseManifest(this.currentItem);
+        }
+        else {
+          this.imageInfo = this.parseManifest(this.manifests[0]);
+        }
       }
       //const template = document.getElementsByClassName('.info-box-content');
       //console.log('template', template);
@@ -681,7 +686,6 @@ module.exports = {
         if (!this.tippy) {
           new this.$tippy(document.querySelectorAll('.info-box'), {
             animation:'scale',
-            
             trigger:'click',
             interactive: true,
             allowHTML: true,
@@ -695,6 +699,9 @@ module.exports = {
               instance.setContent(this.imageInfo)
               //setTimeout(() => { instance.hide() }, 10000)
             },
+            onHide(instance) {
+              instance.setProps({trigger: 'mouseenter'});
+            }
           })
         }
     
@@ -784,6 +791,7 @@ module.exports = {
       // console.log('currentItem', current, previous)
       if (this.viewer && current && (!previous || current['@id'] !== previous['@id'])) {
         this.loadAnnotations().then(() => this.initAnnotator())
+        this.displayInfoBox();
       } else {
         // vvvvv this causes an infinite loop!!!!
         // if (previous && previous.annotations) this.currentItem = { ...this.currentItem, ...{ annotations: [...previous.annotations] } }
@@ -894,7 +902,7 @@ module.exports = {
       align-self: center;
       z-index: 2;
       margin-bottom: 10px;
-      background-color: #a1a1a1;
+      background-color: #a1a1a1 !important;
       opacity: 0.7;
     }
     .slider:hover {
@@ -902,7 +910,7 @@ module.exports = {
     }
     .slider::-webkit-slider-thumb {
       -webkit-appearance: none;
-      background: grey;
+      background: #5b5c5e !important;
       cursor: pointer;
     }
 
