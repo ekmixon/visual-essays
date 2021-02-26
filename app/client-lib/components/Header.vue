@@ -474,6 +474,7 @@
     font-weight: normal;
     height: 21px;
     cursor: pointer;
+    text-align: center;
   }
 
   .citation .fa-sm {

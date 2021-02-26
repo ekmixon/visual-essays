@@ -4,10 +4,14 @@
 
   <div ref="header" id="header" :class="`header ${essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`">
     <div class="homepage-header">
-      <div id="logo" ref="logo"> <img src="https://jstor-labs.github.io/plant-humanities/images/ph-logo.png">  </div>
+      <div id="logo" ref="logo">
+        <img
+                xlink:href="https://jstor-labs.github.io/plant-humanities/images/phl-website-svg-logo.svg"
+                src="https://jstor-labs.github.io/plant-humanities/images/phl-website-png-logo.png" />
+      </div>
       <div id="brand" ref="brand">
-        <span class="brand-name">Plant Humanities</span> <br/>
-        <p class="tagline" ref="tagline">Explore the cultural history of plants and their influence on human societies. </p>
+        <span class="brand-name">Plant Humanities Lab</span> <br/>
+        <p class="tagline" ref="tagline">Explore the cultural histories of plants and their influence on human societies. </p>
       </div>
         <div id="menuToggle" ref="menuToggle">
           <input type="checkbox" />
@@ -267,7 +271,7 @@
   }
 
   #logo {
-    padding: 16px;
+    padding: 8px;
     grid-column-start: 1;
   }
 
@@ -277,7 +281,7 @@
 
   #brand {
     grid-column-start: 2;
-    margin-left: 1rem;
+    margin-left: 0.5rem;
   }
 
   .brand-name {
@@ -436,8 +440,14 @@
 
   @media (max-width: 920px) {
     .homepage-header {
-      grid-template-columns: 80px auto 80px;
+      grid-template-columns: 8vw auto 8vw;
       height: 9vw !important;
+    }
+    #logo img {
+    }
+
+    #brand {
+      margin-top: 6px;
     }
 
     .brand-name {
@@ -457,7 +467,6 @@
     }
 
     .homepage-header {
-      grid-template-columns: 8vw auto 8vw;
       padding: 1vw;
     }
 
@@ -476,8 +485,9 @@
     }
 
     #brand {
+      margin-top: 4px;
       margin-left: 8px;
-      margin-right: 16px;
+      margin-right: 8px;
     }
 
     #menuToggle {
@@ -498,6 +508,11 @@
 
     .tagline {
       font-size: 2.2vw;
+    }
+
+    #brand {
+      margin-top: 2px;
+      margin-left: 6px;
     }
 
     #menuToggle {

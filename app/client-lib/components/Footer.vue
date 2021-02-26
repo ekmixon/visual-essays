@@ -30,7 +30,7 @@
     display: flex;
     align-items: center;
     height: 50px;
-    background-color: lightgrey;
+    background-color: #ffffff;
   } 
   #footer img {
     height: 30px;
