@@ -422,7 +422,6 @@
     height:100px;
     width: 100%;
     font-weight: bold;
-    
       
   }
 
@@ -697,5 +696,24 @@
       margin-left: 16px;
     }
   }
+
+   @media (max-width: 600px) {
+     .citation, .search {
+      display: none ;
+    }
+    .title-bar {
+      grid-template-columns: auto 100px;
+      top: calc(100% - 60px);
+      height: 60px;
+    }
+    .title {
+      margin-left: 16px;
+      margin-bottom: 8px;
+    }
+    .author {
+      margin-left: 16px;
+    }
+
+   }
 
 </style>
