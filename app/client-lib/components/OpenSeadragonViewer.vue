@@ -894,11 +894,16 @@ module.exports = {
       align-self: center;
       z-index: 2;
       margin-bottom: 10px;
-      outline: black;
+      background-color: #a1a1a1;
       opacity: 0.7;
     }
     .slider:hover {
-      opacity: 1;
+      opacity: 1 !important;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      background: grey;
+      cursor: pointer;
     }
 
     .annotations {
