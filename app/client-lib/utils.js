@@ -1,8 +1,8 @@
 export function parseUrl(href) {
   const match = href.match(
-    /^(https?):\/\/(([^:/?#]*)(?::([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/
+    /^(https?):\/\/(([^:/?#]*)(?::([0-9]+))?)(\/?[^?#]*)(\?[^#]*|)(#.*|)$/
   )
-  console.log('parseUrl', href, match)
+  // console.log('parseUrl', href, match)
   return (
     match && {
       protocol: match[1],
@@ -10,7 +10,7 @@ export function parseUrl(href) {
       hostname: match[3],
       origin: `${match[1]}://${match[2]}`,
       port: match[4],
-      pathname: match[5],
+      pathname: match[5] || '/',
       search: match[6],
       hash: match[7]
     }
