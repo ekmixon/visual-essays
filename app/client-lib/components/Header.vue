@@ -483,7 +483,7 @@
   #menuToggle {
     display: block;
     position: absolute;
-    top: 30px;
+    top: 3vh;
     right: 30px;
     margin-left: 30px;
     z-index: 1;
@@ -695,8 +695,12 @@
     .author {
       margin-left: 16px;
     }
+    #menuToggle {
+      top: 2vh;
+      right: 20px;
+    }
   }
-
+  
    @media (max-width: 600px) {
      .citation, .search {
       display: none ;
@@ -712,6 +716,10 @@
     }
     .author {
       margin-left: 16px;
+    }
+    #menuToggle {
+      top: 2vh;
+      right: 20px;
     }
 
    }
