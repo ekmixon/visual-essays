@@ -1,7 +1,8 @@
 export function parseUrl(href) {
   const match = href.match(
     /^(https?):\/\/(([^:/?#]*)(?::([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/
-  );
+  )
+  console.log('parseUrl', href, match)
   return (
     match && {
       protocol: match[1],
@@ -13,7 +14,7 @@ export function parseUrl(href) {
       search: match[6],
       hash: match[7]
     }
-  );
+  )
 }
 
 export function parseQueryString(queryString) {
