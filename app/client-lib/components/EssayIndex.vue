@@ -30,6 +30,7 @@
                         <div v-if="!essay.items" class="essay-cite">
                             <div class="essay-title" v-html="essay.title"></div>
                             <div class="essay-author" v-html="essay.author"></div>
+                            <div v-if="essay.authortitle" class="essay-author-title" v-html="essay.authortitle"></div>
                         </div>
                         <div v-if="showAbstracts" class="essay-abstract" v-html="essay.abstract"></div>
                     </div>
@@ -242,10 +243,17 @@ module.exports = {
         font-weight: 400;
     }
 
+    .essay-author-title {
+        grid-area: author;
+        font-size: 1.1rem;
+        font-style: italic;
+        font-weight: 400;
+    }
+
     .essay-abstract {
         grid-area: abstract;
         font-size: 0.8em;
-        font-style: italic;
+        /*font-style: italic;*/
         /* height: 200px;*/
         margin: 1.0rem 0.2rem 0.5rem 0.3rem;
         overflow: hidden;
