@@ -63,7 +63,7 @@ KNOWN_SITES = {
     'plant-humanities.app': ['jstor-labs', 'plant-humanities'],
     'planthumanities.org': ['jstor-labs', 'plant-humanities'],
     'lab.planthumanities.org': ['jstor-labs', 'plant-humanities'],
-    'plan-thumanities.org': ['jstor-labs', 'plant-humanities'],
+    'plant-humanities.org': ['jstor-labs', 'plant-humanities'],
     'lab.plant-humanities.org': ['jstor-labs', 'plant-humanities'],
     'kent-maps.online': ['kent-map', 'kent'],
     've.rsnyder.info': ['rsnyder', 've'],

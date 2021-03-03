@@ -259,7 +259,8 @@ export default {
         },
         async loadEssay(path, replace) {
           this.footerEnabled = false
-          this.headerHeight = !this.isMobile && window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
+          console.log(`window.innerHeight=${window.innerHeight}`)
+          //this.headerHeight = !this.isMobile && window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
           // Load essay HTML, use local cached version if available
           let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}?ref=${this.ref}`
           console.log(`loadEssay: path=${path} url=${essayUrl}`)
@@ -370,7 +371,7 @@ export default {
           let delta
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 10
-          } else if (e.wheelDeltaY) {
+          } else if (e.wheelDeltaY || e.deltaY) {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           } else if (e.type === 'scroll') {
             delta = this.lastScrollY < e.srcElement.scrollTop ? -5 : 0
@@ -378,7 +379,7 @@ export default {
           }
 
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
-          // console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
+          console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
           if (delta && scrollDir === 'shrink' || window.scrollY === 0) {
             if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
                 (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
@@ -404,6 +405,7 @@ export default {
                 this.header.addEventListener('touchmove', this.resizeHeader )
                 this.$refs.essay.addEventListener('touchmove', this.resizeHeader)
               } else {
+                console.log('add wheel listener')
                 this.header.addEventListener('wheel', this.resizeHeader, {passive: false})
                 this.$refs.essay.addEventListener('wheel', this.resizeHeader, {passive: false})
               }
@@ -416,7 +418,7 @@ export default {
             }
           }
           this.viewerHeight = this.calcViewerHeight()
-          if (!this.isMobile && this.header && window.innerHeight < 1000) this.collapseHeader()
+          if (!this.isMobile && this.header && window.innerHeight < 768) this.collapseHeader()
           if ((this.headerEnabled && !this.header) || (this.footerEnabled && !this.footer)) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
