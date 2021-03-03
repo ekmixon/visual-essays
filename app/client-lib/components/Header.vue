@@ -302,7 +302,7 @@
         })
 
         this.getApiToken().then((token) => {
-          return sendEmail(options, token, "jessica.smith@ithaka.org")
+          return sendEmail(options, token, "planthumanities@doaks.org")
         }).then((resp) => {
           if (resp.status === 200) {
             this.$modal.hide('contact-modal')
