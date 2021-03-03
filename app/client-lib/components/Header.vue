@@ -291,7 +291,7 @@
         this.$emit('open-infobox-modal')
       },
       openSearchTool(qid) {
-        console.log('open search tool', qid);
+        this.closeDrawer()
         this.$emit('open-search-tool', qid)
       },
       onSubmit() {

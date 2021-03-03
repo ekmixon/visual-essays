@@ -228,6 +228,7 @@
         this.$emit('open-infobox-modal')
       },
       openSearchTool() {
+        this.closeDrawer()
         this.$emit('open-search-tool')
       },
       onSubmit() {
