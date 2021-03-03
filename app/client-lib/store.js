@@ -36,6 +36,7 @@ width
 export default new Vuex.Store({
   state: {
     acct: undefined,
+    apiToken: undefined,
     repo: undefined,
     branch: undefined,
     mdPath: undefined,
@@ -110,6 +111,9 @@ export default new Vuex.Store({
       state.acct = acct
       console.log(`setAcct=${state.acct}`)
     },
+    setApiToken(state, token) {
+      state.apiToken = token;
+    },
     setRepo (state, repo) { state.repo = repo },
     setBranch (state, branch) { state.branch = branch },
     setMdPath (state, mdPath) { state.mdPath = mdPath },
@@ -173,6 +177,7 @@ export default new Vuex.Store({
   actions: {
     addComponent: ({ commit }, payload) => commit('addComponent', payload),
     setAcct: ({ commit }, acct) => commit('setAcct', acct),
+    setApiToken: ({ commit}, apiToken) => commit('setApiToken', apiToken),
     setRepo: ({ commit }, repo) => commit('setRepo', repo),
     setBranch: ({ commit }, branch) => commit('setBranch', branch),
     setContentRoot: ({ commit }, contentRoot) => commit('setContentRoot', contentRoot),
@@ -214,6 +219,7 @@ export default new Vuex.Store({
   },
   getters: {
     acct: state => state.acct,
+    apiToken: state => state.apiToken,
     repo: state => state.repo,
     branch: state => state.branch,
     mdPath: state => state.mdPath,

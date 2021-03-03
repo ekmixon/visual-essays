@@ -20,6 +20,8 @@
           </li>
           <li @click="openSearchTool">
             <i :class="`fas fa-search`"></i>Search tool
+          <li @click="$modal.show('contact-modal')">
+            <i class="fas fa-envelope"></i> Contact Us
           </li>
           <li v-if="!readOnly">
             <a v-if="isAuthenticated" @click="logout">
@@ -53,6 +55,37 @@
         </ul>
       </div>
     </nav>
+
+    <modal
+            :draggable="true"
+            class="modal"
+            height="auto"
+            name="contact-modal"
+            width="600px"
+
+    >
+      <div class="contact-us-container">
+        <h1>Contact us</h1>
+        <hr>
+        <form class="form-wrapper" ref="feedback-form" v-on:submit.prevent="onSubmit">
+          <input v-model="name" name="name" placeholder="Name" class="form-name" type="text" required> <br/>
+          <input v-model="email" placeholder="Email" class="form-email" type="email" required> <br/>
+          <input v-model="university" placeholder="University Affiliation (optional)" class="form-uni" type="text"> <br/>
+          <select v-model="role" class="form-role">
+            <option disabled value="">Please select one</option>
+            <option value="Undergraduate Student">Undergraduate</option>
+            <option value="Graduate Student">Graduate Student</option>
+            <option value="Faculty">College/University Faculty</option>
+            <option value="Scholar">Independent Scholar</option>
+            <option value="Plant Enthusiast">Plant Enthusiast</option>
+          </select> <br/>
+          <textarea v-model="message" placeholder="Your message here" class="form-message" type="text" required></textarea>
+
+          <button class="form-submit">Submit form</button>
+        </form>
+      </div>
+    </modal>
+
 
     <div class="title-bar">
       <div class="metadata-group">
@@ -112,9 +145,12 @@
 </template>
 
 <script>
+  import { sendEmail } from '../api/EmailService'
+  import TokenHelpers from '../mixins/token'
 
-  module.exports = {
+  export default {
     name: 'Header',
+    mixins: [TokenHelpers],
     props: {
       //eid: { type: String, default: undefined },
       essayConfig: { type: Object, default: function(){ return {}} },
@@ -137,7 +173,11 @@
       mla: undefined,
       apa: undefined,
       chicago: undefined,
-      tippy: null
+      tippy: null,
+      email: '',
+      university: '',
+      role: '',
+      message: ''
     }),
     computed: {
       essayQid() { return this.essayConfigLoaded ? this.essayConfig.qid || this.essayConfig.eid : null },
@@ -253,6 +293,33 @@
       openSearchTool(qid) {
         console.log('open search tool', qid);
         this.$emit('open-search-tool', qid)
+      },
+      onSubmit() {
+        const options = {
+          name: this.name,
+          email: this.email,
+          university: this.university,
+          role: this.role,
+          message: this.message,
+        };
+
+        this.getApiToken().then((token) => {
+          return sendEmail(options, token, 'labs@ithaka.org')
+        })
+
+        this.getApiToken().then((token) => {
+          return sendEmail(options, token, 'planthumanities@doaks.org')
+        }).then((resp) => {
+          if (resp.status === 200) {
+            this.$modal.hide('contact-modal')
+            alert('Thank you for contacting us.')
+            //success
+          } else {
+            console.log('failed to send ' + resp.status)
+          }
+        }).catch((err) => {
+          console.log(err);
+        })
       },
       toQueryString(args) {
         const parts = []
@@ -684,6 +751,48 @@
     font-family: Roboto !important;
   }
 
+
+  .contact-us-container {
+    padding: 8px 16px 16px;
+  }
+
+  .form-wrapper {
+    margin-top:16px;
+  }
+
+  .form-name, .form-email, .form-uni, .form-message {
+    width: calc(100% - 24px);
+    height: 40px;
+    margin: 10px 0;
+    padding: 8px;
+  }
+
+  .form-role {
+    width: calc(100% - 4px);
+    height: 60px;
+    margin: 10px 0;
+    padding: 6px;
+  }
+
+  .form-message {
+    height: 160px;
+  }
+
+  .form-submit {
+    height: 40px;
+    border: 0;
+    color: white;
+    border-radius: 4px;
+    background-color:green;
+  }
+
+  input:focus:invalid {
+    border: 2px solid red;
+  }
+
+  input:required:valid {
+    border: 2px solid green;
+  }
   @media (max-width: 1000px){
     .citation, .search {
       display: none ;
