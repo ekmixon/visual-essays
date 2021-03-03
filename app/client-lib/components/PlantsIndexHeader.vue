@@ -30,6 +30,9 @@
             <li v-if="siteConfig.repo !== 've-docs'" @click="openDocsSite">
               <i :class="`fas fa-question`"></i>Documentation
             </li>
+            <li @click="openSearchTool">
+              <i :class="`fas fa-search`"></i>Search tool
+            </li>
             <li>
               <a v-if="isAuthenticated" @click="logout">
                 <i :class="`fas fa-user`"></i>Logout
@@ -182,6 +185,9 @@
       openInfoboxModal() {
         this.closeDrawer()
         this.$emit('open-infobox-modal')
+      },
+      openSearchTool() {
+        this.$emit('open-search-tool')
       }
     },
     beforeDestroy() {
