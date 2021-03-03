@@ -577,7 +577,7 @@ module.exports = {
         },
         setSelectedItem(e) {
             const itemID = e.target.feature.properties.id || e.target.feature.properties.qid || e.target.feature.properties.eid
-            this.$emit('set-selected-item', itemID)
+            if (itemID.indexOf(':Q') > 0) this.$emit('set-selected-item', itemID)
         },
         // eslint-disable-next-line no-unused-vars
         handleEssayAction({elem, event, action, value}) {
@@ -660,15 +660,19 @@ module.exports = {
                 if (this.showLabels) {
                     if (prior) {
                         let popup = document.querySelector(`h1[data-eid="${prior}"]`)
-                        popup = popup.parentElement.parentElement.parentElement                        
-                        popup.childNodes[0].classList.remove('popup-invert')
-                        popup.childNodes[1].childNodes[0].classList.remove('popup-invert')
+                        if (popup) {
+                            popup = popup.parentElement.parentElement.parentElement                        
+                            popup.childNodes[0].classList.remove('popup-invert')
+                            popup.childNodes[1].childNodes[0].classList.remove('popup-invert')
+                        }
                     }
                     if (itemID) {
                         let popup = document.querySelector(`h1[data-eid="${itemID}"]`)
-                        popup = popup.parentElement.parentElement.parentElement
-                        popup.childNodes[0].classList.add('popup-invert')
-                        popup.childNodes[1].childNodes[0].classList.add('popup-invert')
+                        if (popup) {
+                            popup = popup.parentElement.parentElement.parentElement
+                            popup.childNodes[0].classList.add('popup-invert')
+                            popup.childNodes[1].childNodes[0].classList.add('popup-invert')
+                        }
                     }
                 } else {
                     if (prior && this.popups[prior]) this.map.closePopup(this.popups[prior])

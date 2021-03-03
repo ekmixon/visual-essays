@@ -379,7 +379,7 @@ export default {
           }
 
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
-          console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
+          // console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
           if (delta && scrollDir === 'shrink' || window.scrollY === 0) {
             if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
                 (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
