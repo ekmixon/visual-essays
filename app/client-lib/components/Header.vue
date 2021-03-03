@@ -18,6 +18,9 @@
           <li v-if="siteConfig.repo !== 've-docs'" @click="openDocsSite">
             <i :class="`fas fa-question`"></i>Documentation
           </li>
+          <li @click="openSearchTool">
+            <i :class="`fas fa-search`"></i>Search tool
+          </li>
           <li v-if="!readOnly">
             <a v-if="isAuthenticated" @click="logout">
               <i :class="`fas fa-user`"></i>Logout
@@ -59,7 +62,7 @@
       <div class="essay-action-group">
         <div v-if="essayQid" class="citation" @click="$modal.show('citation-modal')">
           <i class="fas fa-sm fa-quote-left"></i> Cite this essay</div>
-        <div v-if="aboutQid" class="search" @click="openSearchTool">
+        <div v-if="aboutQid" class="search" @click="openSearchTool(aboutQid)">
           <i class="fas fa-sm fa-search"></i> More resources</div>
       </div>
     </div>
@@ -247,9 +250,9 @@
         this.closeDrawer()
         this.$emit('open-infobox-modal')
       },
-      openSearchTool() {
-        console.log('open search tool', this.aboutQid);
-        this.$emit('open-search-tool', this.aboutQid)
+      openSearchTool(qid) {
+        console.log('open search tool', qid);
+        this.$emit('open-search-tool', qid)
       },
       toQueryString(args) {
         const parts = []
