@@ -35,11 +35,14 @@
                             
                         </div>
                         <div v-if="showAbstracts" class="essay-abstract" v-html="essay.abstract"></div>
+                        
                         <!--
                         <div v-if="essay.authortitle"><input type="checkbox" id="expanded"></div>
+                        -->
+
+                        <input type="checkbox" id="expanded">
                         <div v-if="showAbstracts" class="essay-abstract" v-html="essay.abstract"></div>
                         <label for="expanded" role="button">read more</label>
-                        -->
                     </div>
                 </template>
                 <ul class="social-media">
@@ -276,9 +279,9 @@ module.exports = {
         /* height: 200px;*/
         margin: 1.0rem 0.2rem 0.5rem 0.3rem;
         overflow: hidden;
-            display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;  
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        -webkit-box-orient: vertical;  
     }
 
     .overview p {
@@ -304,20 +307,20 @@ module.exports = {
         outline: -webkit-focus-ring-color auto 5px;
     }
   
-  input:checked + .essay-abstract{
-    -webkit-line-clamp: unset;
-  }
-  
-  input:checked ~ label,
-  .essay-abstract:not(.truncated) ~ label{
-    display: none;
-  }
+    input:checked + .essay-abstract{
+        -webkit-line-clamp: unset;
+    }
+    
+    input:checked ~ label,
+    .essay-abstract:not(.truncated) ~ label{
+        display: none;
+    }
 
     label {
     border-radius: 4px;
     padding: 0.2em 0.6em;
-    border: 1px solid #009ce2;
-    background-color: #00acff;
+    border: 1px solid #605C2A;
+    background-color: #605C2A;
     color: #fff;
     font-size: 0.8em;
   }
