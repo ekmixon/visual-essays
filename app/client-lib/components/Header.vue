@@ -145,12 +145,9 @@
 </template>
 
 <script>
-  // import { sendEmail } from '../api/EmailService'
-  import TokenHelpers from '../mixins/token'
 
   export default {
     name: 'Header',
-    mixins: [TokenHelpers],
     props: {
       //eid: { type: String, default: undefined },
       essayConfig: { type: Object, default: function(){ return {}} },
