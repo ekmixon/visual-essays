@@ -224,7 +224,7 @@
           this.$nextTick(() => this.activeElementChange(current, prior))
             this.activeElementChange(current, prior)
       },
-        immediate: true``
+        immediate: true
       },
       groups: {
         handler: function () {

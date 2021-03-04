@@ -616,7 +616,7 @@ body {
       height: 100vh;
       width: 100%;
       grid-template-columns: auto;
-      grid-template-rows: 143px auto 1fr auto;
+      grid-template-rows: auto auto 1fr auto;
       grid-template-areas: 
         "header"
         "search"

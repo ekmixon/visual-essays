@@ -309,7 +309,7 @@ module.exports = {
 }
 
 .vertical .essay {
-  background-color: #f6f6f6;
+  background-color: #f8f8f8;
   padding: 0 0 0 0 !important;
   /* box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3); */
 }
@@ -329,7 +329,7 @@ module.exports = {
 
 p.has-items:hover {
   cursor: pointer !important;
-  background-color: #f7f7f7;;
+  background-color: #f3f3f3;
 }
   
 .vertical p {
