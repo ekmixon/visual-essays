@@ -304,6 +304,10 @@ module.exports = {
   padding: 0 6px;
 }
 
+.default .essay {
+  padding: 18px 32px;
+}
+
 .vertical .essay {
   background-color: #dadada;
   padding: 0 0 0 0 !important;

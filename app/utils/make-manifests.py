@@ -68,6 +68,30 @@ def create_manifest(iiif_service=iiif_service_endpoint, **kwargs):
     else:
         logger.warning(f'{resp.status_code} {resp.content}')
 
+def get_manifest(url):
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        return resp.json()
+
+def get_thumbnail(manifest):
+    thumbnail = None
+    if 'thumbnail' in manifest:
+        thumbnail = manifest['thumbnail']
+    else:
+        try:
+            logger.info(manifest['sequences'][0]['canvases'][0])
+            if manifest['sequences'][0]['canvases'][0]['thumbnail']:
+                thumbnail = manifest['sequences'][0]['canvases'][0]['thumbnail']['@id']
+        except:
+            pass
+        if thumbnail is None:
+            try:
+                thumbnail = manifest['sequences'][0]['canvases'][0]['images'][0]['resource']['@id'].replace('/full/full/0/default', '/full/150,/0/default')
+            except:
+                pass
+
+    return thumbnail
+
 def as_hyperlink(qid, label=None):
     return '=HYPERLINK("{}", "{}")'.format('https://kg.jstor.org/entity/{}'.format(qid), label if label else qid)
 
@@ -78,13 +102,13 @@ def is_ready(rec):
     return rec.get('ready').lower() in ('x', 't', 'true', 'y', 'yes')
 
 def usage():
-    print(('%s [hl:w:s:i:rn]' % sys.argv[0]))
+    print(('%s [hl:w:s:i:r:n]' % sys.argv[0]))
     print('   -h --help            Print help message')
     print('   -l --loglevel        Logging level (default=warning)')
     print('   -w --workbook        Workbook name (default="%s")' % default_workbook)
     print('   -s --worksheet       Worksheet name (default="%s")' % default_worksheet)
     print('   -i --iiif-service    IIIF service endpoint (default="%s")' % iiif_service_endpoint)
-    print('   -r --refresh         Force refresh')
+    print('   -r --row             Row to process')
     print('   -n --dryrun          Run script without updating worksheet')
 
 if __name__ == '__main__':
@@ -92,7 +116,7 @@ if __name__ == '__main__':
     kwargs = {}
     try:
         opts, args = getopt.getopt(
-            sys.argv[1:], 'hl:w:s:i:rn', ['help', 'loglevel', 'workbook', 'worksheet', 'iiif-service', 'refresh', 'dryrun'])
+            sys.argv[1:], 'hl:w:s:i:r:n', ['help', 'loglevel', 'workbook', 'worksheet', 'iiif-service', 'row', 'dryrun'])
     except getopt.GetoptError as err:
         # print help information and exit:
         logger.info(str(err))  # will print something like "option -a not recognized"
@@ -112,8 +136,8 @@ if __name__ == '__main__':
             kwargs['worksheet'] = a
         elif o in ('-i', '--iiif-service'):
             kwargs['iiif-service'] = a
-        elif o in ('-r', '--refresh'):
-            kwargs['refresh'] = True
+        elif o in ('-r', '--row'):
+            kwargs['row'] = int(a)
         elif o in ('-n', '--dryrun'):
             kwargs['dryrun'] = True
         elif o in ('-h', '--help'):
@@ -125,6 +149,7 @@ if __name__ == '__main__':
 
     dryrun = kwargs.pop('dryrun', False)
     force_refresh = kwargs.pop('refresh', False)
+    row_to_process = kwargs.pop('row') if 'row' in kwargs else None
     iiif_service = kwargs.pop('iiif-service', iiif_service_endpoint)
 
     logger.info(f'iiif-service={iiif_service}')
@@ -143,29 +168,33 @@ if __name__ == '__main__':
     for i, rec in enumerate(recs):
         row = i + 2
         logger.debug(f'{is_ready(rec)} {not rec.get("manifest")} {force_refresh}')
-        if is_ready(rec) and (not rec.get('manifest') or force_refresh):
+        if is_ready(rec):
+            if row_to_process and row_to_process != row: continue
+            logger.info(f'processing row={row}')
             try:
-                '''
-                image_type = rec['url'].split('.')[-1]
-                if image_type not in ('jpg', 'jpeg'):
-                    logger.info(f'WARNING: Unable to process image type: {image_type}')
-                    continue
-                '''
-                logger.info(f'processing row={row}')
-                manifest = create_manifest(iiif_service, **rec)
+                if rec.get('manifest'):
+                    if 'iiif-v2.visual-essays.app' not in rec['manifest']: # external manifest
+                        logger.info('get_manifest')
+                        manifest = get_manifest(rec['manifest'])
+                if manifest is None:
+                    manifest = create_manifest(iiif_service, **rec)
                 if manifest:
-                    logger.debug(json.dumps(manifest, indent=2))
-                    img = manifest['sequences'][0]['canvases'][0]['images'][0]['resource']
-                    row_updates = {
-                        'manifest': manifest['@id'],
-                        'thumbnail': as_image(manifest['thumbnail']),
-                        'iiif-url': img['service']['@id'],
-                        'height': img['height'],
-                        'width': img['width'],
-                        'format': img['format'].split('/')[-1],
-                        'ready': ''
-                    }
-                    updates += [Cell(row, field_idx[fld] + 1, val) for fld, val in row_updates.items() if fld in field_idx]
+                    thumbnail_url = get_thumbnail(manifest)
+                    if thumbnail_url:
+                        logger.debug(json.dumps(manifest, indent=2))
+                        img = manifest['sequences'][0]['canvases'][0]['images'][0]['resource']
+                        row_updates = {
+                            'manifest': manifest['@id'],
+                            'thumbnail': as_image(thumbnail_url),
+                            'iiif-url': img['service']['@id'],
+                            'height': img['height'],
+                            'width': img['width'],
+                            'format': img['format'].split('/')[-1],
+                            'ready': ''
+                        }
+                        updates += [Cell(row, field_idx[fld] + 1, val) for fld, val in row_updates.items() if fld in field_idx]
+            except KeyboardInterrupt:
+                break
             except:
                 logger.warning(traceback.format_exc())
                 logger.debug(json.dumps(manifest, indent=2))
