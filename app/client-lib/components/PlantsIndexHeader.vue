@@ -32,7 +32,7 @@
             </li>
             <li @click="openSearchTool">
               <i :class="`fas fa-search`"></i>Search tool
-            <li @click="$modal.show('contact-modal')">
+            <li @click="openContactModal">
               <i class="fas fa-envelope"></i> Contact Us
             </li>
             <li>
@@ -74,7 +74,7 @@
               class="modal"
               height="auto"
               name="contact-modal"
-              width="600px"
+              id="contact-modal"
 
       >
         <div class="contact-us-container">
@@ -230,6 +230,10 @@
       openSearchTool() {
         this.closeDrawer()
         this.$emit('open-search-tool')
+      },
+      openContactModal() {
+        this.closeDrawer()
+        this.$modal.show('contact-modal')
       },
       onSubmit() {
         const options = {
@@ -560,6 +564,9 @@
       grid-template-columns: 8vw auto 8vw;
       height: 9vw !important;
     }
+    #contact-modal .vm--modal{
+      width: 90vw;
+    }
 
     #brand {
       margin-top: 6px;
@@ -634,7 +641,18 @@
       top: 10px;
       right: 10px;
     }
-
   }
+
+</style>
+<style>
+  /*not scoped*/
+  @media (max-width: 920px) {
+
+    #contact-modal .vm--modal {
+      width: 90vw!important;
+      left: 5vw!important;
+    }
+  }
+
 
 </style>

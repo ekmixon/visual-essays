@@ -20,7 +20,7 @@
           </li>
           <li @click="openSearchTool">
             <i :class="`fas fa-search`"></i>Search tool
-          <li @click="$modal.show('contact-modal')">
+          <li @click="openContactModal">
             <i class="fas fa-envelope"></i> Contact Us
           </li>
           <li v-if="!readOnly">
@@ -61,7 +61,7 @@
             class="modal"
             height="auto"
             name="contact-modal"
-            width="600px"
+            id="contact-modal"
 
     >
       <div class="contact-us-container">
@@ -293,6 +293,10 @@
       openSearchTool(qid) {
         this.closeDrawer()
         this.$emit('open-search-tool', qid)
+      },
+      openContactModal() {
+        this.closeDrawer()
+        this.$modal.show('contact-modal')
       },
       onSubmit() {
         const options = {
