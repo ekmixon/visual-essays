@@ -7,7 +7,7 @@
     <h3 class="entity-title" primary-title v-html="title"></h3>
     <div class="subtitle">{{ description }}</div>
     <div class="entity-description" v-html="html"></div>
-    <a class="entity-link" :href="entity.wikipedia_page" target="_blank">View Source</a>
+    <a v-if="entity.wikipedia_page.en" class="entity-link" :href="entity.wikipedia_page.en.value" target="_blank">View Source</a>
   </div>
 </template>
 
