@@ -10,11 +10,8 @@
     "bundle-report": "webpack-cli --profile --json > compilation-stats.json; webpack-bundle-analyzer --port 4200 compilation-stats.json"
   },
   "dependencies": {
-    "@nuxtjs/axios": "^5.3.6",
-    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "http-vue-loader": "^1.4.2",
-    "js-cookie": "^2.2.1",
     "lodash": "^4.17.20",
     "mobile-detect": "^1.4.4",
     "tippy.js": "^6.2.7",

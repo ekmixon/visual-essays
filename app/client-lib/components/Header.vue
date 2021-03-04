@@ -145,7 +145,7 @@
 </template>
 
 <script>
-  import { sendEmail } from '../api/EmailService'
+  // import { sendEmail } from '../api/EmailService'
   import TokenHelpers from '../mixins/token'
 
   export default {
@@ -174,6 +174,7 @@
       apa: undefined,
       chicago: undefined,
       tippy: null,
+      name: '',
       email: '',
       university: '',
       role: '',
@@ -295,30 +296,15 @@
         this.$emit('open-search-tool', qid)
       },
       onSubmit() {
-        const options = {
-          name: this.name,
-          email: this.email,
-          university: this.university,
-          role: this.role,
-          message: this.message,
-        };
-
-        this.getApiToken().then((token) => {
-          return sendEmail(options, token, 'labs@ithaka.org')
-        })
-
-        this.getApiToken().then((token) => {
-          return sendEmail(options, token, 'planthumanities@doaks.org')
-        }).then((resp) => {
-          if (resp.status === 200) {
-            this.$modal.hide('contact-modal')
-            alert('Thank you for contacting us.')
-            //success
-          } else {
-            console.log('failed to send ' + resp.status)
-          }
-        }).catch((err) => {
-          console.log(err);
+        let body = `${this.message}\n\r[Sent by: ${this.name}`
+        if (this.role !== '') body += `, ${this.role}`
+        if (this.university !== '') body = body += ` at ${this.university}`
+        body += ']'
+        this.$emit('send-email', {
+          fromAddress: this.email,
+          toAddress: 'labs@ithaka.org',
+          messageSubject: 'Plant Humanities Lab Contact us form',
+          messageBodyText: body,
         })
       },
       toQueryString(args) {

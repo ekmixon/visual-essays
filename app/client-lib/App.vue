@@ -18,6 +18,7 @@
         @goto-github="gotoGithub"
         @open-docs-site="openDocsSite"
         @open-search-tool="openSearchTool"
+        @send-email="sendEmail"
       ></component>
     </div>
     <div ref="essay" id="scrollableContent" class="essay" @scroll="resizeHeader">
@@ -491,7 +492,21 @@ export default {
           if (this.externalWindow) { this.externalWindow.close() }
           if (options === undefined) options = 'toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes'
           this.externalWindow = window.open(url, '_blank', options)
-        },         
+        },
+        async sendEmail(options) {
+          let resp = await fetch(`${this.serviceBase}/send-email/`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json'
+                },
+                body: JSON.stringify(options)
+            })
+            resp = await resp.json()
+            // alert('Thank you for contacting us.')
+            this.$modal.hide('contact-modal')
+            console.log(resp)
+        },    
         fadeIn(elem) {
           if (elem) {
             elem.classList.add('visible')
