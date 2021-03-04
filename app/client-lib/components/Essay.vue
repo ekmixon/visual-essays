@@ -327,6 +327,18 @@ module.exports = {
   padding:16px;
 }
 
+.horizontal p.active-elem {
+  background-color: #ffffff;
+  /* padding-top: 16px;
+  padding-bottom: 16px; */
+  box-shadow:  0 0 3px 1px rgba(0, 0, 0, 0.25);
+  cursor: default;
+  border: 1px solid #9e9e9e;
+  border-radius: 8px;
+  margin: 0;
+  padding: 8px;
+}
+
 p.has-items:hover {
   cursor: pointer !important;
   background-color: #f3f3f3;
