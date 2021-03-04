@@ -330,6 +330,8 @@
         padding-left: 0.5rem;
         border-radius: 0 3px 3px 0;
         font-size: 1.4rem;
+        opacity: 1 !important;
+        pointer-events: unset !important;
     }
 
     .autocomplete__input:focus {
