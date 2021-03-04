@@ -220,7 +220,8 @@ const doRemoteRequests = async () => {
     }
   })
 
-  Vue.use(VueAnalytics, {id: siteInfo.gaTrackingID || 'UA-125778965-6'})
+  //Vue.use(VueAnalytics, {id: siteInfo.gaTrackingID || 'UA-125778965-8'})
+  Vue.use(VueAnalytics, {id: 'UA-125778965-6'})
 
   if (siteInfo.favicon) {
     let e = document.createElement('link')
