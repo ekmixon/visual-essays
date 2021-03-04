@@ -145,7 +145,13 @@ if __name__ == '__main__':
         logger.debug(f'{is_ready(rec)} {not rec.get("manifest")} {force_refresh}')
         if is_ready(rec) and (not rec.get('manifest') or force_refresh):
             try:
-                logger.info(f'processing row {row}')
+                '''
+                image_type = rec['url'].split('.')[-1]
+                if image_type not in ('jpg', 'jpeg'):
+                    logger.info(f'WARNING: Unable to process image type: {image_type}')
+                    continue
+                '''
+                logger.info(f'processing row={row}')
                 manifest = create_manifest(iiif_service, **rec)
                 if manifest:
                     logger.debug(json.dumps(manifest, indent=2))
@@ -162,7 +168,7 @@ if __name__ == '__main__':
                     updates += [Cell(row, field_idx[fld] + 1, val) for fld, val in row_updates.items() if fld in field_idx]
             except:
                 logger.warning(traceback.format_exc())
-                logger.info(manifest)
+                logger.debug(json.dumps(manifest, indent=2))
     updates.sort(key=lambda cell: cell.col, reverse=False)
     if dryrun:
         print(updates)
