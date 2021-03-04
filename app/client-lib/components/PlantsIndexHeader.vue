@@ -1,6 +1,6 @@
 <template>
   <div>
-  <div id="do-labs"> A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i></div>
+<!--  <div id="do-labs"> A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i></div>-->
 
   <div :class="`header ${essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`" id="header" ref="header">
     <div class="homepage-header">
@@ -11,7 +11,7 @@
       </div>
       <div id="brand" ref="brand">
         <span class="brand-name">Plant Humanities Lab</span> <br/>
-        <p class="tagline" ref="tagline">Explore the cultural histories of plants and their influence on human societies. </p>
+        <p class="tagline" ref="tagline">Explore the cultural histories of plants and their influence on human societies </p>
       </div>
         <div id="menuToggle" ref="menuToggle">
           <input type="checkbox" />
@@ -32,7 +32,7 @@
             </li>
             <li @click="openSearchTool">
               <i :class="`fas fa-search`"></i>Search tool
-            <li @click="$modal.show('contact-modal')">
+            <li @click="openContactModal">
               <i class="fas fa-envelope"></i> Contact Us
             </li>
             <li>
@@ -74,7 +74,7 @@
               class="modal"
               height="auto"
               name="contact-modal"
-              width="600px"
+              id="contact-modal"
 
       >
         <div class="contact-us-container">
@@ -228,6 +228,10 @@
         this.closeDrawer()
         this.$emit('open-search-tool')
       },
+      openContactModal() {
+        this.closeDrawer()
+        this.$modal.show('contact-modal')
+      },
       onSubmit() {
         let body = `${this.message}\n\r[Sent by: ${this.name}`
         if (this.role !== '') body += `, ${this.role}`
@@ -320,7 +324,7 @@
 
   .homepage-header {
     padding: 0 1rem;
-    background-color: #219653;
+    background-color: #444A1E;
     height: 100px !important;
     z-index: 100;
     display: grid;
@@ -541,6 +545,9 @@
       grid-template-columns: 8vw auto 8vw;
       height: 9vw !important;
     }
+    #contact-modal .vm--modal{
+      width: 90vw;
+    }
 
     #brand {
       margin-top: 6px;
@@ -615,7 +622,18 @@
       top: 10px;
       right: 10px;
     }
-
   }
+
+</style>
+<style>
+  /*not scoped*/
+  @media (max-width: 920px) {
+
+    #contact-modal .vm--modal {
+      width: 90vw!important;
+      left: 5vw!important;
+    }
+  }
+
 
 </style>

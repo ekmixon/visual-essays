@@ -29,6 +29,7 @@ import PlantsIndexHeader from './components/PlantsIndexHeader.vue'
 import KnightlabTimeline from './components/KnightlabTimeline.vue'
 import LeafletTimeDimension from './components/LeafletTimeDimension.vue'
 import PlantSpecimenViewer from './components/PlantSpecimenViewer.vue'
+import Search from './components/Search.vue'
 import SiteFooter from './components/Footer.vue'
 import StoriiiesViewer from './components/StoriiiesViewer.vue'
 import Tabulator from './components/Tabulator.vue'
@@ -36,6 +37,8 @@ import VideoPlayer from './components/VideoPlayer.vue'
 import Viewer from './components/Viewer.vue'
 import VisNetwork from './components/VisNetwork.vue'
 import Citation from './components/Citation.vue'
+
+Vue.component('search', Search)
 
 // Vue.config.productionTip = false
 Vue.config.devtools = true

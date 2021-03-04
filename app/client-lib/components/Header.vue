@@ -20,7 +20,7 @@
           </li>
           <li @click="openSearchTool">
             <i :class="`fas fa-search`"></i>Search tool
-          <li @click="$modal.show('contact-modal')">
+          <li @click="openContactModal">
             <i class="fas fa-envelope"></i> Contact Us
           </li>
           <li v-if="!readOnly">
@@ -61,7 +61,7 @@
             class="modal"
             height="auto"
             name="contact-modal"
-            width="600px"
+            id="contact-modal"
 
     >
       <div class="contact-us-container">
@@ -292,6 +292,10 @@
         this.closeDrawer()
         this.$emit('open-search-tool', qid)
       },
+      openContactModal() {
+        this.closeDrawer()
+        this.$modal.show('contact-modal')
+      },
       onSubmit() {
         let body = `${this.message}\n\r[Sent by: ${this.name}`
         if (this.role !== '') body += `, ${this.role}`
@@ -507,7 +511,7 @@
     margin-right: 1.3vw;
     font-size: 14px;
     color: white;
-    background-color: #219653;
+    background-color: #7A9413;
     border-radius: 4px;
     padding: 8px 24px 4px;
     font-weight: normal;
@@ -520,7 +524,7 @@
     margin-top: 0.6vh;
     font-size: 14px;
     color: white;
-    background-color: #219653;
+    background-color: #7A9413;
     border-radius: 4px;
     padding: 8px 20px 4px;
     font-weight: normal;
@@ -694,12 +698,16 @@
   .copy-citation {
     float: left;
     color: white;
-    background-color: #219653;
+    background-color: #444A1E;
     border-radius: 4px;
     padding: 12px;
     height: 20px;
     margin-left: 10px;
     cursor: pointer;
+  }
+
+  .copy-citation:hover {
+    background-color: #737e31;
   }
 
   .entity-infobox {

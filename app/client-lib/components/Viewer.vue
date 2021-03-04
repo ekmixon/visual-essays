@@ -224,7 +224,7 @@
           this.$nextTick(() => this.activeElementChange(current, prior))
             this.activeElementChange(current, prior)
       },
-        immediate: true
+        immediate: true``
       },
       groups: {
         handler: function () {
@@ -315,33 +315,33 @@
   #tabs-bar span svg {
     margin: 0;
     background-color: white !important;
-    color: #219653 !important;
+    color: #444A1E !important;
   }
 
   #tabs-bar span.active-tab svg {
     margin: 0;
-    background-color: #219653 !important;
+    background-color: #444A1E !important;
     color: white !important;
   }
 
   #tabs-bar span.active-tab:hover {
     margin: 0;
-    background-color: #166337 !important;
+    background-color: #1f220a !important;
     color: white !important;
   }
   #tabs-bar span.active-tab:hover svg {
     margin: 0;
-    background-color: #219653 !important;
+    background-color: #1f220a !important;
     color: white !important;
   }
 
   #tabs-bar span:hover, span.active-tab {
     color: white !important;
-    background-color: #219653 !important;
+    background-color: #444A1E !important;
   }
   #tabs-bar span:hover svg {
     color: white !important;
-    background-color: #219653 !important;
+    background-color: #444A1E !important;
   }
 
   .essay-interaction {

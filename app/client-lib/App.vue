@@ -21,6 +21,7 @@
         @send-email="sendEmail"
       ></component>
     </div>
+    <search class="search"></search>
     <div ref="essay" id="scrollableContent" class="essay" @scroll="resizeHeader">
       <component v-if="html" v-bind:is="contentComponent"
         :html="html"
@@ -104,7 +105,7 @@ export default {
         viewerWidth: 500,
         essayHeight: 0,
         essayWidth: 0,
-        headerHeight: 400,
+        headerHeight: 100,
         header: null,
         essay: null,
         footer: null,
@@ -137,7 +138,7 @@ export default {
       ]
       }),
       computed: {
-        headerMaxHeight() { return this.isMobile ? 200 : 400 },
+        headerMaxHeight() { return this.isMobile ? 200 : 100 },
         headerMinHeight() { return this.isMobile ? 50 : 100 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
@@ -358,7 +359,7 @@ export default {
             } else {
               
               // If external link, add external link icon to text and force opening in new tab
-              link.innerHTML += '<sup><i class="fa fa-external-link-square-alt" style="margin-left:3px;margin-right:2px;font-size:0.7em;color:#219653;"></i></sup>'
+              link.innerHTML += '<sup><i class="fa fa-external-link-square-alt" style="margin-left:3px;margin-right:2px;font-size:0.7em;color:#444A1E;"></i></sup>'
               link.setAttribute('target', '_blank')
             }
           })
@@ -615,9 +616,10 @@ body {
       height: 100vh;
       width: 100%;
       grid-template-columns: auto;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: 143px auto 1fr auto;
       grid-template-areas: 
         "header"
+        "search"
         "essay "
         "footer";
       position: absolute;
@@ -628,9 +630,10 @@ body {
       height: 100vh;
       width: 100%;
       grid-template-columns: 50% 50%;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
       grid-template-areas: 
         "header header"
+        "search search"
         "essay  viewer";
       position: absolute;
     }
@@ -666,6 +669,9 @@ body {
   .essay {
     grid-area: essay;
     overflow-y: auto;
+  }
+  .search {
+    grid-area: search;
   }
   .viewer {
     grid-area: viewer;
@@ -705,7 +711,7 @@ body {
   .fab1 {
     width: 160px;
     height: 45px;
-    background-color: #219653;
+    background-color: #444A1E;
     border-radius: 8px 0 0 8px;
     box-shadow: 0 1px 10px 0 rgb(0, 0, 0, 0.7);
     font-size: 14px;

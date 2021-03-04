@@ -858,7 +858,7 @@ module.exports = {
   }
 
   .image-interaction {
-      border-bottom: 2px solid #219653;
+      border-bottom: 2px solid #444A1E;
       cursor: pointer;
       z-index: 10;
   }
@@ -959,7 +959,7 @@ module.exports = {
       margin-top: 0;
     }
     .anno-controls svg:hover {
-      color: #219653;
+      color: #444A1E;
     }
 
     .annos {
@@ -1024,8 +1024,8 @@ module.exports = {
     }
 
     .controls svg:hover {
-        color: #219653;
-        fill: #219653;
+        color: #444A1E;
+        fill: #444A1E;
         transform: scale(1.05, 1.05);
     }
 
