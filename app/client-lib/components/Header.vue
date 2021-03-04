@@ -145,12 +145,9 @@
 </template>
 
 <script>
-  import { sendEmail } from '../api/EmailService'
-  import TokenHelpers from '../mixins/token'
 
   export default {
     name: 'Header',
-    mixins: [TokenHelpers],
     props: {
       //eid: { type: String, default: undefined },
       essayConfig: { type: Object, default: function(){ return {}} },
@@ -174,6 +171,7 @@
       apa: undefined,
       chicago: undefined,
       tippy: null,
+      name: '',
       email: '',
       university: '',
       role: '',
@@ -299,30 +297,15 @@
         this.$modal.show('contact-modal')
       },
       onSubmit() {
-        const options = {
-          name: this.name,
-          email: this.email,
-          university: this.university,
-          role: this.role,
-          message: this.message,
-        };
-
-        this.getApiToken().then((token) => {
-          return sendEmail(options, token, 'labs@ithaka.org')
-        })
-
-        this.getApiToken().then((token) => {
-          return sendEmail(options, token, 'planthumanities@doaks.org')
-        }).then((resp) => {
-          if (resp.status === 200) {
-            this.$modal.hide('contact-modal')
-            alert('Thank you for contacting us.')
-            //success
-          } else {
-            console.log('failed to send ' + resp.status)
-          }
-        }).catch((err) => {
-          console.log(err);
+        let body = `${this.message}\n\r[Sent by: ${this.name}`
+        if (this.role !== '') body += `, ${this.role}`
+        if (this.university !== '') body = body += ` at ${this.university}`
+        body += ']'
+        this.$emit('send-email', {
+          fromAddress: this.email,
+          toAddress: 'labs@ithaka.org',
+          messageSubject: 'Plant Humanities Lab Contact us form',
+          messageBodyText: body,
         })
       },
       toQueryString(args) {
@@ -528,7 +511,7 @@
     margin-right: 1.3vw;
     font-size: 14px;
     color: white;
-    background-color: #219653;
+    background-color: #7A9413;
     border-radius: 4px;
     padding: 8px 24px 4px;
     font-weight: normal;
@@ -541,7 +524,7 @@
     margin-top: 0.6vh;
     font-size: 14px;
     color: white;
-    background-color: #219653;
+    background-color: #7A9413;
     border-radius: 4px;
     padding: 8px 20px 4px;
     font-weight: normal;
@@ -715,12 +698,16 @@
   .copy-citation {
     float: left;
     color: white;
-    background-color: #219653;
+    background-color: #444A1E;
     border-radius: 4px;
     padding: 12px;
     height: 20px;
     margin-left: 10px;
     cursor: pointer;
+  }
+
+  .copy-citation:hover {
+    background-color: #737e31;
   }
 
   .entity-infobox {

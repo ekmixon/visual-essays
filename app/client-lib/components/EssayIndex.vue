@@ -16,7 +16,7 @@
                         </div>
                         <div v-if="!essay.items" class="essay-cite">
                             <div class="essay-title" v-html="essay.title"></div>
-                            <div class="essay-author" v-html="essay.author"></div>
+                            <div class="essay-author" v-html="essay.author || essay.authors"></div>
                         </div>
                         <div v-if="showAbstracts" class="essay-abstract" v-html="essay.abstract"></div>
                     </a>
@@ -28,11 +28,18 @@
                             <img :src="essay.image" alt="" />
                         </div>
                         <div v-if="!essay.items" class="essay-cite">
+                            
                             <div class="essay-title" v-html="essay.title"></div>
-                            <div class="essay-author" v-html="essay.author"></div>
+                            <div class="essay-author" v-html="essay.author || essay.authors"></div>
                             <div v-if="essay.authortitle" class="essay-author-title" v-html="essay.authortitle"></div>
+                            
                         </div>
                         <div v-if="showAbstracts" class="essay-abstract" v-html="essay.abstract"></div>
+                        <!--
+                        <div v-if="essay.authortitle"><input type="checkbox" id="expanded"></div>
+                        <div v-if="showAbstracts" class="essay-abstract" v-html="essay.abstract"></div>
+                        <label for="expanded" role="button">read more</label>
+                        -->
                     </div>
                 </template>
                 <ul class="social-media">
@@ -71,6 +78,18 @@ module.exports = {
   },
   mounted() {
     console.log(`${this.$options.name}.mounted`)
+
+    const ps = document.querySelectorAll(".essay-abstract");
+    const observer = new ResizeObserver(entries => {
+    for (let entry of entries) {
+        entry.target.classList[entry.target.scrollHeight > entry.contentRect.height ? 'add' : 'remove']('truncated');
+    }
+    });
+
+    ps.forEach(p => {
+    observer.observe(p);
+    });
+
   },
   methods: {
       parsePageHTML() {
@@ -191,7 +210,7 @@ module.exports = {
     }
 
     .card-wrapper:hover .essay-title {
-        /* color: #219653; */
+        /* color: #444A1E; */
     }
 
     a:hover {
@@ -257,6 +276,9 @@ module.exports = {
         /* height: 200px;*/
         margin: 1.0rem 0.2rem 0.5rem 0.3rem;
         overflow: hidden;
+            display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;  
     }
 
     .overview p {
@@ -272,5 +294,32 @@ module.exports = {
     ul.social-media svg {
         margin-right: 12px;
     }
+
+    input {
+        opacity: 0;
+        position: absolute;
+        pointer-events: none;
+    }
+    input:focus ~ label {
+        outline: -webkit-focus-ring-color auto 5px;
+    }
+  
+  input:checked + .essay-abstract{
+    -webkit-line-clamp: unset;
+  }
+  
+  input:checked ~ label,
+  .essay-abstract:not(.truncated) ~ label{
+    display: none;
+  }
+
+    label {
+    border-radius: 4px;
+    padding: 0.2em 0.6em;
+    border: 1px solid #009ce2;
+    background-color: #00acff;
+    color: #fff;
+    font-size: 0.8em;
+  }
 
 </style>

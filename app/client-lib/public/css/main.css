@@ -50,7 +50,7 @@
     text-shadow: none;
   }
   a {
-    /* color: #219653 !important; */
+    /* color: #444A1E !important; */
   }
   a:focus {
     outline: thin dotted;
@@ -212,7 +212,7 @@
     /* border-bottom: 2px solid #6af; */
     color: #444;
     padding-bottom: 1px;
-    color: #219653 !important;
+    color: #444A1E !important;
     text-decoration: underline !important;
     -webkit-transition: .25s;
         -moz-transition: .25s;
@@ -327,7 +327,7 @@
   /* .entity { white-space: nowrap } */
   a.footnote-ref { 
     white-space: nowrap;
-    color: #219653 !important;
+    color: #444A1E !important;
     cursor: pointer;
   }
 

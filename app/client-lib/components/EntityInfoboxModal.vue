@@ -74,6 +74,6 @@ module.exports = {
   }
 
   .close-button:hover {
-    background-color: #219653;
+    background-color: #444A1E;
   }
 </style>

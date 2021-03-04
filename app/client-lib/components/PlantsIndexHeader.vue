@@ -1,6 +1,6 @@
 <template>
   <div>
-  <div id="do-labs"> A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i></div>
+<!--  <div id="do-labs"> A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i></div>-->
 
   <div :class="`header ${essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`" id="header" ref="header">
     <div class="homepage-header">
@@ -11,7 +11,7 @@
       </div>
       <div id="brand" ref="brand">
         <span class="brand-name">Plant Humanities Lab</span> <br/>
-        <p class="tagline" ref="tagline">Explore the cultural histories of plants and their influence on human societies. </p>
+        <p class="tagline" ref="tagline">Explore the cultural histories of plants and their influence on human societies </p>
       </div>
         <div id="menuToggle" ref="menuToggle">
           <input type="checkbox" />
@@ -108,12 +108,9 @@
 </template>
 
 <script>
-  import { sendEmail } from '../api/EmailService'
-  import TokenHelpers from '../mixins/token'
 
   export default {
     name: 'PlantsIndexHeader',
-    mixins: [TokenHelpers],
     props: {
       essayConfig: { type: Object, default: function(){ return {}} },
       siteConfig: { type: Object, default: function(){ return {}} },
@@ -236,32 +233,16 @@
         this.$modal.show('contact-modal')
       },
       onSubmit() {
-        const options = {
-          name: this.name,
-          email: this.email,
-          university: this.university,
-          role: this.role,
-          message: this.message,
-        };
-
-        this.getApiToken().then((token) => {
-          return sendEmail(options, token, 'labs@ithaka.org')
+        let body = `${this.message}\n\r[Sent by: ${this.name}`
+        if (this.role !== '') body += `, ${this.role}`
+        if (this.university !== '') body = body += ` at ${this.university}`
+        body += ']'
+        this.$emit('send-email', {
+          fromAddress: this.email,
+          toAddress: 'labs@ithaka.org',
+          messageSubject: 'Plant Humanities Lab Contact us form',
+          messageBodyText: body,
         })
-
-        this.getApiToken().then((token) => {
-          return sendEmail(options, token, 'planthumanities@doaks.org')
-        }).then((resp) => {
-          if (resp.status === 200) {
-            this.$modal.hide('contact-modal')
-            alert('Thank you for contacting us.')
-            //success
-          } else {
-            console.log('failed to send ' + resp.status)
-          }
-        }).catch((err) => {
-          console.log(err);
-        })
-
       }
     },
     beforeDestroy() {
@@ -343,7 +324,7 @@
 
   .homepage-header {
     padding: 0 1rem;
-    background-color: #219653;
+    background-color: #444A1E;
     height: 100px !important;
     z-index: 100;
     display: grid;

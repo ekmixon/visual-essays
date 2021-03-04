@@ -18,8 +18,10 @@
         @goto-github="gotoGithub"
         @open-docs-site="openDocsSite"
         @open-search-tool="openSearchTool"
+        @send-email="sendEmail"
       ></component>
     </div>
+    <search class="search"></search>
     <div ref="essay" id="scrollableContent" class="essay" @scroll="resizeHeader">
       <component v-if="html" v-bind:is="contentComponent"
         :html="html"
@@ -103,7 +105,7 @@ export default {
         viewerWidth: 500,
         essayHeight: 0,
         essayWidth: 0,
-        headerHeight: 400,
+        headerHeight: 100,
         header: null,
         essay: null,
         footer: null,
@@ -136,7 +138,7 @@ export default {
       ]
       }),
       computed: {
-        headerMaxHeight() { return this.isMobile ? 200 : 400 },
+        headerMaxHeight() { return this.isMobile ? 200 : 100 },
         headerMinHeight() { return this.isMobile ? 50 : 100 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
@@ -259,7 +261,8 @@ export default {
         },
         async loadEssay(path, replace) {
           this.footerEnabled = false
-          this.headerHeight = !this.isMobile && window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
+          console.log(`window.innerHeight=${window.innerHeight}`)
+          //this.headerHeight = !this.isMobile && window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
           // Load essay HTML, use local cached version if available
           let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}?ref=${this.ref}`
           console.log(`loadEssay: path=${path} url=${essayUrl}`)
@@ -356,7 +359,7 @@ export default {
             } else {
               
               // If external link, add external link icon to text and force opening in new tab
-              link.innerHTML += '<sup><i class="fa fa-external-link-square-alt" style="margin-left:3px;margin-right:2px;font-size:0.7em;color:#219653;"></i></sup>'
+              link.innerHTML += '<sup><i class="fa fa-external-link-square-alt" style="margin-left:3px;margin-right:2px;font-size:0.7em;color:#444A1E;"></i></sup>'
               link.setAttribute('target', '_blank')
             }
           })
@@ -370,7 +373,7 @@ export default {
           let delta
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 10
-          } else if (e.wheelDeltaY) {
+          } else if (e.wheelDeltaY || e.deltaY) {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           } else if (e.type === 'scroll') {
             delta = this.lastScrollY < e.srcElement.scrollTop ? -5 : 0
@@ -404,6 +407,7 @@ export default {
                 this.header.addEventListener('touchmove', this.resizeHeader )
                 this.$refs.essay.addEventListener('touchmove', this.resizeHeader)
               } else {
+                console.log('add wheel listener')
                 this.header.addEventListener('wheel', this.resizeHeader, {passive: false})
                 this.$refs.essay.addEventListener('wheel', this.resizeHeader, {passive: false})
               }
@@ -416,7 +420,7 @@ export default {
             }
           }
           this.viewerHeight = this.calcViewerHeight()
-          if (!this.isMobile && this.header && window.innerHeight < 1000) this.collapseHeader()
+          if (!this.isMobile && this.header && window.innerHeight < 768) this.collapseHeader()
           if ((this.headerEnabled && !this.header) || (this.footerEnabled && !this.footer)) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
@@ -489,7 +493,21 @@ export default {
           if (this.externalWindow) { this.externalWindow.close() }
           if (options === undefined) options = 'toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes'
           this.externalWindow = window.open(url, '_blank', options)
-        },         
+        },
+        async sendEmail(options) {
+          let resp = await fetch(`${this.serviceBase}/send-email/`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json'
+                },
+                body: JSON.stringify(options)
+            })
+            resp = await resp.json()
+            // alert('Thank you for contacting us.')
+            this.$modal.hide('contact-modal')
+            console.log(resp)
+        },    
         fadeIn(elem) {
           if (elem) {
             elem.classList.add('visible')
@@ -598,9 +616,10 @@ body {
       height: 100vh;
       width: 100%;
       grid-template-columns: auto;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: 143px auto 1fr auto;
       grid-template-areas: 
         "header"
+        "search"
         "essay "
         "footer";
       position: absolute;
@@ -611,9 +630,10 @@ body {
       height: 100vh;
       width: 100%;
       grid-template-columns: 50% 50%;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
       grid-template-areas: 
         "header header"
+        "search search"
         "essay  viewer";
       position: absolute;
     }
@@ -649,6 +669,9 @@ body {
   .essay {
     grid-area: essay;
     overflow-y: auto;
+  }
+  .search {
+    grid-area: search;
   }
   .viewer {
     grid-area: viewer;
@@ -688,7 +711,7 @@ body {
   .fab1 {
     width: 160px;
     height: 45px;
-    background-color: #219653;
+    background-color: #444A1E;
     border-radius: 8px 0 0 8px;
     box-shadow: 0 1px 10px 0 rgb(0, 0, 0, 0.7);
     font-size: 14px;

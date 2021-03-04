@@ -63,7 +63,7 @@ KNOWN_SITES = {
     'plant-humanities.app': ['jstor-labs', 'plant-humanities'],
     'planthumanities.org': ['jstor-labs', 'plant-humanities'],
     'lab.planthumanities.org': ['jstor-labs', 'plant-humanities'],
-    'plan-thumanities.org': ['jstor-labs', 'plant-humanities'],
+    'plant-humanities.org': ['jstor-labs', 'plant-humanities'],
     'lab.plant-humanities.org': ['jstor-labs', 'plant-humanities'],
     'kent-maps.online': ['kent-map', 'kent'],
     've.rsnyder.info': ['rsnyder', 've'],
@@ -490,6 +490,24 @@ def specimens(path):
             return (open(os.path.join(BASEDIR, 'app', 'server', 'json-viewer.html'), 'r').read().replace("'{{DATA}}'", json.dumps(_specimens)), 200, cors_headers)
         else:
             return (_specimens, 200, cors_headers)
+
+@app.route('/send-email/', methods=['POST', 'OPTIONS'])
+def send_email():
+    if request.method == 'OPTIONS':
+        return ('', 204, cors_headers)
+    data = request.json
+    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImpzdG9ybGFicyIsInVzZXJfY2xhaW1zIjp7InN1cGVydXNlciI6dHJ1ZX0sImV4cCI6MTczNjE4ODA2N30.WFuob_hAYUi1DWvplUwHMLqMYv8JMt2i8sCqzXrVpbs'
+    logger.info(f'send-email: {data}')
+    resp = requests.post(
+        'https://www.jstor.org/api/labs-email-service/',
+        headers = {
+            'Authorization': f'JWT {token}',
+            'User-agent': 'Labs python client'
+        },
+        json = request.json
+    )
+    logger.info(resp.status_code)
+    return {'status': 'OK'}, 200, cors_headers
 
 @app.route('/<path:path>', methods=['GET'])
 @app.route('/', methods=['GET'])
