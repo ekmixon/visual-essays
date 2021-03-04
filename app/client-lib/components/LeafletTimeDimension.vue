@@ -747,7 +747,7 @@ module.exports = {
     }
 
     .map-interaction {
-        border-bottom: 2px solid #219653;
+        border-bottom: 2px solid #444A1E;
         cursor: pointer;
         z-index: 10;
     }

@@ -1,6 +1,6 @@
 <template>
   <div>
-  <div id="do-labs"> A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i></div>
+<!--  <div id="do-labs"> A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i></div>-->
 
   <div :class="`header ${essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`" id="header" ref="header">
     <div class="homepage-header">
@@ -11,7 +11,7 @@
       </div>
       <div id="brand" ref="brand">
         <span class="brand-name">Plant Humanities Lab</span> <br/>
-        <p class="tagline" ref="tagline">Explore the cultural histories of plants and their influence on human societies. </p>
+        <p class="tagline" ref="tagline">Explore the cultural histories of plants and their influence on human societies </p>
       </div>
         <div id="menuToggle" ref="menuToggle">
           <input type="checkbox" />
@@ -320,7 +320,7 @@
 
   .homepage-header {
     padding: 0 1rem;
-    background-color: #219653;
+    background-color: #444A1E;
     height: 100px !important;
     z-index: 100;
     display: grid;

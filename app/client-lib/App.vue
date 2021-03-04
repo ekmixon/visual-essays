@@ -359,7 +359,7 @@ export default {
             } else {
               
               // If external link, add external link icon to text and force opening in new tab
-              link.innerHTML += '<sup><i class="fa fa-external-link-square-alt" style="margin-left:3px;margin-right:2px;font-size:0.7em;color:#219653;"></i></sup>'
+              link.innerHTML += '<sup><i class="fa fa-external-link-square-alt" style="margin-left:3px;margin-right:2px;font-size:0.7em;color:#444A1E;"></i></sup>'
               link.setAttribute('target', '_blank')
             }
           })
@@ -711,7 +711,7 @@ body {
   .fab1 {
     width: 160px;
     height: 45px;
-    background-color: #219653;
+    background-color: #444A1E;
     border-radius: 8px 0 0 8px;
     box-shadow: 0 1px 10px 0 rgb(0, 0, 0, 0.7);
     font-size: 14px;

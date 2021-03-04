@@ -210,7 +210,7 @@ module.exports = {
     }
 
     .card-wrapper:hover .essay-title {
-        /* color: #219653; */
+        /* color: #444A1E; */
     }
 
     a:hover {

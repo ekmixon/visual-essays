@@ -390,7 +390,7 @@
     margin-right: 1.3vw;
     font-size: 14px;
     color: white;
-    background-color: #219653;
+    background-color: #444A1E;
     border-radius: 4px;
     padding: 8px 24px 4px;
     font-weight: normal;
@@ -404,7 +404,7 @@
     margin-top: 2vh;
     font-size: 14px;
     color: white;
-    background-color: #219653;
+    background-color: #444A1E;
     border-radius: 4px;
     padding: 8px 20px 4px;
     font-weight: normal;
@@ -575,7 +575,7 @@
   .copy-citation {
     float: left;
     color: white;
-    background-color: #219653;
+    background-color: #444A1E;
     border-radius: 4px;
     padding: 12px;
     height: 20px;
