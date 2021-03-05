@@ -301,7 +301,6 @@ module.exports = {
     input {
         opacity: 0;
         position: absolute;
-        /* pointer-events: none; */
     }
     input:focus ~ label {
         outline: -webkit-focus-ring-color auto 5px;
@@ -317,12 +316,12 @@ module.exports = {
     }
 
     label {
-    border-radius: 4px;
-    padding: 0.2em 0.6em;
-    border: 1px solid #605C2A;
-    background-color: #605C2A;
-    color: #fff;
-    font-size: 0.8em;
-  }
+        border-radius: 4px;
+        padding: 0.2em 0.6em;
+        border: 1px solid #605C2A;
+        background-color: #605C2A;
+        color: #fff;
+        font-size: 0.8em;
+    }
 
 </style>
