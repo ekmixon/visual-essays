@@ -40,17 +40,17 @@
             </li>
             -->
             <li @click="nav('/bios')">
-              <i class="fas fa-user-friends"></i> Author Bios
+              <i class="fas fa-user-friends"></i>Author Bios
             </li>
             <li @click="openContactModal">
-              <i class="fas fa-envelope"></i> Contact Us
+              <i class="fas fa-envelope"></i>Contact Us
             </li>
             <li>
               <a @click="logout" v-if="isAuthenticated">
-                <i :class="`fas fa-user`"></i> Logout
+                <i :class="`fas fa-user`"></i>Logout
               </a>
               <a :href="`https://visual-essays.app/login?redirect=${loginRedirect}`" v-else>
-                <i :class="`fas fa-user`"></i> Author login
+                <i :class="`fas fa-user`"></i>Author login
               </a>
             </li>
             <hr>
@@ -477,9 +477,18 @@
     position: relative;
     margin: 0;
     color: rgba(0, 0, 0, 0.99);
-    min-height: 273px;
   }
 
+  .homepage-header {
+    grid-area: homepage-header;
+    padding: 0 1rem;
+    background-color: #444A1E;
+    height: 100px !important;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: 80px auto 100px;
+  }
+  
   .search-container {
     grid-area: search-container;
     align-self: center;
@@ -674,16 +683,6 @@
     padding: 14px;
     color: white;
     text-align: center;
-  }
-
-  .homepage-header {
-    grid-area: homepage-header;
-    padding: 0 1rem;
-    background-color: #444A1E;
-    height: 100px !important;
-    z-index: 100;
-    display: grid;
-    grid-template-columns: 80px auto 100px;
   }
 
   #logo {

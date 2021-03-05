@@ -138,7 +138,7 @@ export default {
       }),
       computed: {
         headerMaxHeight() { return this.isMobile ? 200 : 400 },
-        headerMinHeight() { return this.isMobile ? 50 : this.layout === 'index' ? 273 : 100 },
+        headerMinHeight() { return this.isMobile ? 50 : this.headerComponent.name === 'PlantsIndexHeader' ? 345 : 100 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         acct() { return this.siteInfo.acct },

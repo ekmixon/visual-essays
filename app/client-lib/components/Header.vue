@@ -24,14 +24,14 @@
           </li>
           -->
           <li @click="nav('/bios')">
-            <i class="fas fa-user-friends"></i> Author Bios
+            <i class="fas fa-user-friends"></i>Author Bios
           </li>
           <li @click="openContactModal">
-            <i class="fas fa-envelope"></i> Contact Us
+            <i class="fas fa-envelope"></i>Contact Us
           </li>
           <li v-if="!readOnly">
             <a v-if="isAuthenticated" @click="logout">
-              <i :class="`fas fa-user`"></i> Logout
+              <i :class="`fas fa-user`"></i>Logout
             </a>
             <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
               <i :class="`fas fa-user`"></i> Author Login
