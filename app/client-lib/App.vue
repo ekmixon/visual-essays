@@ -419,7 +419,7 @@ export default {
             }
           }
           this.viewerHeight = this.calcViewerHeight()
-          if (!this.isMobile && this.header && window.innerHeight < 768) this.collapseHeader()
+          if (!this.isMobile && this.header && window.innerHeight < 640) this.collapseHeader()
           if ((this.headerEnabled && !this.header) || (this.footerEnabled && !this.footer)) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
