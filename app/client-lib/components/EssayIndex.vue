@@ -39,7 +39,6 @@
                         <!--
                         <div v-if="essay.authortitle"><input type="checkbox" id="expanded"></div>
                         -->
-
                         <!--
                         <input type="checkbox" id="expanded">
                         <div v-if="showAbstracts" :id="`essay-${eidx}`" class="essay-abstract" v-html="essay.abstract"></div>
@@ -89,19 +88,6 @@ module.exports = {
   },
   mounted() {
     console.log(`${this.$options.name}.mounted`)
-
-    /*
-    const ps = document.querySelectorAll(".essay-abstract");
-    const observer = new ResizeObserver(entries => {
-    for (let entry of entries) {
-        entry.target.classList[entry.target.scrollHeight > entry.contentRect.height ? 'add' : 'remove']('truncated');
-    }
-    });
-
-    ps.forEach(p => {
-    observer.observe(p);
-    });
-    */
 
   },
   methods: {
@@ -185,17 +171,16 @@ module.exports = {
     },
     expandAbstract(e){
         console.log('this.id', e)
-        console.log(e.currentTarget)
-        console.log(document.getElementById('essay-'+e))
         document.getElementById('essay-'+e).style['-webkit-line-clamp'] = 'unset';
 
-        console.log(document.getElementById('button-'+e))
         var button = document.getElementById('button-'+e)
-        if (button.innerHTML == 'read more'){
-            button.innerHTML == 'read less';
+        if (button.innerText == 'read more'){
+            button.innerText = 'read less';
+            document.getElementById('essay-'+e).style['-webkit-line-clamp'] = 'unset';
         }
-        if (button.innerHTML == 'read less'){
-            button.innerHTML == 'read more';
+        else if (button.innerText == 'read less'){
+            button.innerText = 'read more';
+            document.getElementById('essay-'+e).style['-webkit-line-clamp'] = 6;
         }
 
 
