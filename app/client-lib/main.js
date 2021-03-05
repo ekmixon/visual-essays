@@ -225,7 +225,16 @@ const doRemoteRequests = async () => {
   })
 
   //Vue.use(VueAnalytics, {id: siteInfo.gaTrackingID || 'UA-125778965-8'})
-  Vue.use(VueAnalytics, {id: 'UA-125778965-6'})
+  let gaTrackingCodes = ['UA-125778965-6']
+  if (siteInfo.gaTrackingID) {
+    if (Array.isArray(siteInfo.gaTrackingID)) {
+      gaTrackingCodes = [...gaTrackingCodes, ...siteInfo.gaTrackingID]
+    } else {
+      gaTrackingCodes.push(siteInfo.gaTrackingID)
+    }
+  }
+  console.log(`gaTrackingCodes=${gaTrackingCodes}`)
+  Vue.use(VueAnalytics, {id: gaTrackingCodes})
 
   if (siteInfo.favicon) {
     let e = document.createElement('link')
