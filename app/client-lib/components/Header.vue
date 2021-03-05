@@ -309,7 +309,7 @@
         body += ']'
         this.$emit('send-email', {
           fromAddress: this.email,
-          toAddress: 'labs@ithaka.org',
+          toAddress: ['planthumanities@doaks.org', 'labs@ithaka.org'],
           messageSubject: 'Plant Humanities Lab Contact us form',
           messageBodyText: body,
         })
