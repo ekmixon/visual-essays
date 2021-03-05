@@ -491,6 +491,7 @@
       ". search-components"
       ". search-examples";
     background-color: rgba(0, 0, 0, .3);
+    padding: 16px 0;
   }
 
   .search-header {
@@ -499,7 +500,13 @@
 
   .search-header__title {
     font-family: 'Playfair Display', Serif !important;
-    font-size: 2em;
+    font-size: 2.2em;
+  }
+
+  .search-header__subtitle {
+    font-size: 1.3em;
+    font-weight: normal;
+    padding-top: 4px;
   }
 
   .search-header__title,
@@ -511,15 +518,17 @@
     color: white !important;
   }
 
-  .search-header__subtitle {
-    padding-top: 6px;
-  }
 
   .search-components {
     grid-area: search-components;
     display: flex;
     height: 50px;
-    margin: 12px 0;
+    margin: 24px 0;
+  }
+
+  .search-examples {
+    font-size: 1.3em;
+    font-weight: normal;
   }
 
   .language-selector {
@@ -528,12 +537,21 @@
 
   .search-examples {
     grid-area: search-examples;
-    padding-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .examples-label {
     font-weight: bold;
-    padding-right: 12px;
+    padding-right: 10px;
+  }
+
+  .examples-links a{
+    border-bottom: 1px solid white;
+  }
+
+  .marker {
+    margin: 0 12px;
+    text-decoration: none !important;
   }
 
   .selector {
@@ -883,6 +901,14 @@
       grid-template-columns: 8vw auto 8vw;
       height: 9vw !important;
     }
+    .search-container {
+      display: block;
+      padding: 0 7vw ;
+    }
+    .search-header__subtitle {
+      padding-top: 0;
+    }
+
     #contact-modal .vm--modal{
       width: 90vw;
     }
@@ -903,12 +929,17 @@
   }
 
   @media (max-width: 740px) {
-    #do-labs{
+    #do-labs {
       padding: 2vw;
     }
 
     .homepage-header {
       padding: 1vw;
+    }
+
+    .search-components {
+      height: 40px;
+      margin: 16px 0;
     }
 
     .brand-name {
@@ -922,7 +953,7 @@
     }
 
     #logo {
-      padding:4px;
+      padding: 4px;
     }
 
     #brand {
@@ -935,11 +966,33 @@
       top: 20px;
       right: 20px;
     }
+
+    .search-container {
+      padding: 0 5vw;
+    }
+
+    .search-header__title {
+      font-size: 4.5vw;
+    }
+
+    .search-header__subtitle {
+      font-size: 3.1vw;
+    }
+
+    .search-examples {
+      padding: 8px 0;
+      font-size: 3.1vw;
+    }
+
   }
 
   @media (max-width: 600px) {
     .homepage-header {
       grid-template-columns: 8vw auto 8vw;
+    }
+
+    .search-components {
+      width: 85vw;
     }
 
     .brand-name {
@@ -960,6 +1013,7 @@
       top: 10px;
       right: 10px;
     }
+
   }
 
 </style>
