@@ -301,7 +301,7 @@ module.exports = {
     input {
         opacity: 0;
         position: absolute;
-        pointer-events: none;
+        /* pointer-events: none; */
     }
     input:focus ~ label {
         outline: -webkit-focus-ring-color auto 5px;
