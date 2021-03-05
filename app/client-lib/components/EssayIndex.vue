@@ -298,19 +298,19 @@ module.exports = {
         margin-right: 12px;
     }
 
-    input {
+    .essay-card input {
         opacity: 0;
         position: absolute;
     }
-    input:focus ~ label {
+    .essay-card input:focus ~ label {
         outline: -webkit-focus-ring-color auto 5px;
     }
   
-    input:checked + .essay-abstract{
+    .essay-card input:checked + .essay-abstract{
         -webkit-line-clamp: unset;
     }
     
-    input:checked ~ label,
+    .essay-card input:checked ~ label,
     .essay-abstract:not(.truncated) ~ label{
         display: none;
     }
