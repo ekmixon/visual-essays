@@ -15,20 +15,26 @@
               <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
             </li>
           </template>
-          <li v-if="siteConfig.repo !== 've-docs'" @click="openDocsSite">
+          <!--
+          <li @click="openDocsSite" v-if="siteConfig.repo !== 've-docs'">
             <i :class="`fas fa-question`"></i>Documentation
           </li>
           <li @click="openSearchTool">
-            <i :class="`fas fa-search`"></i>Search tool
+            <i :class="`fas fa-search`"></i> Search tool
+          </li>
+          -->
+          <li @click="nav('/bios')">
+            <i class="fas fa-user-friends"></i>Author Bios
+          </li>
           <li @click="openContactModal">
-            <i class="fas fa-envelope"></i> Contact Us
+            <i class="fas fa-envelope"></i>Contact Us
           </li>
           <li v-if="!readOnly">
             <a v-if="isAuthenticated" @click="logout">
               <i :class="`fas fa-user`"></i>Logout
             </a>
             <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
-              <i :class="`fas fa-user`"></i>Login
+              <i :class="`fas fa-user`"></i> Author Login
             </a>
           </li>
           <hr>
@@ -670,7 +676,8 @@
   }
 
   .app-version {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
   }
 
   .subtitle {

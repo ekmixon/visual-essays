@@ -31,20 +31,26 @@
                 <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
               </li>
             </template>
+            <!--
             <li @click="openDocsSite" v-if="siteConfig.repo !== 've-docs'">
               <i :class="`fas fa-question`"></i>Documentation
             </li>
             <li @click="openSearchTool">
-              <i :class="`fas fa-search`"></i>Search tool
+              <i :class="`fas fa-search`"></i> Search tool
+            </li>
+            -->
+            <li @click="nav('/bios')">
+              <i class="fas fa-user-friends"></i>Author Bios
+            </li>
             <li @click="openContactModal">
-              <i class="fas fa-envelope"></i> Contact Us
+              <i class="fas fa-envelope"></i>Contact Us
             </li>
             <li>
               <a @click="logout" v-if="isAuthenticated">
                 <i :class="`fas fa-user`"></i>Logout
               </a>
               <a :href="`https://visual-essays.app/login?redirect=${loginRedirect}`" v-else>
-                <i :class="`fas fa-user`"></i>Login
+                <i :class="`fas fa-user`"></i>Author login
               </a>
             </li>
             <hr>
@@ -62,7 +68,7 @@
             <li @click="gotoGithub" v-if="isAuthenticated">
               <i class="fab fa-github"></i>Github repository
             </li>
-            <li style="margin-top:10px; padding:0;">
+            <li style="margin-top:16px; padding:0;">
               <div class="app-version">App: {{appVersion}}</div>
             </li>
             <li style="padding:0;">
@@ -140,8 +146,8 @@
         <div class="search-examples">
           <span class="examples-label">Example searches:</span>
           <span class="examples-links">
-            <a href="https://search.plant-humanities.org/?eid=Q171497" target="_blank">Sunflower</a><span class="marker"> | </span>
-            <a href="https://search.plant-humanities.org/?eid=Q1043" target="_blank">Carl Linnaeus</a><span class="marker"> | </span>
+            <a href="https://search.plant-humanities.org/?eid=Q171497" target="_blank">Sunflower</a> |
+            <a href="https://search.plant-humanities.org/?eid=Q1043" target="_blank">Carl Linnaeus</a> |
             <a href="https://search.plant-humanities.org/?eid=Q1055" target="_blank">Hamburg, Germany</a>
           </span>
         </div>
@@ -424,7 +430,7 @@
             .finally(() => (this.isSearching = false))
       },
       openSearchTool(eid) {
-        this.openWindow(`https://search.plant-humanities.org${eid ? '?eid='+eid : ''}`, `toolbar=yes,location=yes,menubar=yes,scrollbars=yes,status=yes,titlebar=yes,left=0,top=0,width=1001,height=1200`)
+        this.openWindow(`https://search.plant-humanities.org/?eid=${eid}${this.selectedLanguage !== 'en' ? '&language='+this.selectedLanguage : ''}`, `toolbar=yes,location=yes,menubar=yes,scrollbars=yes,status=yes,titlebar=yes,left=0,top=0,width=1001,height=1200`)
       },
       openWindow(url, options) {
         console.log('openWindow', url)
@@ -471,9 +477,18 @@
     position: relative;
     margin: 0;
     color: rgba(0, 0, 0, 0.99);
-    min-height: 273px;
   }
 
+  .homepage-header {
+    grid-area: homepage-header;
+    padding: 0 1rem;
+    background-color: #444A1E;
+    height: 100px !important;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: 80px auto 100px;
+  }
+  
   .search-container {
     grid-area: search-container;
     align-self: center;
@@ -670,16 +685,6 @@
     text-align: center;
   }
 
-  .homepage-header {
-    grid-area: homepage-header;
-    padding: 0 1rem;
-    background-color: #444A1E;
-    height: 100px !important;
-    z-index: 100;
-    display: grid;
-    grid-template-columns: 80px auto 100px;
-  }
-
   #logo {
     padding: 8px;
     grid-column-start: 1;
@@ -702,16 +707,17 @@
   }
 
   .tagline {
-      font-size: 1.3rem;
-      color: white;
-      font-family: Roboto, Sans-serif;
-      font-weight: 300;
-      margin: 0;
+    font-size: 1.3rem;
+    color: white;
+    font-family: Roboto, Sans-serif;
+    font-weight: 300;
+    margin: 0;
     line-height: 1;
   }
 
   .app-version {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
   }
 
   #menuToggle {

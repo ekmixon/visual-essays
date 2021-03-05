@@ -138,7 +138,7 @@ export default {
       }),
       computed: {
         headerMaxHeight() { return this.isMobile ? 200 : 400 },
-        headerMinHeight() { return this.isMobile ? 50 : 100 },
+        headerMinHeight() { return this.isMobile ? 50 : this.headerComponent.name === 'PlantsIndexHeader' ? 345 : 100 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         acct() { return this.siteInfo.acct },
@@ -419,7 +419,7 @@ export default {
             }
           }
           this.viewerHeight = this.calcViewerHeight()
-          if (!this.isMobile && this.header && window.innerHeight < 768) this.collapseHeader()
+          if (!this.isMobile && this.header && window.innerHeight < 640) this.collapseHeader()
           if ((this.headerEnabled && !this.header) || (this.footerEnabled && !this.footer)) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
