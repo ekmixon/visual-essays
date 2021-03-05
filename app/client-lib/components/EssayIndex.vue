@@ -23,7 +23,7 @@
                 </template>
                 <template v-else>
                     <div v-if="essay.items" v-html="essay.title" class="essay-title"></div>
-                    <div class="essay-card" :class="{group: essay.items}">
+                    <div class="essay-card" :class="{group: essay.items}" >
                         <div class="essay-image">
                             <img :src="essay.image" alt="" />
                         </div>
@@ -40,9 +40,16 @@
                         <div v-if="essay.authortitle"><input type="checkbox" id="expanded"></div>
                         -->
 
+                        <!--
                         <input type="checkbox" id="expanded">
-                        <div v-if="showAbstracts" class="essay-abstract" v-html="essay.abstract"></div>
+                        <div v-if="showAbstracts" :id="`essay-${eidx}`" class="essay-abstract" v-html="essay.abstract"></div>
                         <label for="expanded" role="button">read more</label>
+                        -->
+                        
+                        <div v-if="showAbstracts" :id="`essay-${eidx}`" class="essay-abstract" v-html="essay.abstract"></div>
+                        <button :id="`button-${eidx}`" class="expand-button" v-on:click="expandAbstract(`${eidx}`)" value="more">read more</button>
+                        
+
                     </div>
                 </template>
                 <ul class="social-media">
@@ -77,11 +84,13 @@ module.exports = {
       sections: []
   }),
   computed: {
-      showAbstracts() { return !this.essayConfig || this.essayConfig['show-abstracts'] !== 'false' }
+      showAbstracts() { return !this.essayConfig || this.essayConfig['show-abstracts'] !== 'false' },
+
   },
   mounted() {
     console.log(`${this.$options.name}.mounted`)
 
+    /*
     const ps = document.querySelectorAll(".essay-abstract");
     const observer = new ResizeObserver(entries => {
     for (let entry of entries) {
@@ -92,6 +101,7 @@ module.exports = {
     ps.forEach(p => {
     observer.observe(p);
     });
+    */
 
   },
   methods: {
@@ -172,6 +182,23 @@ module.exports = {
             hash: match[7]
             }
         )
+    },
+    expandAbstract(e){
+        console.log('this.id', e)
+        console.log(e.currentTarget)
+        console.log(document.getElementById('essay-'+e))
+        document.getElementById('essay-'+e).style['-webkit-line-clamp'] = 'unset';
+
+        console.log(document.getElementById('button-'+e))
+        var button = document.getElementById('button-'+e)
+        if (button.innerHTML == 'read more'){
+            button.innerHTML == 'read less';
+        }
+        if (button.innerHTML == 'read less'){
+            button.innerHTML == 'read more';
+        }
+
+
     }
   },
   watch: {
@@ -298,21 +325,14 @@ module.exports = {
         margin-right: 12px;
     }
 
-    .essay-card input {
-        opacity: 0;
-        position: absolute;
-    }
-    .essay-card input:focus ~ label {
-        outline: -webkit-focus-ring-color auto 5px;
-    }
-  
-    .essay-card input:checked + .essay-abstract{
+
+    .expand-abstract {
         -webkit-line-clamp: unset;
+
     }
-    
-    .essay-card input:checked ~ label,
-    .essay-abstract:not(.truncated) ~ label{
-        display: none;
+
+    .expand-button {
+
     }
 
     label {
