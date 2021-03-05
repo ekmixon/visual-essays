@@ -141,7 +141,7 @@
           <span class="examples-label">Example searches:</span>
           <span class="examples-links">
             <a href="https://search.plant-humanities.org/?eid=Q171497" target="_blank">Sunflower</a> |
-            <a href="https://search.plant-humanities.org/?eid=Q1043" target="_blank">Carl Linnauus</a> |
+            <a href="https://search.plant-humanities.org/?eid=Q1043" target="_blank">Carl Linnaeus</a> |
             <a href="https://search.plant-humanities.org/?eid=Q1055" target="_blank">Hamburg, Germany</a>
           </span>
         </div>
@@ -424,7 +424,7 @@
             .finally(() => (this.isSearching = false))
       },
       openSearchTool(eid) {
-        this.openWindow(`https://search.plant-humanities.org${eid ? '?eid='+eid : ''}`, `toolbar=yes,location=yes,menubar=yes,scrollbars=yes,status=yes,titlebar=yes,left=0,top=0,width=1001,height=1200`)
+        this.openWindow(`https://search.plant-humanities.org/?eid=${eid}${this.selectedLanguage !== 'en' ? '&language='+this.selectedLanguage : ''}`, `toolbar=yes,location=yes,menubar=yes,scrollbars=yes,status=yes,titlebar=yes,left=0,top=0,width=1001,height=1200`)
       },
       openWindow(url, options) {
         console.log('openWindow', url)
