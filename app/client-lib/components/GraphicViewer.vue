@@ -32,8 +32,8 @@ module.exports = {
         input() { return this.items[0].img || this.items[0].url || this.items[0].file },
         graphicStyle() {
             return {
-                //width: `${this.width*.95}px`,
-                //height: `${this.height*.95}px`,
+                //width: `${this.width}px`,
+                //height: `${this.height}px`,
                 overflowY: 'auto !important',
                 marginLeft: '0',   
             }
@@ -71,15 +71,17 @@ module.exports = {
         grid-template-areas:
         "main"
         "footer";
+        justify-items: center;
+        align-items: center;
     }
 
     #graphic-container {
-        grid-area: main
+        grid-area: main;
+        width:100%;
     }
 
     #graphic {
-        max-width:100%;
-        max-height:100%;
+        width:100%;
     }
 
     .citation {
