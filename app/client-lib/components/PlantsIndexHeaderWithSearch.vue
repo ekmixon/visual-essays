@@ -39,8 +39,11 @@
               <i :class="`fas fa-search`"></i> Search tool
             </li>
             -->
-            <li @click="nav('/bios')">
-              <i class="fas fa-user-friends"></i>Author Bios
+            <li @click="nav('/help')">
+              <i :class="`fas fa-question`"></i>Help
+            </li>
+            <li @click="nav('/contributors')">
+              <i class="fas fa-user-friends"></i>Contributors
             </li>
             <li @click="openContactModal">
               <i class="fas fa-envelope"></i>Contact Us
