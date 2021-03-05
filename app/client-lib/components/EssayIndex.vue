@@ -165,7 +165,7 @@ module.exports = {
         }
         else if (button.innerText == 'read less'){
             button.innerText = 'read more';
-            document.getElementById('essay-'+e).style['-webkit-line-clamp'] = 8;
+            document.getElementById('essay-'+e).style['-webkit-line-clamp'] = 5;
         }
     }
   },
@@ -268,14 +268,15 @@ module.exports = {
     }
 
     .essay-abstract {
+        line-height: 1.4;
         grid-area: abstract;
         font-size: 0.9em;
         /*font-style: italic;*/
         /* height: 200px;*/
-        margin: 1.0rem 0.2rem 0.5rem 0.3rem;
+        margin: 0 16px 16px 0;
         overflow: hidden;
         display: -webkit-box;
-        -webkit-line-clamp: 8;
+        -webkit-line-clamp: 5;
         -webkit-box-orient: vertical;  
     }
 
@@ -301,6 +302,8 @@ module.exports = {
         opacity: 0.8;
         color: #fff;
         font-size: 0.8em;
+        height: 40px;
+        width: 120px;
     }
 
 </style>
