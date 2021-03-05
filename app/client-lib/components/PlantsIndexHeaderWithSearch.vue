@@ -31,20 +31,26 @@
                 <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
               </li>
             </template>
+            <!--
             <li @click="openDocsSite" v-if="siteConfig.repo !== 've-docs'">
               <i :class="`fas fa-question`"></i>Documentation
             </li>
             <li @click="openSearchTool">
-              <i :class="`fas fa-search`"></i>Search tool
+              <i :class="`fas fa-search`"></i> Search tool
+            </li>
+            -->
+            <li @click="nav('/bios')">
+              <i class="fas fa-user-friends"></i> Author Bios
+            </li>
             <li @click="openContactModal">
               <i class="fas fa-envelope"></i> Contact Us
             </li>
             <li>
               <a @click="logout" v-if="isAuthenticated">
-                <i :class="`fas fa-user`"></i>Logout
+                <i :class="`fas fa-user`"></i> Logout
               </a>
               <a :href="`https://visual-essays.app/login?redirect=${loginRedirect}`" v-else>
-                <i :class="`fas fa-user`"></i>Login
+                <i :class="`fas fa-user`"></i> Author login
               </a>
             </li>
             <hr>
@@ -62,7 +68,7 @@
             <li @click="gotoGithub" v-if="isAuthenticated">
               <i class="fab fa-github"></i>Github repository
             </li>
-            <li style="margin-top:10px; padding:0;">
+            <li style="margin-top:16px; padding:0;">
               <div class="app-version">App: {{appVersion}}</div>
             </li>
             <li style="padding:0;">
@@ -684,16 +690,17 @@
   }
 
   .tagline {
-      font-size: 1.3rem;
-      color: white;
-      font-family: Roboto, Sans-serif;
-      font-weight: 300;
-      margin: 0;
+    font-size: 1.3rem;
+    color: white;
+    font-family: Roboto, Sans-serif;
+    font-weight: 300;
+    margin: 0;
     line-height: 1;
   }
 
   .app-version {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
   }
 
   #menuToggle {
