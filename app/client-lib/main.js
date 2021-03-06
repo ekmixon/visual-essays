@@ -243,6 +243,9 @@ const doRemoteRequests = async () => {
     e.type='image/x-icon'
     document.getElementsByTagName('head')[0].appendChild(e)
   }
+  if (siteInfo.title) {
+    document.title = siteInfo.title
+  }
   if (siteInfo.css) {
     let e = document.createElement('link')
     e.href = siteInfo.css
