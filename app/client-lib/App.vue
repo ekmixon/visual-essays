@@ -484,8 +484,13 @@ export default {
         openDocsSite() {
           this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
         },
-        openSearchTool(eid) {
-          this.openWindow(`https://search.plant-humanities.org${eid ? '?eid='+eid : ''}`, `toolbar=yes,location=yes,left=0,top=0,width=1001,height=1200,scrollbars=yes,status=yes`)
+        openSearchTool(eid, asPopup) {
+          let url = `https://search.plant-humanities.org${eid ? '?eid='+eid : ''}`
+          if (asPopup) {
+            this.openWindow(url, `toolbar=yes,location=yes,left=0,top=0,width=1001,height=1200,scrollbars=yes,status=yes`)
+          } else {
+            this.openWindow(url, `toolbar=yes,location=yes,menubar=yes,scrollbars=yes,status=yes,titlebar=yes`)
+          }
         },
         openWindow(url, options) {
           console.log('openWindow', url)
