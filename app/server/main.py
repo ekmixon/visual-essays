@@ -48,7 +48,7 @@ from specimens import get_specimens
 
 try:
     from gc_cache import Cache
-    cache = Cache()
+    cache = Cache(creds_path=f'{BASEDIR}/creds/visual-essay-gcreds.json')
 except:
     logger.warning(f'Cache init failed')
     logger.warning(traceback.format_exc())

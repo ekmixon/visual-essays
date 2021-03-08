@@ -7,7 +7,9 @@ logger = logging.getLogger()
 
 import os
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
-BASEDIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+BASEDIR = os.path.dirname(SCRIPT_DIR)
+while BASEDIR != '/' and not os.path.exists(os.path.join(BASEDIR, 'index.html')):
+    BASEDIR = os.path.dirname(BASEDIR)
 
 import sys
 import getopt
