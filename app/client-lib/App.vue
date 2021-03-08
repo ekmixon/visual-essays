@@ -380,10 +380,12 @@ export default {
           }
 
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
-          // console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
+          let headerHeight = this.header.style.height ? parseInt(this.header.style.height.replace(/px/,'')) : this.header.clientHeight
+          // console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${headerHeight} min=${this.headerMinHeight}`)
           if (delta && scrollDir === 'shrink' || window.scrollY === 0) {
-            if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
-                (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
+            // console.log(scrollDir === 'shrink' && headerHeight > this.headerMinHeight)
+            if ((scrollDir === 'shrink' && headerHeight > this.headerMinHeight) ||
+                (scrollDir === 'expand' && headerHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
               let newHeaderHeight = this.header.clientHeight + delta
               if (scrollDir === 'shrink' && newHeaderHeight < this.headerMinHeight) newHeaderHeight = this.headerMinHeight
               if (scrollDir === 'expand' && newHeaderHeight > this.headerMaxHeight) newHeaderHeight = this.headerMaxHeight
@@ -576,7 +578,8 @@ export default {
           if (this.html && this.hash && this.header) this.$nextTick(() => {this.anchor = this.hash; this.hash = undefined})
         },
         headerComponent() {
-          console.log('headerComponent')
+          console.log(`headerComponent: component=${this.headerComponent.name} height=${this.headerHeight} min=${this.headerMinHeight}`)
+          if (this.headerHeight < this.headerMinHeight) this.headerHeight = this.headerMinHeight
           this.header = null
           this.headerResizeObserver = null
           this.$nextTick(() => this.waitForHeaderFooter())
