@@ -374,13 +374,6 @@
           })
         }
       
-        console.log('authors', authors)
-        /*
-        let author = this.claimsInfo.author
-          ? this.claimsInfo.author[0].value.value
-          : this.claimsInfo['author name string'][0].value
-        */
-
         let title = this.claimsInfo['title'][0]['value']['text']
         let sponsor = this.claimsInfo['sponsor'][0]['value']['value']
         let publish_date = '2021'
@@ -393,29 +386,33 @@
         let chicagoAuthor = '';
 
         if (authors.length > 0){
-          console.log('here', authors.length)
           let splitAuthor = authors[0].split(' ');
           mlaAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor.slice(0, splitAuthor.length-1).join(' ')
           apaAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor[0].charAt(0)
           chicagoAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor.slice(0, splitAuthor.length-1).join(' ')
 
           if (authors.length > 1){
-            console.log('more than one author')
             for (var i = 1; i < authors.length; i++){
-              mlaAuthor += ', and ' + authors[i]
-              apaAuthor += ', & ' + authors[i].split(' ').pop()+ ', ' + authors[0].split(' ')[0].charAt(0)
-              chicagoAuthor += ', and ' + authors[i]
+
+              if (i == authors.length-1){
+                mlaAuthor += ', and ' + authors[i]
+                apaAuthor += '., & ' + authors[i].split(' ').pop()+ ', ' + authors[i].split(' ')[0].charAt(0)
+                chicagoAuthor += ', and ' + authors[i]
+              }
+              else {
+                mlaAuthor += ', ' + authors[i]
+                apaAuthor += '., ' + authors[i].split(' ').pop()+ ', ' + authors[i].split(' ')[0].charAt(0)
+                chicagoAuthor += ', ' + authors[i]
+
+              }
             }
           }
           
           mlaAuthor += '. '
           apaAuthor += '. '
           chicagoAuthor += '. '
-
-          console.log('mlaAuthor in here', mlaAuthor)
         }
 
-        console.log('all', mlaAuthor, apaAuthor, chicagoAuthor)
         //mla
         this.mla = mlaAuthor + '<i>' + title + '</i>. ' + sponsor + ', ' + publish_date + '. '
         this.mla += url + '. Accessed ' + access_date.getDate() + ' ' + access_date.toLocaleString('default', { month: 'short' }) + '. ' + access_date.getFullYear()+ '.' 
@@ -428,11 +425,9 @@
         this.chicago += publish_date + '. Accessed ' + access_date.toLocaleString('default', { month: 'long' }) + ' ' + access_date.getDate() + ', ' + access_date.getFullYear()+ '.'
       },
       copyTextToClipboard(e) {
-        console.log('clicked!', e.target.textContent)
         if (navigator.clipboard) navigator.clipboard.writeText(e.target.textContent)
       },
       copyCitationToClipboard(citation) {
-        console.log('clicked!', 'citation', citation)
         if (navigator.clipboard){
           navigator.clipboard.writeText(citation)
           // alert("Copied to clipboard!");
