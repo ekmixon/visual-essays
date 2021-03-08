@@ -50,6 +50,8 @@ try:
     from gc_cache import Cache
     cache = Cache()
 except:
+    logger.warning(f'Cache init failed')
+    logger.warning(traceback.format_exc())
     from expiringdict import ExpiringDict
     expiration = 60 * 60 * 24 # one day
     cache = ExpiringDict(max_len=200, max_age_seconds=expiration)
