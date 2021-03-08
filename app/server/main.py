@@ -48,8 +48,10 @@ from specimens import get_specimens
 
 try:
     from gc_cache import Cache
-    cache = Cache()
+    cache = Cache(creds_path=f'{BASEDIR}/creds/visual-essay-gcreds.json')
 except:
+    logger.warning(f'Cache init failed')
+    logger.warning(traceback.format_exc())
     from expiringdict import ExpiringDict
     expiration = 60 * 60 * 24 # one day
     cache = ExpiringDict(max_len=200, max_age_seconds=expiration)
@@ -280,6 +282,7 @@ def essay(path=None):
     raw = qargs.get('raw', 'false') in ('', 'true')
     refresh = qargs.get('refresh', 'false') in ('', 'true')
     cache_key = f'{site}|{acct}|{repo}|{ref}|{path}'
+    logger.info(f'cache key={cache_key} ENV={ENV} CONTENT_ROOT={CONTENT_ROOT} refresh={refresh} cache={cache}')
     cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' and not CONTENT_ROOT else None
     if cached_essay and cached_essay['url']:
         markdown, _ , md_sha = get_gh_file(cached_essay['url'])
