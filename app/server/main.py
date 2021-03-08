@@ -516,6 +516,8 @@ def send_email():
 @app.route('/', methods=['GET'])
 def main(path=None):
     site, acct, repo, ref, path, qargs = _context(path)
+    if site in ('lab.planthumanities.org', 'plant-humanities.app'):
+        return redirect(f'https://lab.plant-humanities.org{path}', code=302)
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
         if site.startswith('localhost') or site.startswith('192.168') or site.endswith('gitpod.io'):
