@@ -28,7 +28,14 @@ module.exports = {
     }),
     
     computed: {
-        containerStyle() { return { width: `${this.width}px`, height: `${this.height}px`} },
+        containerStyle() {
+            return {
+                width: `${this.width}px`,
+                height: `${this.height}px`,
+                maxHeight: `${this.height}px` ? `${this.height}px` : '',
+                overflowY: "auto !important",
+            }
+        },
         input() { return this.items[0].img || this.items[0].url || this.items[0].file },
         graphicStyle() {
             return {
@@ -67,12 +74,12 @@ module.exports = {
 
     .grid-container {
         display: grid;
-        grid-template-rows: 95% 5%;
+        grid-template-rows: auto 5%;
         grid-template-areas:
         "main"
         "footer";
         justify-items: center;
-        align-items: center;
+        align-items: start;
     }
 
     #graphic-container {
@@ -85,16 +92,25 @@ module.exports = {
     }
 
     .citation {
-      /* row-start / column-start / row-end / column-end */
+        /*
       grid-area: footer;
       z-index: 2;
       justify-self: stretch;
       align-self: stretch;
-      /* background-color: rgba(255, 255, 255, 0.8); */
       background-color: #ccc;
       padding: 3px 6px;
         text-align: center;
         line-height: 1;
+        */
+
+        justify-self: stretch;
+        /*align-self: stretch;*/
+        max-height: 30px;
+        overflow: auto; 
+        background-color: #ccc;
+        padding: 9px 6px;
+        text-align: center;
+        line-height: 1; 
     }
 
     .title {
