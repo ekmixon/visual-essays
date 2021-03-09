@@ -46,7 +46,7 @@
       >
       
       <div class="citation">
-        <span v-if="title || label || description" v-html="title || label || description" class="image-label"></span><br>
+        <span v-if='title || label || description' v-html="title || label || description" class="image-label"></span><br>
         <span v-if="attribution" v-html="attribution" class="attribution"></span>
         <span v-if="licenseUrl" class="licenses">
           <a :href="licenseUrl" target="_blank">
@@ -168,7 +168,17 @@ module.exports = {
         ? this.metadata.title_formatted
         : this.currentItem && this.currentItem.label ? this.currentItem.label : null
     },
-    title() { return this.items ? this.items[0]['title'] : null },
+    title() {
+      if (this.items.length > 0){
+        if (this.items[0]['title']){
+          if (this.items[0]['title'] !== "" && this.items[0]['title'] !== 'true'){
+            return this.items[0]['title']
+          }
+        }
+      }
+      return null;
+      //return this.items[0]['title'] ? (this.items[0]['title'] !== "" ? this.items[0]['title'] : null) : null
+      },
     description() { return this.currentItem ? this.currentItem.description || this.metadata.description : null },
     attribution() { return this.currentItem ? this.currentItem.attribution || this.metadata.attribution : null },
     date() { return this.currentItem ? this.currentItem.date || this.metadata.date : null },
