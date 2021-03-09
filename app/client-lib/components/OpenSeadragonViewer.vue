@@ -219,7 +219,7 @@ module.exports = {
           visibilityRatio: 1.0,
           constrainDuringPan: true,
           // minZoomImageRatio: 0, 
-          minZoomImageRatio: 0.8,
+          minZoomImageRatio: 0.6,
           // maxZoomPixelRatio: Infinity,
           maxZoomPixelRatio: 10,
           homeFillsViewer: this.fit === 'cover',
@@ -975,7 +975,7 @@ module.exports = {
       z-index: 1;
       justify-self: stretch;
       /*align-self: stretch;*/
-      max-height: 30px;
+      max-height: 50px;
       overflow: auto;
       /* background-color: rgba(255, 255, 255, 0.8); */
       background-color: #ccc;

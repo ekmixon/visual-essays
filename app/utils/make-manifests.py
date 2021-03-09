@@ -174,7 +174,7 @@ if __name__ == '__main__':
     for i, rec in enumerate(recs):
         row = i + 2
         logger.debug(f'{is_ready(rec)} {not rec.get("manifest")} {force_refresh}')
-        if is_ready(rec):
+        if is_ready(rec) or force_refresh:
             if row_to_process and row_to_process != row: continue
             logger.info(f'processing row={row}')
             try:
