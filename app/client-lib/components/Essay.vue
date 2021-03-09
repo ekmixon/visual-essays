@@ -188,7 +188,6 @@ module.exports = {
       if (this.paragraphs[paraId]) {
         let scrollTo
         const para = this.paragraphs[paraId]
-        /*
         if (this.layout !== 'vertical') {
           // position active paragraph just above viewer pane, if possible
           const paraBottom = para.top + para.height
@@ -198,7 +197,6 @@ module.exports = {
         } else {
           scrollTo = para.top - 56
         }
-        */
         console.log(`paragraphClickHandler layout=${this.layout} para=${paraId} top=${para.top} height=${para.height} scrollTo=${scrollTo}`)
         let scrollable = document.getElementById('scrollableContent')
         if (!scrollable) scrollable = window

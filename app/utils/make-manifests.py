@@ -62,6 +62,7 @@ def create_manifest(iiif_service=iiif_service_endpoint, force=False, **kwargs):
     logger.info(f'create_manifest: service_endpoint={iiif_service} force={force} kwargs={kwargs}')
     data = {**dict([(f,kwargs[f]) for f in kwargs if f not in ignore_fields and kwargs[f]]), **{'iiif': True,}}
     data = format_fields(data)
+    data['url'] = data['url'].replace(' ', '%20')
     if force:
         data['force'] = True
     resp = requests.post(iiif_service, headers={'Content-type': 'application/json'}, json=data)
