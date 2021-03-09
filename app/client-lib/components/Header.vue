@@ -15,18 +15,29 @@
               <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
             </li>
           </template>
-          <li v-if="siteConfig.repo !== 've-docs'" @click="openDocsSite">
+          <!--
+          <li @click="openDocsSite" v-if="siteConfig.repo !== 've-docs'">
             <i :class="`fas fa-question`"></i>Documentation
           </li>
           <li @click="openSearchTool">
-            <i :class="`fas fa-search`"></i>Search tool
+            <i :class="`fas fa-search`"></i> Search tool
+          </li>
+          -->
+          <li @click="nav('/help')">
+            <i :class="`fas fa-question`"></i>Help
+          </li>
+          <li @click="nav('/contributors')">
+            <i class="fas fa-user-friends"></i>Contributors
+          </li>
+          <li @click="openContactModal">
+            <i class="fas fa-envelope"></i>Contact Us
           </li>
           <li v-if="!readOnly">
             <a v-if="isAuthenticated" @click="logout">
               <i :class="`fas fa-user`"></i>Logout
             </a>
             <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
-              <i :class="`fas fa-user`"></i>Login
+              <i :class="`fas fa-user`"></i> Author Login
             </a>
           </li>
           <hr>
@@ -53,6 +64,37 @@
         </ul>
       </div>
     </nav>
+
+    <modal
+            :draggable="true"
+            class="modal"
+            height="auto"
+            name="contact-modal"
+            id="contact-modal"
+
+    >
+      <div class="contact-us-container">
+        <h1>Contact us</h1>
+        <hr>
+        <form class="form-wrapper" ref="feedback-form" v-on:submit.prevent="onSubmit">
+          <input v-model="name" name="name" placeholder="Name" class="form-name" type="text" required> <br/>
+          <input v-model="email" placeholder="Email" class="form-email" type="email" required> <br/>
+          <input v-model="university" placeholder="University Affiliation (optional)" class="form-uni" type="text"> <br/>
+          <select v-model="role" class="form-role">
+            <option disabled value="">Please select one</option>
+            <option value="Undergraduate Student">Undergraduate</option>
+            <option value="Graduate Student">Graduate Student</option>
+            <option value="Faculty">College/University Faculty</option>
+            <option value="Scholar">Independent Scholar</option>
+            <option value="Plant Enthusiast">Plant Enthusiast</option>
+          </select> <br/>
+          <textarea v-model="message" placeholder="Your message here" class="form-message" type="text" required></textarea>
+
+          <button class="form-submit">Submit form</button>
+        </form>
+      </div>
+    </modal>
+
 
     <div class="title-bar">
       <div class="metadata-group">
@@ -113,7 +155,7 @@
 
 <script>
 
-  module.exports = {
+  export default {
     name: 'Header',
     props: {
       //eid: { type: String, default: undefined },
@@ -137,7 +179,12 @@
       mla: undefined,
       apa: undefined,
       chicago: undefined,
-      tippy: null
+      tippy: null,
+      name: '',
+      email: '',
+      university: '',
+      role: '',
+      message: ''
     }),
     computed: {
       essayQid() { return this.essayConfigLoaded ? this.essayConfig.qid || this.essayConfig.eid : null },
@@ -251,8 +298,24 @@
         this.$emit('open-infobox-modal')
       },
       openSearchTool(qid) {
-        console.log('open search tool', qid);
+        this.closeDrawer()
         this.$emit('open-search-tool', qid)
+      },
+      openContactModal() {
+        this.closeDrawer()
+        this.$modal.show('contact-modal')
+      },
+      onSubmit() {
+        let body = `${this.message}\n\r[Sent by: ${this.name}`
+        if (this.role !== '') body += `, ${this.role}`
+        if (this.university !== '') body = body += ` at ${this.university}`
+        body += ']'
+        this.$emit('send-email', {
+          fromAddress: this.email,
+          toAddress: ['planthumanities@doaks.org', 'labs@ithaka.org'],
+          messageSubject: 'Plant Humanities Lab Contact us form',
+          messageBodyText: body,
+        })
       },
       toQueryString(args) {
         const parts = []
@@ -311,13 +374,6 @@
           })
         }
       
-        console.log('authors', authors)
-        /*
-        let author = this.claimsInfo.author
-          ? this.claimsInfo.author[0].value.value
-          : this.claimsInfo['author name string'][0].value
-        */
-
         let title = this.claimsInfo['title'][0]['value']['text']
         let sponsor = this.claimsInfo['sponsor'][0]['value']['value']
         let publish_date = '2021'
@@ -330,29 +386,33 @@
         let chicagoAuthor = '';
 
         if (authors.length > 0){
-          console.log('here', authors.length)
           let splitAuthor = authors[0].split(' ');
           mlaAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor.slice(0, splitAuthor.length-1).join(' ')
           apaAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor[0].charAt(0)
           chicagoAuthor = splitAuthor[splitAuthor.length-1] + ', ' + splitAuthor.slice(0, splitAuthor.length-1).join(' ')
 
           if (authors.length > 1){
-            console.log('more than one author')
             for (var i = 1; i < authors.length; i++){
-              mlaAuthor += ', and ' + authors[i]
-              apaAuthor += ', & ' + authors[i].split(' ').pop()+ ', ' + authors[0].split(' ')[0].charAt(0)
-              chicagoAuthor += ', and ' + authors[i]
+
+              if (i == authors.length-1){
+                mlaAuthor += ', and ' + authors[i]
+                apaAuthor += '., & ' + authors[i].split(' ').pop()+ ', ' + authors[i].split(' ')[0].charAt(0)
+                chicagoAuthor += ', and ' + authors[i]
+              }
+              else {
+                mlaAuthor += ', ' + authors[i]
+                apaAuthor += '., ' + authors[i].split(' ').pop()+ ', ' + authors[i].split(' ')[0].charAt(0)
+                chicagoAuthor += ', ' + authors[i]
+
+              }
             }
           }
           
           mlaAuthor += '. '
           apaAuthor += '. '
           chicagoAuthor += '. '
-
-          console.log('mlaAuthor in here', mlaAuthor)
         }
 
-        console.log('all', mlaAuthor, apaAuthor, chicagoAuthor)
         //mla
         this.mla = mlaAuthor + '<i>' + title + '</i>. ' + sponsor + ', ' + publish_date + '. '
         this.mla += url + '. Accessed ' + access_date.getDate() + ' ' + access_date.toLocaleString('default', { month: 'short' }) + '. ' + access_date.getFullYear()+ '.' 
@@ -365,11 +425,9 @@
         this.chicago += publish_date + '. Accessed ' + access_date.toLocaleString('default', { month: 'long' }) + ' ' + access_date.getDate() + ', ' + access_date.getFullYear()+ '.'
       },
       copyTextToClipboard(e) {
-        console.log('clicked!', e.target.textContent)
         if (navigator.clipboard) navigator.clipboard.writeText(e.target.textContent)
       },
       copyCitationToClipboard(citation) {
-        console.log('clicked!', 'citation', citation)
         if (navigator.clipboard){
           navigator.clipboard.writeText(citation)
           // alert("Copied to clipboard!");
@@ -457,7 +515,7 @@
     margin-right: 1.3vw;
     font-size: 14px;
     color: white;
-    background-color: #219653;
+    background-color: #7A9413;
     border-radius: 4px;
     padding: 8px 24px 4px;
     font-weight: normal;
@@ -470,7 +528,7 @@
     margin-top: 0.6vh;
     font-size: 14px;
     color: white;
-    background-color: #219653;
+    background-color: #7A9413;
     border-radius: 4px;
     padding: 8px 20px 4px;
     font-weight: normal;
@@ -616,7 +674,8 @@
   }
 
   .app-version {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
   }
 
   .subtitle {
@@ -644,12 +703,16 @@
   .copy-citation {
     float: left;
     color: white;
-    background-color: #219653;
+    background-color: #444A1E;
     border-radius: 4px;
     padding: 12px;
     height: 20px;
     margin-left: 10px;
     cursor: pointer;
+  }
+
+  .copy-citation:hover {
+    background-color: #737e31;
   }
 
   .entity-infobox {
@@ -684,6 +747,48 @@
     font-family: Roboto !important;
   }
 
+
+  .contact-us-container {
+    padding: 8px 16px 16px;
+  }
+
+  .form-wrapper {
+    margin-top:16px;
+  }
+
+  .form-name, .form-email, .form-uni, .form-message {
+    width: calc(100% - 24px);
+    height: 40px;
+    margin: 10px 0;
+    padding: 8px;
+  }
+
+  .form-role {
+    width: calc(100% - 4px);
+    height: 60px;
+    margin: 10px 0;
+    padding: 6px;
+  }
+
+  .form-message {
+    height: 160px;
+  }
+
+  .form-submit {
+    height: 40px;
+    border: 0;
+    color: white;
+    border-radius: 4px;
+    background-color:green;
+  }
+
+  input:focus:invalid {
+    border: 2px solid red;
+  }
+
+  input:required:valid {
+    border: 2px solid green;
+  }
   @media (max-width: 1000px){
     .citation, .search {
       display: none ;

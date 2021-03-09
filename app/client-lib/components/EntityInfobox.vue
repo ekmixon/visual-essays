@@ -1,10 +1,13 @@
 <template>
   <div class="entity-infobox">
-    <div class="entity-image-holder" v-if="imageSrc" :style="{backgroundSize: imageFit, backgroundImage: 'url(' + imageSrc + ')'}"></div>
-      <h3 class="entity-title" primary-title v-html="title"></h3>
-      <div class="subtitle">{{ description }}</div>
-      <div class="entity-description" v-html="html"></div>
-      <a class="entity-link" :href="entity.wikipedia_page" target="_blank">View Source</a>
+    <!--
+      <div class="entity-image-holder" v-if="imageSrc" :style="{backgroundSize: imageFit, backgroundImage: 'url(' + imageSrc + ')'}"></div>
+    -->
+    <img v-if="imageSrc" :src="imageSrc">
+    <h3 class="entity-title" primary-title v-html="title"></h3>
+    <div class="subtitle">{{ description }}</div>
+    <div class="entity-description" v-html="html"></div>
+    <a v-if="entity.wikipedia_page && entity.wikipedia_page.en" class="entity-link" :href="entity.wikipedia_page && entity.wikipedia_page.en.value" target="_blank">View Source</a>
   </div>
 </template>
 
@@ -120,8 +123,16 @@ module.exports = {
 
   h3.entity-title {
     grid-area: title;
-    font-size: 1.5em;
+    font-size: 1.3em;
     margin: 0.5rem;
+  }
+
+  .entity-infobox img {
+    grid-area: image;
+    justify-self: center;
+    object-fit: contain;
+    max-height: 200px;
+    margin-top: 6px;
   }
 
   .entity-image-holder {
@@ -140,8 +151,8 @@ module.exports = {
   .entity-description {
     grid-area: description;
     margin: 16px 0;
-    line-height: 1.3;
-    font-size: 1.1rem;
+    line-height: 1.4;
+    font-size: 1rem;
     margin: 0.5rem;
   }
 

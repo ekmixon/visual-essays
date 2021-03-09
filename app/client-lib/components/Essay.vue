@@ -188,7 +188,6 @@ module.exports = {
       if (this.paragraphs[paraId]) {
         let scrollTo
         const para = this.paragraphs[paraId]
-        /*
         if (this.layout !== 'vertical') {
           // position active paragraph just above viewer pane, if possible
           const paraBottom = para.top + para.height
@@ -198,7 +197,6 @@ module.exports = {
         } else {
           scrollTo = para.top - 56
         }
-        */
         console.log(`paragraphClickHandler layout=${this.layout} para=${paraId} top=${para.top} height=${para.height} scrollTo=${scrollTo}`)
         let scrollable = document.getElementById('scrollableContent')
         if (!scrollable) scrollable = window
@@ -304,8 +302,12 @@ module.exports = {
   padding: 0 6px;
 }
 
+.default .essay {
+  padding: 18px 32px;
+}
+
 .vertical .essay {
-  background-color: #dadada;
+  background-color: #f8f8f8;
   padding: 0 0 0 0 !important;
   /* box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3); */
 }
@@ -314,15 +316,30 @@ module.exports = {
   background-color: #ffffff;
   /* padding-top: 16px;
   padding-bottom: 16px; */
-  border-left: none;
-  box-shadow:  0 1px 3px 1px rgba(0,0,0,0.25);
+  box-shadow:  0 0 3px 1px rgba(0, 0, 0, 0.25);
   position: relative;
   cursor: default;
+  border: 1px solid #9e9e9e;
+  border-radius: 8px;
+  margin: 8px;
+  padding:16px;
+}
+
+.horizontal p.active-elem {
+  background-color: #ffffff;
+  /* padding-top: 16px;
+  padding-bottom: 16px; */
+  box-shadow:  0 0 3px 1px rgba(0, 0, 0, 0.25);
+  cursor: default;
+  border: 1px solid #9e9e9e;
+  border-radius: 8px;
+  margin: 0;
+  padding: 8px;
 }
 
 p.has-items:hover {
   cursor: pointer !important;
-  background-color: #f7f7f7;;
+  background-color: #f3f3f3;
 }
   
 .vertical p {
@@ -363,7 +380,7 @@ p.active-elem .inferred.plant,
 p.active-elem .inferred.entity,
 .tagged.event,
 p.active-elem .inferred.event {
-  border-bottom: 2px solid #219653;
+  border-bottom: 2px solid #444A1E;
   cursor: pointer;
   z-index: 10;
   /* white-space: nowrap; */
@@ -388,7 +405,7 @@ p.active-elem .inferred.plant:hover,
 p.active-elem .inferred.entity:hover,
 .tagged.event:hover,
 p.active-elem .inferred.event:hover {
-  background: #a8e2bb !important;
+  background: #e1ecbe !important;
   transition: all 0.2s ease-in;
 }
 

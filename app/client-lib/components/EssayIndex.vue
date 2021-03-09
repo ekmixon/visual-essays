@@ -16,22 +16,27 @@
                         </div>
                         <div v-if="!essay.items" class="essay-cite">
                             <div class="essay-title" v-html="essay.title"></div>
-                            <div class="essay-author" v-html="essay.author"></div>
+                            <div class="essay-author" v-html="essay.author || essay.authors"></div>
                         </div>
                         <div v-if="showAbstracts" class="essay-abstract" v-html="essay.abstract"></div>
                     </a>
                 </template>
                 <template v-else>
                     <div v-if="essay.items" v-html="essay.title" class="essay-title"></div>
-                    <div class="essay-card" :class="{group: essay.items}">
+                    <div class="essay-card" :class="{group: essay.items}" >
                         <div class="essay-image">
                             <img :src="essay.image" alt="" />
                         </div>
                         <div v-if="!essay.items" class="essay-cite">
                             <div class="essay-title" v-html="essay.title"></div>
-                            <div class="essay-author" v-html="essay.author"></div>
-                        </div>
+                            <div class="essay-author" v-html="essay.author || essay.authors"></div>
+                            <div v-if="essay.authortitle" class="essay-author-title" v-html="essay.authortitle"></div>
+                        </div>    
+                        <!--
                         <div v-if="showAbstracts" class="essay-abstract" v-html="essay.abstract"></div>
+                        -->
+                        <div v-if="showAbstracts" :id="`essay-${eidx}`" class="essay-abstract" v-html="essay.abstract"></div>
+                        <button v-if="showAbstracts" :id="`button-${eidx}`" class="expand-button" v-on:click="expandAbstract(`${eidx}`)">read more</button>
                     </div>
                 </template>
                 <ul class="social-media">
@@ -66,10 +71,12 @@ module.exports = {
       sections: []
   }),
   computed: {
-      showAbstracts() { return !this.essayConfig || this.essayConfig['show-abstracts'] !== 'false' }
+      showAbstracts() { return !this.essayConfig || this.essayConfig['show-abstracts'] !== 'false' },
+
   },
   mounted() {
     console.log(`${this.$options.name}.mounted`)
+
   },
   methods: {
       parsePageHTML() {
@@ -149,6 +156,17 @@ module.exports = {
             hash: match[7]
             }
         )
+    },
+    expandAbstract(e){
+        var button = document.getElementById('button-'+e)
+        if (button.innerText == 'read more'){
+            button.innerText = 'read less';
+            document.getElementById('essay-'+e).style['-webkit-line-clamp'] = 'unset';
+        }
+        else if (button.innerText == 'read less'){
+            button.innerText = 'read more';
+            document.getElementById('essay-'+e).style['-webkit-line-clamp'] = 5;
+        }
     }
   },
   watch: {
@@ -190,7 +208,7 @@ module.exports = {
     }
 
     .card-wrapper:hover .essay-title {
-        /* color: #219653; */
+        /* color: #444A1E; */
     }
 
     a:hover {
@@ -242,13 +260,24 @@ module.exports = {
         font-weight: 400;
     }
 
-    .essay-abstract {
-        grid-area: abstract;
-        font-size: 0.8em;
+    .essay-author-title {
+        grid-area: author;
+        font-size: 1.1rem;
         font-style: italic;
+        font-weight: 400;
+    }
+
+    .essay-abstract {
+        line-height: 1.4;
+        grid-area: abstract;
+        font-size: 0.9em;
+        /*font-style: italic;*/
         /* height: 200px;*/
-        margin: 1.0rem 0.2rem 0.5rem 0.3rem;
+        margin: 0 16px 16px 0;
         overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;  
     }
 
     .overview p {
@@ -263,6 +292,18 @@ module.exports = {
 
     ul.social-media svg {
         margin-right: 12px;
+    }
+
+    .expand-button {
+        border-radius: 4px;
+        padding: 0.2em 0.6em;
+        border: 1px solid #605C2A;
+        background-color: #605C2A;
+        opacity: 0.8;
+        color: #fff;
+        font-size: 0.8em;
+        height: 40px;
+        width: 120px;
     }
 
 </style>

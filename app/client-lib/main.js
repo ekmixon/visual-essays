@@ -25,10 +25,12 @@ import EssayIndex from './components/EssayIndex.vue'
 import GraphicViewer from './components/GraphicViewer.vue'
 import IIIFSideBySide from './components/IIIFSideBySide.vue'
 import OpenSeadragonViewer from './components/OpenSeadragonViewer.vue'
-import PlantsIndexHeader from './components/PlantsIndexHeader.vue'
+// import PlantsIndexHeader from './components/PlantsIndexHeader.vue'
+import PlantsIndexHeaderWithSearch from './components/PlantsIndexHeaderWithSearch.vue'
 import KnightlabTimeline from './components/KnightlabTimeline.vue'
 import LeafletTimeDimension from './components/LeafletTimeDimension.vue'
 import PlantSpecimenViewer from './components/PlantSpecimenViewer.vue'
+import Search from './components/Search.vue'
 import SiteFooter from './components/Footer.vue'
 import StoriiiesViewer from './components/StoriiiesViewer.vue'
 import Tabulator from './components/Tabulator.vue'
@@ -36,6 +38,8 @@ import VideoPlayer from './components/VideoPlayer.vue'
 import Viewer from './components/Viewer.vue'
 import VisNetwork from './components/VisNetwork.vue'
 import Citation from './components/Citation.vue'
+
+Vue.component('search', Search)
 
 // Vue.config.productionTip = false
 Vue.config.devtools = true
@@ -57,7 +61,7 @@ const baseComponentIndex = [
   { name: 'knightlabTimeline', src: '/components/KnightlabTimeline.vue', component: KnightlabTimeline, selectors: ['tag:knightlab-timeline'], icon: 'fa-history', label: 'Knightlab Timeline'},
   { name: 'mapViewer', src: '/components/LeafletTimeDimension.vue', component: LeafletTimeDimension, selectors: ['tag:map'], icon: 'fa-map-marker-alt', label: 'Map'},
   { name: 'plantSpecimenViewer', src: '/components/PlantSpecimenViewer.vue', component: PlantSpecimenViewer, selectors: ['tag:plant-specimen'], icon: 'fa-seedling', label: 'Plant Specimens'},
-  { name: 'plantsIndexHeader', src: '/components/PlantsIndexHeader.vue', component: PlantsIndexHeader, type: 'header', header: ['plants-index']},
+  { name: 'plantsIndexHeader', src: '/components/PlantsIndexHeaderWithSearch.vue', component: PlantsIndexHeaderWithSearch, layouts: ['plants-index'], type: 'header', header: ['plants-index']},
   { name: 'siteFooter', src: '/components/Footer.vue', component: SiteFooter},
   { name: 'storiiiesViewer', src: '/components/StoriiiesViewer.vue', component: StoriiiesViewer, selectors: ['tag:storiiies'], icon: 'fa-book', label: 'Storiiies Viewer'},
   { name: 'tabulator', src: '/components/Tabulator.vue', component: Tabulator, selectors: ['tag:tabulator'], icon: 'fa-table', label: 'Tabulator'},
@@ -220,7 +224,17 @@ const doRemoteRequests = async () => {
     }
   })
 
-  Vue.use(VueAnalytics, {id: siteInfo.gaTrackingID || 'UA-125778965-6'})
+  //Vue.use(VueAnalytics, {id: siteInfo.gaTrackingID || 'UA-125778965-8'})
+  let gaTrackingCodes = ['UA-125778965-6']
+  if (siteInfo.gaTrackingID) {
+    if (Array.isArray(siteInfo.gaTrackingID)) {
+      gaTrackingCodes = [...gaTrackingCodes, ...siteInfo.gaTrackingID]
+    } else {
+      gaTrackingCodes.push(siteInfo.gaTrackingID)
+    }
+  }
+  console.log(`gaTrackingCodes=${gaTrackingCodes}`)
+  Vue.use(VueAnalytics, {id: gaTrackingCodes})
 
   if (siteInfo.favicon) {
     let e = document.createElement('link')
@@ -228,6 +242,9 @@ const doRemoteRequests = async () => {
     e.rel = 'icon'
     e.type='image/x-icon'
     document.getElementsByTagName('head')[0].appendChild(e)
+  }
+  if (siteInfo.title) {
+    document.title = siteInfo.title
   }
   if (siteInfo.css) {
     let e = document.createElement('link')

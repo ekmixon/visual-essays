@@ -48,8 +48,10 @@ from specimens import get_specimens
 
 try:
     from gc_cache import Cache
-    cache = Cache()
+    cache = Cache(creds_path=f'{BASEDIR}/creds/visual-essay-gcreds.json')
 except:
+    logger.warning(f'Cache init failed')
+    logger.warning(traceback.format_exc())
     from expiringdict import ExpiringDict
     expiration = 60 * 60 * 24 # one day
     cache = ExpiringDict(max_len=200, max_age_seconds=expiration)
@@ -63,6 +65,8 @@ KNOWN_SITES = {
     'plant-humanities.app': ['jstor-labs', 'plant-humanities'],
     'planthumanities.org': ['jstor-labs', 'plant-humanities'],
     'lab.planthumanities.org': ['jstor-labs', 'plant-humanities'],
+    'plant-humanities.org': ['jstor-labs', 'plant-humanities'],
+    'lab.plant-humanities.org': ['jstor-labs', 'plant-humanities'],
     'kent-maps.online': ['kent-map', 'kent'],
     've.rsnyder.info': ['rsnyder', 've'],
     'docs.visual-essays.app': ['jstor-labs', 've-docs']
@@ -278,6 +282,7 @@ def essay(path=None):
     raw = qargs.get('raw', 'false') in ('', 'true')
     refresh = qargs.get('refresh', 'false') in ('', 'true')
     cache_key = f'{site}|{acct}|{repo}|{ref}|{path}'
+    logger.info(f'cache key={cache_key} ENV={ENV} CONTENT_ROOT={CONTENT_ROOT} refresh={refresh} cache={cache}')
     cached_essay = cache.get(cache_key) if not refresh and not ENV == 'dev' and not CONTENT_ROOT else None
     if cached_essay and cached_essay['url']:
         markdown, _ , md_sha = get_gh_file(cached_essay['url'])
@@ -489,10 +494,30 @@ def specimens(path):
         else:
             return (_specimens, 200, cors_headers)
 
+@app.route('/send-email/', methods=['POST', 'OPTIONS'])
+def send_email():
+    if request.method == 'OPTIONS':
+        return ('', 204, cors_headers)
+    data = request.json
+    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImpzdG9ybGFicyIsInVzZXJfY2xhaW1zIjp7InN1cGVydXNlciI6dHJ1ZX0sImV4cCI6MTczNjE4ODA2N30.WFuob_hAYUi1DWvplUwHMLqMYv8JMt2i8sCqzXrVpbs'
+    logger.info(f'send-email: {data}')
+    resp = requests.post(
+        'https://www.jstor.org/api/labs-email-service/',
+        headers = {
+            'Authorization': f'JWT {token}',
+            'User-agent': 'Labs python client'
+        },
+        json = request.json
+    )
+    logger.info(resp.status_code)
+    return {'status': 'OK'}, 200, cors_headers
+
 @app.route('/<path:path>', methods=['GET'])
 @app.route('/', methods=['GET'])
 def main(path=None):
     site, acct, repo, ref, path, qargs = _context(path)
+    if site in ('lab.planthumanities.org', 'plant-humanities.app'):
+        return redirect(f'https://lab.plant-humanities.org{path}', code=302)
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
         if site.startswith('localhost') or site.startswith('192.168') or site.endswith('gitpod.io'):

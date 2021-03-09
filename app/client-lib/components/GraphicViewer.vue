@@ -28,12 +28,19 @@ module.exports = {
     }),
     
     computed: {
-        containerStyle() { return { width: `${this.width}px`, height: `${this.height}px`} },
+        containerStyle() {
+            return {
+                width: `${this.width}px`,
+                height: `${this.height}px`,
+                maxHeight: `${this.height}px` ? `${this.height}px` : '',
+                overflowY: "auto !important",
+            }
+        },
         input() { return this.items[0].img || this.items[0].url || this.items[0].file },
         graphicStyle() {
             return {
-                //width: `${this.width*.95}px`,
-                //height: `${this.height*.95}px`,
+                //width: `${this.width}px`,
+                //height: `${this.height}px`,
                 overflowY: 'auto !important',
                 marginLeft: '0',   
             }
@@ -67,32 +74,43 @@ module.exports = {
 
     .grid-container {
         display: grid;
-        grid-template-rows: 95% 5%;
+        grid-template-rows: auto 5%;
         grid-template-areas:
         "main"
         "footer";
+        justify-items: center;
+        align-items: start;
     }
 
     #graphic-container {
-        grid-area: main
+        grid-area: main;
+        width:100%;
     }
 
     #graphic {
-        max-width:100%;
-        max-height:100%;
+        width:100%;
     }
 
     .citation {
-      /* row-start / column-start / row-end / column-end */
+        /*
       grid-area: footer;
       z-index: 2;
       justify-self: stretch;
       align-self: stretch;
-      /* background-color: rgba(255, 255, 255, 0.8); */
       background-color: #ccc;
       padding: 3px 6px;
         text-align: center;
         line-height: 1;
+        */
+
+        justify-self: stretch;
+        /*align-self: stretch;*/
+        max-height: 30px;
+        overflow: auto; 
+        background-color: #ccc;
+        padding: 9px 6px;
+        text-align: center;
+        line-height: 1; 
     }
 
     .title {

@@ -18,6 +18,7 @@
         @goto-github="gotoGithub"
         @open-docs-site="openDocsSite"
         @open-search-tool="openSearchTool"
+        @send-email="sendEmail"
       ></component>
     </div>
     <div ref="essay" id="scrollableContent" class="essay" @scroll="resizeHeader">
@@ -137,7 +138,7 @@ export default {
       }),
       computed: {
         headerMaxHeight() { return this.isMobile ? 200 : 400 },
-        headerMinHeight() { return this.isMobile ? 50 : 100 },
+        headerMinHeight() { return this.isMobile ? 50 : this.headerComponent.name === 'PlantsIndexHeader' ? 345 : 100 },
         siteInfo() { return this.$store.getters.siteInfo || {} },
         viewerIsOpen() { return this.$store.getters.viewerIsOpen },
         acct() { return this.siteInfo.acct },
@@ -259,7 +260,8 @@ export default {
         },
         async loadEssay(path, replace) {
           this.footerEnabled = false
-          this.headerHeight = !this.isMobile && window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
+          console.log(`window.innerHeight=${window.innerHeight}`)
+          //this.headerHeight = !this.isMobile && window.innerHeight < 1000 ? this.headerMinHeight : this.headerMaxHeight
           // Load essay HTML, use local cached version if available
           let essayUrl = `${this.serviceBase}/essay/${this.siteInfo.acct}/${this.siteInfo.repo}${path}?ref=${this.ref}`
           console.log(`loadEssay: path=${path} url=${essayUrl}`)
@@ -370,7 +372,7 @@ export default {
           let delta
           if (e.touches) {
             delta = (e.touches[0].screenY - this.lastTouchY) / 10
-          } else if (e.wheelDeltaY) {
+          } else if (e.wheelDeltaY || e.deltaY) {
             delta = (e.wheelDeltaY ? e.wheelDeltaY : -e.deltaY)
           } else if (e.type === 'scroll') {
             delta = this.lastScrollY < e.srcElement.scrollTop ? -5 : 0
@@ -378,10 +380,12 @@ export default {
           }
 
           const scrollDir = delta > 0 ? 'expand' : 'shrink'
-          // console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${this.header.clientHeight} min=${this.headerMinHeight}`)
+          let headerHeight = this.header.style.height ? parseInt(this.header.style.height.replace(/px/,'')) : this.header.clientHeight
+          // console.log(`resizeHeader: delta=${delta} dir=${scrollDir} pos=${window.scrollY} height=${headerHeight} min=${this.headerMinHeight}`)
           if (delta && scrollDir === 'shrink' || window.scrollY === 0) {
-            if ((scrollDir === 'shrink' && this.header.clientHeight > this.headerMinHeight) ||
-                (scrollDir === 'expand' && this.header.clientHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
+            // console.log(scrollDir === 'shrink' && headerHeight > this.headerMinHeight)
+            if ((scrollDir === 'shrink' && headerHeight > this.headerMinHeight) ||
+                (scrollDir === 'expand' && headerHeight < this.headerMaxHeight && this.$refs.essay.scrollTop === 0)) {
               let newHeaderHeight = this.header.clientHeight + delta
               if (scrollDir === 'shrink' && newHeaderHeight < this.headerMinHeight) newHeaderHeight = this.headerMinHeight
               if (scrollDir === 'expand' && newHeaderHeight > this.headerMaxHeight) newHeaderHeight = this.headerMaxHeight
@@ -404,6 +408,7 @@ export default {
                 this.header.addEventListener('touchmove', this.resizeHeader )
                 this.$refs.essay.addEventListener('touchmove', this.resizeHeader)
               } else {
+                console.log('add wheel listener')
                 this.header.addEventListener('wheel', this.resizeHeader, {passive: false})
                 this.$refs.essay.addEventListener('wheel', this.resizeHeader, {passive: false})
               }
@@ -416,7 +421,7 @@ export default {
             }
           }
           this.viewerHeight = this.calcViewerHeight()
-          if (!this.isMobile && this.header && window.innerHeight < 1000) this.collapseHeader()
+          if (!this.isMobile && this.header && window.innerHeight < 640) this.collapseHeader()
           if ((this.headerEnabled && !this.header) || (this.footerEnabled && !this.footer)) setTimeout(this.waitForHeaderFooter, 250)
         },
         calcViewerHeight() {
@@ -481,15 +486,34 @@ export default {
         openDocsSite() {
           this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
         },
-        openSearchTool(qid) {
-          this.openWindow(`https://search.plant-humanities.app${eid ? '?eid='=qid : ''}`, `toolbar=yes,location=yes,left=0,top=0,width=1001,height=1200,scrollbars=yes,status=yes`)
+        openSearchTool(eid, asPopup) {
+          let url = `https://search.plant-humanities.org${eid ? '?eid='+eid : ''}`
+          if (asPopup) {
+            this.openWindow(url, `toolbar=yes,location=yes,left=0,top=0,width=1001,height=1200,scrollbars=yes,status=yes`)
+          } else {
+            this.openWindow(url, `toolbar=yes,location=yes,menubar=yes,scrollbars=yes,status=yes,titlebar=yes`)
+          }
         },
         openWindow(url, options) {
           console.log('openWindow', url)
           if (this.externalWindow) { this.externalWindow.close() }
           if (options === undefined) options = 'toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes'
           this.externalWindow = window.open(url, '_blank', options)
-        },         
+        },
+        async sendEmail(options) {
+          let resp = await fetch(`${this.serviceBase}/send-email/`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json'
+                },
+                body: JSON.stringify(options)
+            })
+            resp = await resp.json()
+            // alert('Thank you for contacting us.')
+            this.$modal.hide('contact-modal')
+            console.log(resp)
+        },    
         fadeIn(elem) {
           if (elem) {
             elem.classList.add('visible')
@@ -554,7 +578,8 @@ export default {
           if (this.html && this.hash && this.header) this.$nextTick(() => {this.anchor = this.hash; this.hash = undefined})
         },
         headerComponent() {
-          console.log('headerComponent')
+          console.log(`headerComponent: component=${this.headerComponent.name} height=${this.headerHeight} min=${this.headerMinHeight}`)
+          if (this.headerHeight < this.headerMinHeight) this.headerHeight = this.headerMinHeight
           this.header = null
           this.headerResizeObserver = null
           this.$nextTick(() => this.waitForHeaderFooter())

@@ -1,17 +1,17 @@
 <template>
   <div>
-  <div id="do-labs"> A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i></div>
+<!--  <div id="do-labs"> A collaboration between <i>JSTOR Labs</i> & <i>Dumbarton Oaks</i></div>-->
 
-  <div ref="header" id="header" :class="`header ${essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`">
+  <div :class="`header ${essayConfig.layout === 'index' ? 'index' : 'essay'}`" :style="`height:${height}; background-image: url(${banner})`" id="header" ref="header">
     <div class="homepage-header">
       <div id="logo" ref="logo">
         <img
-                xlink:href="https://jstor-labs.github.io/plant-humanities/images/phl-website-svg-logo.svg"
-                src="https://jstor-labs.github.io/plant-humanities/images/phl-website-png-logo.png" />
+                src="https://jstor-labs.github.io/plant-humanities/images/phl-website-png-logo.png"
+                xlink:href="https://jstor-labs.github.io/plant-humanities/images/phl-website-svg-logo.svg" />
       </div>
       <div id="brand" ref="brand">
         <span class="brand-name">Plant Humanities Lab</span> <br/>
-        <p class="tagline" ref="tagline">Explore the cultural histories of plants and their influence on human societies. </p>
+        <p class="tagline" ref="tagline">Explore the cultural histories of plants and their influence on human societies </p>
       </div>
         <div id="menuToggle" ref="menuToggle">
           <input type="checkbox" />
@@ -27,22 +27,27 @@
                 <i :class="`fas fa-${item.icon}`"></i>{{item.label}}
               </li>
             </template>
-            <li v-if="siteConfig.repo !== 've-docs'" @click="openDocsSite">
+            <li @click="openDocsSite" v-if="siteConfig.repo !== 've-docs'">
               <i :class="`fas fa-question`"></i>Documentation
             </li>
+            <li @click="openSearchTool">
+              <i :class="`fas fa-search`"></i>Search tool
+            <li @click="openContactModal">
+              <i class="fas fa-envelope"></i> Contact Us
+            </li>
             <li>
-              <a v-if="isAuthenticated" @click="logout">
+              <a @click="logout" v-if="isAuthenticated">
                 <i :class="`fas fa-user`"></i>Logout
               </a>
-              <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
+              <a :href="`https://visual-essays.app/login?redirect=${loginRedirect}`" v-else>
                 <i :class="`fas fa-user`"></i>Login
               </a>
             </li>
             <hr>
-            <li style="margin-top:10px;" @click="viewMarkdown">
+            <li @click="viewMarkdown" style="margin-top:10px;">
               <i class="fas fa-file-code"></i>View page markdown
             </li>
-            <li v-if="isAuthenticated" @click="editMarkdown('default')">
+            <li @click="editMarkdown('default')" v-if="isAuthenticated">
               <i class="fas fa-edit"></i>Edit page
             </li>
             <!--
@@ -50,7 +55,7 @@
               <i class="fas fa-edit"></i>Edit page (Custom)
             </li>
             -->
-            <li v-if="isAuthenticated" @click="gotoGithub">
+            <li @click="gotoGithub" v-if="isAuthenticated">
               <i class="fab fa-github"></i>Github repository
             </li>
             <li style="margin-top:10px; padding:0;">
@@ -64,6 +69,36 @@
 
     </div>
 
+      <modal
+              :draggable="true"
+              class="modal"
+              height="auto"
+              name="contact-modal"
+              id="contact-modal"
+
+      >
+        <div class="contact-us-container">
+         <h1>Contact us</h1>
+          <hr>
+          <form class="form-wrapper" ref="feedback-form" v-on:submit.prevent="onSubmit">
+            <input v-model="name" name="name" placeholder="Name" class="form-name" type="text" required> <br/>
+            <input v-model="email" placeholder="Email" class="form-email" type="email" required> <br/>
+            <input v-model="university" placeholder="University Affiliation (optional)" class="form-uni" type="text"> <br/>
+            <select v-model="role" class="form-role">
+              <option disabled value="">Please select one</option>
+              <option value="Undergraduate Student">Undergraduate</option>
+              <option value="Graduate Student">Graduate Student</option>
+              <option value="Faculty">College/University Faculty</option>
+              <option value="Scholar">Independent Scholar</option>
+              <option value="Plant Enthusiast">Plant Enthusiast</option>
+            </select> <br/>
+            <textarea v-model="message" placeholder="Your message here" class="form-message" type="text" required></textarea>
+
+            <button class="form-submit">Submit form</button>
+          </form>
+        </div>
+      </modal>
+
     <div class="title-bar">
       <div class="title" v-html="title"></div>
       <div class="author" v-html="author"></div>
@@ -73,7 +108,8 @@
 </template>
 
 <script>
-  module.exports = {
+
+  export default {
     name: 'PlantsIndexHeader',
     props: {
       essayConfig: { type: Object, default: function(){ return {}} },
@@ -84,11 +120,16 @@
       contentRef: { type: String },
       isAuthenticated: { type: Boolean, default: false },
       href: String
-    },    
+    },
     data: () => ({
       headerWidth: null,
       headerHeight: null,
-      observer: null
+      observer: null,
+      name: '',
+      email: '',
+      university: '',
+      role: '',
+      message: ''
     }),
     computed: {
       essayConfigLoaded() { return this.essayConfig !== null },
@@ -120,7 +161,7 @@
     },
     methods: {
       initObserver() {
-        const header = this.$refs.header, 
+        const header = this.$refs.header,
               vm = this,
               config = { attributes: true }
 
@@ -182,13 +223,33 @@
       openInfoboxModal() {
         this.closeDrawer()
         this.$emit('open-infobox-modal')
+      },
+      openSearchTool() {
+        this.closeDrawer()
+        this.$emit('open-search-tool')
+      },
+      openContactModal() {
+        this.closeDrawer()
+        this.$modal.show('contact-modal')
+      },
+      onSubmit() {
+        let body = `${this.message}\n\r[Sent by: ${this.name}`
+        if (this.role !== '') body += `, ${this.role}`
+        if (this.university !== '') body = body += ` at ${this.university}`
+        body += ']'
+        this.$emit('send-email', {
+          fromAddress: this.email,
+          toAddress: 'labs@ithaka.org',
+          messageSubject: 'Plant Humanities Lab Contact us form',
+          messageBodyText: body,
+        })
       }
     },
     beforeDestroy() {
       if (this.observer) this.observer.disconnect()
     },
     watch: {
-      href() { 
+      href() {
         console.log('header.href', this.href)
       }
     }
@@ -223,7 +284,7 @@
     align-items: stretch;
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
-    grid-template-areas: 
+    grid-template-areas:
       "title"
       "author";
     color: white;
@@ -233,7 +294,7 @@
     top: calc(100% - 100px);
     height: 100px;
     width: 100%;
-    font-weight: bold;    
+    font-weight: bold;
   }
 
   .title {
@@ -263,7 +324,7 @@
 
   .homepage-header {
     padding: 0 1rem;
-    background-color: #219653;
+    background-color: #444A1E;
     height: 100px !important;
     z-index: 100;
     display: grid;
@@ -365,7 +426,7 @@
     transform-origin: 0% 100%;
   }
 
-  /* 
+  /*
   * Transform all the slices of hamburger
   * into a crossmark.
   */
@@ -437,13 +498,55 @@
     transform: none;
   }
 
+  .contact-us-container {
+    padding: 8px 16px 16px;
+  }
+
+  .form-wrapper {
+    margin-top:16px;
+  }
+
+  .form-name, .form-email, .form-uni, .form-message {
+    width: calc(100% - 24px);
+    height: 40px;
+    margin: 10px 0;
+    padding: 8px;
+  }
+
+  .form-role {
+    width: calc(100% - 4px);
+    height: 60px;
+    margin: 10px 0;
+    padding: 6px;
+  }
+
+  .form-message {
+    height: 160px;
+  }
+
+  .form-submit {
+    height: 40px;
+    border: 0;
+    color: white;
+    border-radius: 4px;
+    background-color:green;
+  }
+
+  input:focus:invalid {
+    border: 2px solid red;
+  }
+
+  input:required:valid {
+    border: 2px solid green;
+  }
 
   @media (max-width: 920px) {
     .homepage-header {
       grid-template-columns: 8vw auto 8vw;
       height: 9vw !important;
     }
-    #logo img {
+    #contact-modal .vm--modal{
+      width: 90vw;
     }
 
     #brand {
@@ -519,7 +622,18 @@
       top: 10px;
       right: 10px;
     }
-
   }
+
+</style>
+<style>
+  /*not scoped*/
+  @media (max-width: 920px) {
+
+    #contact-modal .vm--modal {
+      width: 90vw!important;
+      left: 5vw!important;
+    }
+  }
+
 
 </style>
