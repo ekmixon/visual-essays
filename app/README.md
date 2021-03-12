@@ -84,6 +84,12 @@ If the pip install command fails with a `ERROR: Failed building wheel for crypto
 pip install cryptography --global-option=build_ext --global-option="-L/usr/local/opt/openssl/lib" --global-option="-I/usr/local/opt/openssl/include"
 ```
 
+On a Mac M1
+```bash
+brew install openssl@1.1 rust
+env LDFLAGS="-L$(brew --prefix openssl@1.1)/lib" CFLAGS="-I$(brew --prefix openssl@1.1)/include" pip install cryptography
+```
+
 If the `Pillow` install fails, ensure the needed dependencies are installed.  Information for this can be found at https://pillow.readthedocs.io/en/latest/installation.html.  For macos this can probably be resolved by using homebrew to install the needed dependencies.
 
 ```bash
