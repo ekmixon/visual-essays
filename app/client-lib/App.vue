@@ -686,7 +686,6 @@ body {
   }
 
   #visual-essay.horizontal .essay {
-    padding: 0.5em;
     font-size: 90%;
     line-height: 1.2em !important;
   }
