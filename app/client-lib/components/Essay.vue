@@ -299,7 +299,7 @@ module.exports = {
 <style>
 
 .essay {
-  padding: 0 6px;
+  padding: 0 8px;
 }
 
 .default .essay {
@@ -308,7 +308,7 @@ module.exports = {
 
 .vertical .essay {
   background-color: #f8f8f8;
-  padding: 0 0 0 0 !important;
+  /*padding: 0 0 0 0 !important;*/
   /* box-shadow: 5px 5px 10px 0px rgba(0,0,0,0.3); */
 }
 
@@ -321,8 +321,8 @@ module.exports = {
   cursor: default;
   border: 1px solid #9e9e9e;
   border-radius: 8px;
-  margin: 8px;
-  padding:16px;
+  padding: 7px 23px 7px 15px;
+
 }
 
 .horizontal p.active-elem {
@@ -333,8 +333,7 @@ module.exports = {
   cursor: default;
   border: 1px solid #9e9e9e;
   border-radius: 8px;
-  margin: 0;
-  padding: 8px;
+  padding: 7px;
 }
 
 p.has-items:hover {
@@ -343,8 +342,12 @@ p.has-items:hover {
 }
   
 .vertical p {
-  padding: 8px 28px 8px 24px;
+  padding: 8px 24px 8px 16px;
   line-height: 1.6;
+}
+
+.horizontal p {
+  padding: 8px;
 }
 
 .vertical h1,
