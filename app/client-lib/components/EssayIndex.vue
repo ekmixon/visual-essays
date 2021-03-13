@@ -3,7 +3,7 @@
     <div class="section" v-for="(sect, sidx) in sections" :key="`section-${sidx}`">
         <h1 v-if="sect.title" v-html="sect.title"></h1>
         <div v-if="sect.paragraphs" class="overview">
-            <p v-html="para" v-for="(para, pidx) in sect.paragraphs" :key="`para-${sidx}-${pidx}`"></p>
+            <p v-html="para.html" :style="para.style || ''" v-for="(para, pidx) in sect.paragraphs" :key="`para-${sidx}-${pidx}`"></p>
         </div>
         <div v-if="sect.essays" class="essay-index">
             <template v-for="(essay, eidx) in sect.essays">
@@ -137,7 +137,13 @@ module.exports = {
 
                 })
             } else {
-                section.paragraphs = children.slice(1).map(c => c.innerHTML)
+                section.paragraphs = children.slice(1).map(c => {
+                    let para = {html: c.innerHTML}
+                    Array.from(c.attributes).forEach(attr => {
+                        if (attr.name === 'style') para.style = attr.value
+                    })
+                    return para
+                })
             }
         })
         return sections
