@@ -44,8 +44,6 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   gcloud builds submit --tag gcr.io/juncture-essays/${GCR_SERVICE}
   gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/juncture-essays/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
 
-  git checkout develop
-
 else
   echo "There are Uncommitted changes. Please commit and try again"
   exit 1
