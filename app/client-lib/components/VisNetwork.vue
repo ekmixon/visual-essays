@@ -68,7 +68,7 @@ module.exports = {
     componentsBaseURL() {
       return window.location.hostname === "localhost"
         ? ""
-        : "https://jstor-labs.github.io/visual-essays";
+        : "https://jstor-labs.github.io/juncture";
     },
   },
   mounted() {
@@ -241,7 +241,7 @@ module.exports = {
       return parts.join("&");
     },
     getEntity(eid) {
-      let url = `https://visual-essays.app/entity/${encodeURIComponent(eid)}?refresh=false`;
+      let url = `https://juncture-digital.org/entity/${encodeURIComponent(eid)}?refresh=false`;
       const args = {};
       if (this.context) args.context = this.context;
       //if (this.entity.article) args.article = this.entity.article

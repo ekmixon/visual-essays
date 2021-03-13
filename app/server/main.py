@@ -48,7 +48,7 @@ from specimens import get_specimens
 
 try:
     from gc_cache import Cache
-    cache = Cache(creds_path=f'{BASEDIR}/creds/visual-essay-gcreds.json')
+    cache = Cache(creds_path=f'{BASEDIR}/creds/juncture-gcreds.json')
 except:
     logger.warning(f'Cache init failed')
     logger.warning(traceback.format_exc())
@@ -69,7 +69,7 @@ KNOWN_SITES = {
     'lab.plant-humanities.org': ['jstor-labs', 'plant-humanities'],
     'kent-maps.online': ['kent-map', 'kent'],
     've.rsnyder.info': ['rsnyder', 've'],
-    'docs.visual-essays.app': ['jstor-labs', 've-docs']
+    'docs.juncture-digital.org': ['jstor-labs', 've-docs']
 }
 
 cors_headers = {
@@ -136,7 +136,7 @@ def _is_local(site):
 def _is_ve_site(site):
     _site = site.split(':')[0]
     _site = _site[4:] if _site[:4] in ('dev.', 'exp.') else _site
-    return _site == 'visual-essays.app' or _is_local(site)
+    return _site == 'juncture-digital.org' or _is_local(site)
 
 def qargs():
     return dict([(k, request.args.get(k)) for k in request.args])
@@ -172,7 +172,7 @@ def _get_site_info(href):
             'repo':    repo,
             'baseurl': f'/{acct}/{repo}'
         })
-    elif hostname != 'docs.visual-essays.app' and (hostname.startswith('localhost') or hostname.startswith('192.168') or hostname.endswith('visual-essays.app') or hostname.endswith('gitpod.io')):
+    elif hostname != 'docs.juncture-digital.org' and (hostname.startswith('localhost') or hostname.startswith('192.168') or hostname.endswith('juncture-digital.org') or hostname.endswith('gitpod.io')):
         if len(path_elems) >= 2:
             resp = requests.get(f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}')
             if resp.status_code == 200:
@@ -521,13 +521,13 @@ def main(path=None):
     with open(os.path.join(BASEDIR, 'index.html'), 'r') as fp:
         html = fp.read()
         if site.startswith('localhost') or site.startswith('192.168') or site.endswith('gitpod.io'):
-            html = re.sub(r'"/visual-essays/js/visual-essays', f'"/static/js/visual-essays', html)
-            html = re.sub(r'"/visual-essays/app/client-lib/public/css/', f'"/static/app/client-lib/public/css/', html)
+            html = re.sub(r'"/juncture/js/juncture', f'"/static/js/juncture', html)
+            html = re.sub(r'"/juncture/app/client-lib/public/css/', f'"/static/app/client-lib/public/css/', html)
         if ENV == 'dev':
             if site.endswith('gitpod.io'):
-                html = re.sub(r'"/static/js/visual-essays.+"', f'"https://8088-{os.environ.get("GITPOD_WORKSPACE_URL").replace("https://","")}/js/visual-essays.js"', html)
+                html = re.sub(r'"/static/js/juncture.+"', f'"https://8088-{os.environ.get("GITPOD_WORKSPACE_URL").replace("https://","")}/js/juncture.js"', html)
             else:
-                html = re.sub(r'"/static/js/visual-essays.+"', f'"http://{site}:8088/js/visual-essays.js"', html)
+                html = re.sub(r'"/static/js/juncture.+"', f'"http://{site}:8088/js/juncture.js"', html)
         return html, 200
 
     return 'Not found', 404

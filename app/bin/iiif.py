@@ -12,7 +12,7 @@ import json
 import requests
 logging.getLogger('requests').setLevel(logging.INFO)
 
-iiif_service_endpoint = 'https://iiif-v2.visual-essays.app/manifest/'
+iiif_service_endpoint = 'https://iiif.juncture-digital.org/manifest/'
 
 def get_manifest(url, **metadata):
     metadata['iiif'] = True

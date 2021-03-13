@@ -39,7 +39,7 @@
               <a @click="logout" v-if="isAuthenticated">
                 <i :class="`fas fa-user`"></i>Logout
               </a>
-              <a :href="`https://visual-essays.app/login?redirect=${loginRedirect}`" v-else>
+              <a :href="`https://juncture-digital.org/login?redirect=${loginRedirect}`" v-else>
                 <i :class="`fas fa-user`"></i>Login
               </a>
             </li>

@@ -2,8 +2,8 @@
 
 if output="$(git status --porcelain)" && [ -z "$output" ]; then
 
-  GCR_SERVICE=${1:-visual-essays-dev}
-  REF=${2:-develop}
+  GCR_SERVICE=${1:-juncture-essays-dev}
+  REF=${2:-juncture}
 
   echo $REF
   git checkout $REF
@@ -15,7 +15,7 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   echo $APP_VERSION
 
   export PATH="${PATH}:/home/gitpod/google-cloud-sdk/bin"
-  gcloud config set project visual-essay
+  gcloud config set project juncture-essays
   gcloud config set compute/region us-central1
   gcloud config set run/region us-central1
 
@@ -30,9 +30,9 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   cp -va app/Dockerfile gcr-build
   cp -va app/server/*.py app/server/*.txt app/server/*.html app/server/sparql app/server/mappings gcr-build/server
   cat index.html | sed "s/APP_VERSION/$APP_VERSION/" \
-                 | sed 's/\/visual-essays\/js\//\/static\/js\//' \
-                 | sed "s/visual-essays\.min/visual-essays.${COMMIT_HASH}.min/" \
-                 | sed 's/\/visual-essays\/app\/client-lib\/public\/css\//\/static\/css\//' > gcr-build/index.html
+                 | sed 's/\/juncture\/js\//\/static\/js\//' \
+                 | sed "s/juncture\.min/juncture.${COMMIT_HASH}.min/" \
+                 | sed 's/\/juncture\/app\/client-lib\/public\/css\//\/static\/css\//' > gcr-build/index.html
   cp -va app/client-lib/components gcr-build
   cp -va app/client-lib/public/css gcr-build
 
@@ -41,8 +41,8 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   cp -va images gcr-build
 
   cd gcr-build
-  gcloud builds submit --tag gcr.io/visual-essay/${GCR_SERVICE}
-  gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/visual-essay/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
+  gcloud builds submit --tag gcr.io/juncture-essays/${GCR_SERVICE}
+  gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/juncture-essays/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
 
   git checkout develop
 

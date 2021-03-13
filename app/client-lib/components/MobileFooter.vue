@@ -2,7 +2,7 @@
   <v-container id="footer" ref="footer" v-mutate.attr="onMutate" style="z-index:100 !important;">
     <v-row>
       <v-col cols="6" nogutter>
-        <img src="https://jstor-labs.github.io/visual-essays/images/labs.jpg" height="30px">
+        <img src="https://jstor-labs.github.io/juncture/images/labs.jpg" height="30px">
       </v-col>
       <v-col cols="6">
       </v-col>

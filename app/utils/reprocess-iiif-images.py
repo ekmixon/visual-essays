@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     for i, rec in enumerate(recs):
         row = i + 2
-        if rec.get('manifest') and 'iiif-v2.visual-essays.app' in rec['manifest']:
+        if rec.get('manifest') and 'iiif-v2.juncture-digital.org' in rec['manifest']:
             if row_to_process is None or row_to_process == row:
                 # logger.info(f'{i} {rec["iiif-url"]} {rec["iiif-url"] in processed}')
                 if rec['iiif-url'] not in processed or force_refresh:

@@ -76,13 +76,13 @@ const baseComponentIndex = [
 const loc = window.location
 console.log(loc)
 
-//let service = loc.host.indexOf('dev.') === 0 ? `https://dev.visual-essays.app` : 'https://visual-essays.app'
+//let service = loc.host.indexOf('dev.') === 0 ? `https://dev.juncture-digital.org` : 'https://juncture-digital.org'
 let service = loc.origin
 let site = loc.href
 let mode = 'prod'
 
 if (loc.hostname.indexOf('.github.io') > 0) {
-  service = 'https://visual-essays.app'
+  service = 'https://juncture-digital.org'
   site = `${loc.origin}/${loc.pathname.split('/')[1]}`
 } else if (loc.hostname.indexOf('localhost') >= 0) {
   service = 'http://localhost:8080'
@@ -114,7 +114,7 @@ if (referrerUrl) {
     const pathEnd = referrerPath[referrerPath.length-1] === 'README.md' || referrerPath[referrerPath.length-1] === 'index.md' ? referrerPath.length-1 : referrerPath.length
     const ghPath = referrerPath.slice(pathStart, pathEnd).join('/').replace(/\.md$/, '')
     const redirect = (ghAcct === 'JSTOR-Labs' && ghRepo === 've-docs') 
-      ? `https://docs.visual-essays.app/${ghPath}`
+      ? `https://docs.juncture-digital.org/${ghPath}`
       : `${loc.origin}/${ghAcct}/${ghRepo}/${ghPath}${ghBranch === 'master' || ghBranch === 'main' ? '' : '?ref=' + ghBranch}`
     console.log(`redirect=${redirect}`)
     window.location = redirect

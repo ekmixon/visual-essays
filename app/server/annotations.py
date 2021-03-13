@@ -22,7 +22,7 @@ class NotFoundException(Exception):
 # Helper methods
 def _target(acct, repo, essay, image_hash, **kwargs):
     '''Returns a target constructed from the acct, repo, essay, and image_hash values'''
-    return f'https://visual-essays.app/{acct}/{repo}/{essay}/{image_hash}'
+    return f'https://juncture-digital.org/{acct}/{repo}/{essay}/{image_hash}'
 
 def _github_api_urls(target):
     '''Returns GitHub urls for content and last modified date'''
@@ -81,10 +81,10 @@ def _put_annos(target, annos, sha, **kwargs):
     gh_content_url, _ = _github_api_urls(target)
     annos_page = {
         '@context': 'http://www.w3.org/ns/anno.jsonld',
-        'id': f'http://visual-essays.app/annotations/?include=description&target={rel_target}',
+        'id': f'http://juncture-digital.org/annotations/?include=description&target={rel_target}',
         'type': 'AnnotationPage',
         'partOf': {
-            'id': f'http://visual-essays.app/annotations/?include=description&target={rel_target}',
+            'id': f'http://juncture-digital.org/annotations/?include=description&target={rel_target}',
             'total': len(annos),
             'modified': datetime.utcnow().isoformat(),
         },

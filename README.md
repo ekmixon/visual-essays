@@ -1,2 +1,2 @@
-# visual-essays
-Visual Essays
+# juncture
+Juncture

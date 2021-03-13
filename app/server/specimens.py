@@ -185,7 +185,7 @@ def _get_manifest(specimen, image_url, preload=False):
         }]
         }
         resp = requests.post(
-            'https://iiif.visual-essays.app/presentation/create',
+            'https://iiif.juncture-digital.org/presentation/create',
             headers={'Content-type': 'application/json'},
             json=manifest
         )
@@ -194,7 +194,7 @@ def _get_manifest(specimen, image_url, preload=False):
             specimen['manifest'] = manifest['@id']
             if preload:
                 resp = requests.post(
-                    'https://iiif.visual-essays.app/images/preload',
+                    'https://iiif.juncture-digital.org/images/preload',
                     headers={'Content-type': 'application/json'},
                     json={'url': image_url}
                 )
@@ -207,7 +207,7 @@ def _get_manifest_iiifhosting(specimen, wdid, taxon_name):
         images = dict([(img['type'], img['url']) for img in specimen.get('images', [])])
         parsed_url = urlparse(images['best'])
         qargs = parse_qs(parsed_url.query)
-        proxied_url = f'https://iiif-v2.visual-essays.app/gp-proxy{qargs["rft_id"][0]}'
+        proxied_url = f'https://iiif-v2.juncture-digital.org/gp-proxy{qargs["rft_id"][0]}'
         logger.info(proxied_url)
         data = {'url': proxied_url, 'iiif': True}
         if taxon_name:
@@ -232,7 +232,7 @@ def _get_manifest_iiifhosting(specimen, wdid, taxon_name):
         if 'herbarium' in specimen:
             data['Herbarium'] = specimen['herbarium']['label']
         # resp = requests.post('http://localhost:8088/manifest/', headers={'Content-type': 'application/json'}, json=data)
-        resp = requests.post('https://iiif-v2.visual-essays.app/manifest/', headers={'Content-type': 'application/json'}, json=data)
+        resp = requests.post('https://iiif-v2.juncture-digital.org/manifest/', headers={'Content-type': 'application/json'}, json=data)
         if resp.status_code == 200:
             specimen['manifest'] = resp.json()['@id']
         else:

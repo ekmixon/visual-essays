@@ -311,15 +311,15 @@
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
 <!-- <script src="https://recogito.github.io/js/openseadragon-annotorious.min.js"></script> -->
-<script src="https://jstor-labs.github.io/visual-essays/js/openseadragon-annotorious.min.js"></script>
+<script src="https://jstor-labs.github.io/juncture/js/openseadragon-annotorious.min.js"></script>
 
 <script src="https://kit.fontawesome.com/19541ddce8.js" crossorigin="anonymous"></script>
 
 <script type="text/javascript">
 
-    const imageServer = 'https://iiif.visual-essays.app'
+    const imageServer = 'https://iiif.juncture-digital.org'
     const annosEndpoint = '/annotations/'
-    const testManifest = 'https://iiif.visual-essays.app/presentation/ed36b26d3cba264d7f1a7202655f324ffe08f2ef5fee64ee7be8b770/manifest'
+    const testManifest = 'https://iiif.juncture-digital.org/presentation/ed36b26d3cba264d7f1a7202655f324ffe08f2ef5fee64ee7be8b770/manifest'
 
     const options = {
         dropzoneSelector: 'ul',
@@ -346,7 +346,7 @@
         data: () => ({
             drawer: false,
             isAuthenticated: false,
-            prefixUrl: 'https://jstor-labs.github.io/visual-essays/images/',
+            prefixUrl: 'https://jstor-labs.github.io/juncture/images/',
             manifest: undefined,
             viewer: undefined,
             annotorious: undefined,

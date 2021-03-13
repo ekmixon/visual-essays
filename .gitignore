@@ -9,3 +9,4 @@ client-lib/nohup.out
 nohup.out
 yarn.lock
 visual-essays.*.min.js
+juncture.*.min.js

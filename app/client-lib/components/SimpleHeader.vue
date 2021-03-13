@@ -22,7 +22,7 @@
             <a v-if="isAuthenticated" @click="logout">
               <i :class="`fas fa-user`"></i>Logout
             </a>
-            <a v-else :href="`https://visual-essays.app/login?redirect=${loginRedirect}`">
+            <a v-else :href="`https://juncture-digital.org/login?redirect=${loginRedirect}`">
               <i :class="`fas fa-user`"></i>Login
             </a>
           </li>
@@ -152,7 +152,7 @@
       },
       entity () { return this.$store.getters.items.find(entity => this.essayConfig.qid === entity.eid || this.essayConfig.qid === entity.id) || {} },
       //apiBaseURL() { return window.location.origin }
-      apiBaseURL() { return 'https://visual-essays.app'},
+      apiBaseURL() { return 'https://juncture-digital.org'},
 
       mlaCitation() { return this.mla },
       apaCitation() { return this.apa },

@@ -9,7 +9,7 @@ function resolve (dir) {
 module.exports = (env, argv) => {
   config = {
     entry: {
-      'visual-essays' : './main.js'
+      'juncture' : './main.js'
     },
     output: {
       path: path.resolve(__dirname, '../../js'),

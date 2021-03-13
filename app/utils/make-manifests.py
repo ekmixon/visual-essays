@@ -37,7 +37,7 @@ logging.getLogger('oauth2client.client').setLevel(logging.WARNING)
 scope = ['https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive']
 
-iiif_service_endpoint = 'https://iiif-v2.visual-essays.app/manifest/'
+iiif_service_endpoint = 'https://iiif-v2.juncture-digital.org/manifest/'
 
 ignore_fields = {'ready', 'essay', 'thumbnail', 'manifest', 'iiif-url', 'width', 'height', 'format'}
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
             try:
                 manifest = None
                 if rec.get('manifest'):
-                    if 'iiif-v2.visual-essays.app' not in rec['manifest']: # external manifest
+                    if 'iiif-v2.juncture-digital.org' not in rec['manifest']: # external manifest
                         manifest = get_manifest(rec['manifest'])
                 if manifest is None:
                     manifest = create_manifest(iiif_service, **rec, force=force_refresh)

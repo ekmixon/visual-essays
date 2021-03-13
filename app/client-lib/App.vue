@@ -476,7 +476,7 @@ export default {
         },
         editMarkdown(editor) {
           this.openWindow(editor == 'custom'
-            ? `https://editor.visual-essays.app/${this.siteInfo.acct}/${this.siteInfo.repo}${this.baseurl}${this.essayFname}`
+            ? `https://editor.juncture-digital.org/${this.siteInfo.acct}/${this.siteInfo.repo}${this.baseurl}${this.essayFname}`
             : `https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/edit/${this.siteInfo.editBranch}${this.essayFname}.md`
           ) 
         },
@@ -484,7 +484,7 @@ export default {
           this.openWindow(`https://github.com/${this.siteInfo.acct}/${this.siteInfo.repo}/tree/${this.ref}`, null)
         },
         openDocsSite() {
-          this.openWindow(`https://docs.visual-essays.app?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
+          this.openWindow(`https://docs.juncture-digital.org?readonly`, `toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes`)
         },
         openSearchTool(eid, asPopup) {
           let url = `https://search.plant-humanities.org${eid ? '?eid='+eid : ''}`
