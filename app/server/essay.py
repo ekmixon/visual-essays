@@ -571,7 +571,7 @@ def _get_manifest(item, essay_path, acct, repo):
         data = {**dict([(label_map.get(k,k),item[k]) for k in item if k not in ('id', 'region', 'fit', 'hires', 'iiif-url', 'static', 'iiif', 'tag', 'tagged_in')]),
                 **{'acct': acct, 'repo': repo, 'essay': essay_path}}
         data['iiif'] = 'true'
-        resp = requests.post('https://iiif-v2.juncture-digital.org/manifest/', headers={'Content-type': 'application/json'}, json=data)
+        resp = requests.post('https://iiif-v2.visual-essays.app/manifest/', headers={'Content-type': 'application/json'}, json=data)
         if resp.status_code == 200:
             item['manifest'] = resp.json()['@id']
     return item

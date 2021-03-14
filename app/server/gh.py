@@ -14,6 +14,8 @@ logging.getLogger('requests').setLevel(logging.INFO)
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 BASEDIR = os.path.dirname(SCRIPT_DIR)
+while BASEDIR != '/' and not os.path.exists(os.path.join(BASEDIR, 'index.html')):
+    BASEDIR = os.path.dirname(BASEDIR)
 logger.info(f'SCRIPT_DIR={SCRIPT_DIR} BASEDIR={BASEDIR}')
 
 _gh_token = os.environ.get('gh_token')
@@ -58,6 +60,7 @@ def gh_repo_info(acct, repo):
 _checked_prefixes = {}
 def has_gh_repo_prefix(path):
     elems = path[1:].split('/')
+    logger.info(f'has_gh_repo_prefix: path={path} elems={elems}')
     prefix = '/'.join(elems[:2]) if len(elems) >= 2 else None
     if prefix is not None and prefix not in _checked_prefixes:
         _checked_prefixes[prefix] = gh_repo_info(elems[0], elems[1]) is not None

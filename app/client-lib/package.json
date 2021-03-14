@@ -1,7 +1,7 @@
 {
   "name": "juncture",
   "version": "1.0.0",
-  "description": "Visual essay js library",
+  "description": "Juncture js library",
   "main": "webpack.config.js",
   "scripts": {
     "serve": "vue-cli-service --port 8088 serve main.js",

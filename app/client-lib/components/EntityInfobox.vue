@@ -60,7 +60,7 @@ module.exports = {
       if (Object.keys(args).length > 0) {
         url += `?${this.toQueryString(args)}`
       }
-      console.log(`getEntity=${url}`)
+      console.log(`EntityInfobox.getEntity=${url}`)
       return fetch(url).then(resp => resp.json())
     },
     getSummaryInfo() {

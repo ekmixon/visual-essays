@@ -206,8 +206,8 @@
           : this.href)
       },
       entity () { return this.$store.getters.items.find(entity => this.essayConfig.qid === entity.eid || this.essayConfig.qid === entity.id) || {} },
-      //apiBaseURL() { return window.location.origin }
-      apiBaseURL() { return 'https://juncture-digital.org'},
+      // apiBaseURL() { return window.location.origin },
+      apiBaseURL() { return this.$store.getters.serviceBase },
 
       mlaCitation() { return this.mla },
       apaCitation() { return this.apa },
@@ -218,7 +218,7 @@
       // console.log(`${this.$options.name}.mounted: height=${this.height}`, this.siteConfig, this.essayConfig)
       // console.log(`href=${this.href} appVersion=${this.appVersion} ref=${this.contentRef} isAuthenticated=${this.isAuthenticated}`)
       
-      this.getClaimsInfo()
+      if (this.essayQid) this.getClaimsInfo()
 
       // set initial height
       this.$refs.header.style.height = `${this.height}px`
@@ -345,7 +345,7 @@
         if (Object.keys(args).length > 0) {
           url += `?${this.toQueryString(args)}`
         }
-        console.log(`getEntity=${url}`)
+        console.log(`Header.getEntity=${url}`)
         return fetch(url).then(resp => resp.json())
         //console.log('resp', resp)
       },

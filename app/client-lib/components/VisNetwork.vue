@@ -59,9 +59,7 @@ module.exports = {
     itemsInActiveElements() {
       return this.$store.getters.itemsInActiveElements;
     },
-    apiBaseURL() {
-      return window.location.origin;
-    },
+    apiBaseURL() { return this.$store.getters.serviceBase },
     input() { 
       return this.items[0] && this.items[0].file || this.items[0].url
     },
@@ -248,7 +246,7 @@ module.exports = {
       if (Object.keys(args).length > 0) {
         url += `?${this.toQueryString(args)}`;
       }
-      console.log(`getEntity=${url}`);
+      console.log(`VisNetwork.getEntity=${url}`);
       return fetch(url).then((resp) => resp.json());
     },
     getSummaryInfo() {

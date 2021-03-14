@@ -152,7 +152,7 @@
       },
       entity () { return this.$store.getters.items.find(entity => this.essayConfig.qid === entity.eid || this.essayConfig.qid === entity.id) || {} },
       //apiBaseURL() { return window.location.origin }
-      apiBaseURL() { return 'https://juncture-digital.org'},
+      apiBaseURL() { return this.$store.getters.serviceBase },
 
       mlaCitation() { return this.mla },
       apaCitation() { return this.apa },
@@ -271,7 +271,7 @@
         if (Object.keys(args).length > 0) {
           url += `?${this.toQueryString(args)}`
         }
-        console.log(`getEntity=${url}`)
+        console.log(`SimpleHeader.getEntity=${url}`)
         return fetch(url).then(resp => resp.json())
         //console.log('resp', resp)
       },

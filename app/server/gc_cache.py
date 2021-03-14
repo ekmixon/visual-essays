@@ -18,7 +18,7 @@ import json
 from dateutil.parser import parse
 from datetime import datetime, timedelta
 
-DEFAULT_PROJECT_NAME = 'juncture'
+DEFAULT_PROJECT_NAME = 'juncture-essays'
 DEFAULT_BUCKET_NAME = 'juncture-cache'
 DEFAULT_CREDS_PATH = os.path.join(BASEDIR, 'creds', 'juncture-gcreds.json')
 

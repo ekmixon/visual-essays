@@ -43,7 +43,8 @@ module.exports = {
     imageSrc () { return this.thumbnail ?  this.thumbnail : this.entity.images ? this.entity.images[0] : null },
     html () { return this.entityInfo ?  this.entityInfo.extract_html : null },
     context() { return this.$store.getters.context },
-    apiBaseURL() { return window.location.origin }
+    // apiBaseURL() { return window.location.origin }
+    apiBaseURL() { return this.$store.getters.serviceBase }
   },
   mounted() {
     //this.getSummaryInfo()
@@ -64,7 +65,7 @@ module.exports = {
       if (Object.keys(args).length > 0) {
         url += `?${this.toQueryString(args)}`
       }
-      console.log(`getEntity=${url}`)
+      console.log(`Citation.getEntity=${url}`)
       return fetch(url).then(resp => resp.json())
     },
     getSummaryInfo() {

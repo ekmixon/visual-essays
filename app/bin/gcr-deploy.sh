@@ -19,28 +19,29 @@ if output="$(git status --porcelain)" && [ -z "$output" ]; then
   gcloud config set compute/region us-central1
   gcloud config set run/region us-central1
 
-  rm -rf gcr-build
+  # rm -rf gcr-build
 
   cd app/client-lib
-  yarn build --hash=${COMMIT_HASH}
+  # yarn build --hash=${COMMIT_HASH}
+  yarn build
 
   cd ../..
 
-  mkdir -p gcr-build/server
-  cp -va app/Dockerfile gcr-build
-  cp -va app/server/*.py app/server/*.txt app/server/*.html app/server/sparql app/server/mappings gcr-build/server
-  cat index.html | sed "s/APP_VERSION/$APP_VERSION/" \
-                 | sed 's/\/juncture\/js\//\/static\/js\//' \
-                 | sed "s/juncture\.min/juncture.${COMMIT_HASH}.min/" \
-                 | sed 's/\/juncture\/app\/client-lib\/public\/css\//\/static\/css\//' > gcr-build/index.html
-  cp -va app/client-lib/components gcr-build
-  cp -va app/client-lib/public/css gcr-build
+  #mkdir -p gcr-build/server
+  #cp -va app/Dockerfile gcr-build
+  #cp -va app/server/*.py app/server/*.txt app/server/*.html app/server/sparql app/server/mappings gcr-build/server
+  #cat index.html | sed "s/APP_VERSION/$APP_VERSION/" \
+  #               | sed 's/\/juncture\/js\//\/static\/js\//' \
+  #               | sed "s/juncture\.min/juncture.${COMMIT_HASH}.min/" \
+  #               | sed 's/\/juncture\/app\/client-lib\/public\/css\//\/static\/css\//' > gcr-build/index.html
+  #cp -va app/client-lib/components gcr-build
+  #cp -va app/client-lib/public/css gcr-build
 
-  cp -va creds gcr-build
-  cp -va js gcr-build
-  cp -va images gcr-build
+  #cp -va creds gcr-build
+  #cp -va js gcr-build
+  #cp -va images gcr-build
 
-  cd gcr-build
+  #cd gcr-build
   gcloud builds submit --tag gcr.io/juncture-essays/${GCR_SERVICE}
   gcloud beta run deploy ${GCR_SERVICE} --image gcr.io/juncture-essays/${GCR_SERVICE} --allow-unauthenticated --platform managed --memory 1Gi
 
