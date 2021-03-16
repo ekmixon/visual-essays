@@ -6,6 +6,7 @@ node_modules
 venv
 client-lib/nohup.out
 .vscode
+.idea
 nohup.out
 yarn.lock
 visual-essays.*.min.js

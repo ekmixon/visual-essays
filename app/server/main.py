@@ -135,8 +135,8 @@ def _is_local(site):
 
 def _is_ve_site(site):
     _site = site.split(':')[0]
-    _site = _site[4:] if _site[:4] in ('dev.', 'exp.') else _site
-    return _site == 'juncture-digital.org' or _is_local(site)
+    _site = _site[4:] if _site[:4] in ('dev.', 'exp.', 'lab.') else _site
+    return _site.startswith('juncture-digital') or _is_local(site)
 
 def qargs():
     return dict([(k, request.args.get(k)) for k in request.args])
@@ -170,20 +170,32 @@ def _get_site_info(href):
             'ghpSite': True,
             'acct':    acct,
             'repo':    repo,
-            'baseurl': f'/{acct}/{repo}'
+            'baseurl': f'/{repo}'
         })
-    elif hostname != 'docs.juncture-digital.org' and (hostname.startswith('localhost') or hostname.startswith('192.168') or hostname.endswith('juncture-digital.org') or hostname.endswith('gitpod.io')):
+    elif hostname != 'docs.juncture-digital.org' and _is_ve_site(hostname):
         if len(path_elems) >= 2:
-            resp = requests.get(f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}')
-            if resp.status_code == 200:
-                repo_info = resp.json()
+            if has_gh_repo_prefix(f'/{"/".join(path_elems[:2])}'):
                 site_info.update({
-                    'acct': path_elems[0],
-                    'repo': path_elems[1], 
-                    'defaultBranch': repo_info['default_branch'],
-                    'ref': site_info['ref'] if site_info['ref'] else repo_info['default_branch'],
+                    'acct': path_elems[0], 
+                    'repo': path_elems[1],
                     'baseurl': f'/{path_elems[0]}/{path_elems[1]}'
-                })
+                }) 
+                logger.info(f'site_info 1: acct={site_info["acct"]} repo={site_info["repo"]}')
+            else:
+                url = f'https://api.github.com/repos/{path_elems[0]}/{path_elems[1]}'
+                resp = requests.get(url)
+                logger.info(f'site_info 2: url={url} resp={resp.status_code}')
+                if resp.status_code == 200:
+                    repo_info = resp.json()
+                    site_info.update({
+                        'acct': path_elems[0],
+                        'repo': path_elems[1], 
+                        'defaultBranch': repo_info['default_branch'],
+                        'ref': site_info['ref'] if site_info['ref'] else repo_info['default_branch'],
+                        'baseurl': f'/{path_elems[0]}/{path_elems[1]}'
+                    })
+                else:
+                    site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
         else:
             site_info.update({'acct': KNOWN_SITES['default'][0], 'repo': KNOWN_SITES['default'][1]})
     else:

@@ -37,7 +37,7 @@
               <i :class="`fas fa-user`"></i>Logout
             </a>
             <a v-else :href="`https://juncture-digital.org/login?redirect=${loginRedirect}`">
-              <i :class="`fas fa-user`"></i> Author Login
+              <i :class="`fas fa-user`"></i>Author Login
             </a>
           </li>
           <hr>

@@ -215,6 +215,7 @@ export default {
         this.href = window.location.href
         this.qargs = this.parseQueryString()
 
+        console.log(`location.pathname=${window.location.pathname} baseurl=${this.baseurl}`)
         let path = window.location.pathname.length > this.baseurl.length
           ? window.location.pathname.slice(this.baseurl.length)
           : '/'
@@ -348,6 +349,8 @@ export default {
                   target = target.parentElement
                 }
                 let path = target.dataset.target
+                console.log(`path=${path} baseurl=${this.baseurl} ${path.indexOf(this.baseurl)}`)
+                if (path.indexOf(this.baseurl) === 0) path = path.slice(this.baseurl.length)
                 console.log('click', path)
                 if (path[0] === '#') {
                   document.querySelector(path).scrollIntoView({block:'start'})

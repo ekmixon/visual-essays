@@ -76,8 +76,8 @@ const baseComponentIndex = [
 const loc = window.location
 console.log(loc)
 
-//let service = loc.host.indexOf('dev.') === 0 ? `https://dev.juncture-digital.org` : 'https://juncture-digital.org'
-let service = loc.origin
+let service = loc.host.indexOf('dev.') === 0 ? `https://dev.juncture-digital.org` : 'https://juncture-digital.org'
+// let service = loc.origin
 let site = loc.href
 let mode = 'prod'
 
@@ -194,6 +194,24 @@ const checkJWTExpiration = async(jwt) => {
   return isExpired
 }
 
+const ensureLink = function(href, rel, type) {
+  if (!document.querySelector(`[href="${href}"]`)) {
+    let e = document.createElement('link')
+    e.href = href
+    if (rel) e.rel = rel
+    if (type) e.type = type
+    document.getElementsByTagName('head')[0].appendChild(e)
+  }
+}
+
+const ensureScript = function(src, crossorigin) {
+  if (!document.querySelector(`script[src="${src}"]`)) {
+    let e = document.createElement('script')
+    e.src = src
+    document.getElementsByTagName('head')[0].appendChild(e)
+  }
+}
+
 const doRemoteRequests = async () => {
   const remoteRequests = [
     getSiteInfo(),
@@ -236,22 +254,19 @@ const doRemoteRequests = async () => {
   console.log(`gaTrackingCodes=${gaTrackingCodes}`)
   Vue.use(VueAnalytics, {id: gaTrackingCodes})
 
-  if (siteInfo.favicon) {
-    let e = document.createElement('link')
-    e.href = siteInfo.favicon
-    e.rel = 'icon'
-    e.type='image/x-icon'
-    document.getElementsByTagName('head')[0].appendChild(e)
-  }
-  if (siteInfo.title) {
-    document.title = siteInfo.title
-  }
-  if (siteInfo.css) {
-    let e = document.createElement('link')
-    e.href = siteInfo.css
-    e.rel = 'stylesheet'
-    document.getElementsByTagName('head')[0].appendChild(e)
-  }
+  if (siteInfo.title) document.title = siteInfo.title
+  if (siteInfo.favicon) ensureLink(siteInfo.favicon, 'icon', 'image/x-icon')
+  if (siteInfo.css) ensureLink(siteInfo.css, 'stylesheet')
+
+  ensureLink('https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900', 'stylesheet')
+  ensureLink('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap', 'stylesheet')
+  ensureLink('https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css', 'stylesheet')
+  ensureLink('https://fonts.googleapis.com/icon?family=Material+Icons', 'stylesheet')
+  ensureLink('https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css', 'stylesheet')
+  ensureLink('https://juncture-digital.org/static/css/main.css', 'stylesheet')
+  ensureScript('https://cdn.jsdelivr.net/npm/http-vue-loader@1.4.2/src/httpVueLoader.min.js')
+  ensureScript('https://kit.fontawesome.com/19541ddce8.js', 'anonymous')
+
   console.log('components', components)
   console.log('siteInfo', siteInfo)
   store.dispatch('setSiteInfo', siteInfo)

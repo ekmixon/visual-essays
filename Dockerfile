@@ -15,12 +15,12 @@ RUN set -e; \
 WORKDIR /usr/src/app
 
 ADD app/server server
-ADD creds creds
 ADD index.html .
 ADD js js
 ADD app/client-lib/public/css css
 ADD images images
 ADD app/client-lib/components components
+ADD creds creds
 
 ENV PORT 8080
 
