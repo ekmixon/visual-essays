@@ -23,6 +23,7 @@
             <i :class="`fas fa-search`"></i> Search tool
           </li>
           -->
+          <!--
           <li @click="nav('/help')">
             <i :class="`fas fa-question`"></i>Help
           </li>
@@ -32,6 +33,7 @@
           <li @click="openContactModal">
             <i class="fas fa-envelope"></i>Contact Us
           </li>
+          -->
           <li v-if="!readOnly">
             <a v-if="isAuthenticated" @click="logout">
               <i :class="`fas fa-user`"></i>Logout
