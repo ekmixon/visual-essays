@@ -11,7 +11,7 @@
         <span v-if="hasAnnotations" @click="showAnnotations = !showAnnotations" title="Show Annotations">
           <i class="far fa-comment-alt-dots"></i>
         </span>
-        <span v-if="hasAnnotations" @click="showAnnotationsNavigator = !showAnnotationsNavigator" title="Open Annotations Navigator">
+        <span v-if="hasAnnotations" @click="showAnnotationsNavigator = !showAnnotationsNavigator" title="Play Annotations">
           <svg width="19" height="20" viewBox="0 0 20 21" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M13.3333 8L7.77778 12.4444V3.55556L13.3333 8ZM2.22222 0H17.7778C19 0 20 1 20 2.22222V13.7778C20 15 19 16 17.7778 16H11.885L14.2682 18.8598C14.6218 19.2841 14.5645 19.9147 14.1402 20.2682C13.7159 20.6218 13.0853 20.5645 12.7318 20.1402L9.75 16.562L6.76822 20.1402C6.41466 20.5645 5.78409 20.6218 5.35982 20.2682C4.93554 19.9147 4.87821 19.2841 5.23178 18.8598L7.61496 16H2.22222C1 16 0 15 0 13.7778V2.22222C0 1 1 0 2.22222 0ZM2.22222 13.7778H17.7778V2.22222H2.22222V13.7778Z"/>
           </svg>
@@ -103,6 +103,7 @@ module.exports = {
     prefixUrl,
     manifests: undefined,
     page: 0,
+    goToRegionCoords: null,
     currentItem: undefined,
     viewer: undefined,
     imageSize: {x:0,y:0},
@@ -379,7 +380,7 @@ module.exports = {
     }, 100),
     newPage(e) {
       this.page = e.page
-      console.log(e)
+      console.log('new page event', e)
     },
     initAnnotator() {
       // console.log('initAnnotator', this.currentItem.annotations.length)
@@ -496,6 +497,10 @@ module.exports = {
       console.log(`gotoAnnotation "${anno.body[0].value}" ${anno.id.split('/').pop()}`)
       this.gotoRegion(anno.target.selector.value.split('=')[1])
     },
+    gotoPage(page, region) {
+      this.viewer.goToPage(page);
+      this.gotoRegion(region)
+    },
     gotoRegion(region) {
       this.viewer.viewport.zoomSpring.animationTime = 2
       this.viewer.viewport.fitBounds(this.parseRegionString(region))
@@ -541,6 +546,23 @@ module.exports = {
                   if (anno) {
                     this.gotoAnnotation(anno)
                   } else {
+                    if (region.includes(':')){
+                      console.log('region includes :');
+                      //split string and make current item
+                      let refImage = region.split(':')[0];
+                      let result = this.manifests.find(obj => {
+                        return obj.ref === refImage
+                      })
+                      if (result){
+                        this.page = refImage-1;
+                        this.currentItem = result;
+                        this.goToRegionCoords = region.split(':')[1]
+                        //console.log('goToRegionCoords', region.split(':')[1])
+                        
+                        this.viewer.goToPage(this.page)
+                      }
+                      console.log('this.currentItem', this.currentItem);
+                    }
                     this.gotoRegion(region)
                   }
                   break
@@ -606,13 +628,19 @@ module.exports = {
       if (licenseCode) {
         console.log(`licenseCode=${licenseCode}`)    
         if (licenseCode.toUpperCase() === 'PD' || licenseCode.toUpperCase() === 'public domain') {
+          
           licenseUrl = licenseUrl || 'https://creativecommons.org/publicdomain/mark/1.0'
           licenseIcons = [ccLicenseIcons.PD]
+          console.log('if', licenseIcons)
         } else if (licenseCode.indexOf('CC0') === 0) {
           licenseUrl = licenseUrl || 'https://creativecommons.org/publicdomain/zero/1.0'
           licenseIcons = [ccLicenseIcons.CC, ccLicenseIcons.CC0]
+          console.log('else if', licenseIcons)
+        } else if (licenseCode == 'NO KNOWN COPYRIGHT RESTRICTIONS') {
+          //do nothing
+          licenseIcons = [];
         } else {
-          const icons = []
+          let icons = []
           const ccVersion = licenseCode.split(' ').pop()
           const ccTerms = licenseCode.split(' ').filter(t => t !== '').slice(1,2).pop().split('-')
           icons.push(ccLicenseIcons.CC)
@@ -621,6 +649,7 @@ module.exports = {
           })
           licenseUrl = licenseUrl || `https://creativecommons.org/licenses/${ccTerms.join('-').toLowerCase()}/${ccVersion}`
           licenseIcons = icons
+          console.log('else', licenseIcons)
         }
       }
       this.licenseUrl = licenseUrl
@@ -702,7 +731,7 @@ module.exports = {
             allowHTML: true,
             placement: 'bottom-start',
             zIndex: 11,
-            preventOverflow: { enabled: false },
+            preventOverflow: { enabled: true },
             hideOnClick: true,
             // theme: 'light-border',
             
@@ -734,6 +763,7 @@ module.exports = {
   watch: {
     license: {
       handler: function () {
+      
         this.evalLicense()
       },
       immediate: true
@@ -762,7 +792,7 @@ module.exports = {
         // console.log(`sort: a=${aIdx} b=${bIdx}`)
         return aIdx > bIdx ? 1 : -1
       })
-      console.log(current)
+      console.log('current', current)
       const cur = current.map(item => this.stringifyKeysInOrder(item))
       const prev = previous ? previous.map(item => this.stringifyKeysInOrder(item)) : []
       if (this.viewer) {
@@ -773,6 +803,7 @@ module.exports = {
           this.currentItem = { ...this.manifests[this.page], ...current[0] }
         }
       }
+      console.log('currentitem', this.currentItem)
     },
     manifests(manifests) {
       // console.log('manifests', manifests)
@@ -784,7 +815,17 @@ module.exports = {
     page() {
       console.log(`page=${this.page}`)
       this.currentItem = this.manifests[this.page]
+      if (this.goToRegionCoords != null){
+        //this.$nextTick(() => setTimeout(() => this.gotoRegion(this.goToRegionCoords), 100))
+
+        this.$nextTick(() => {
+          this.gotoRegion(this.goToRegionCoords)
+          this.goToRegionCoords = null;
+        })
+        
+      }
     },
+    
     actions: {
       handler: function () {
         this.actions.forEach(action => this.handleEssayAction(action))
