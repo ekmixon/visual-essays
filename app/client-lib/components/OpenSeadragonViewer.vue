@@ -296,7 +296,6 @@ module.exports = {
             this.viewer.world.getItemAt(numItems-1).setClip(new OpenSeadragon.Rect(0, 0, 0, 0))
           }
           this.imageSize = e.item.getContentSize() || {x:0 , y:0}
-
         })
         // console.log(this.drawRect({left: 0, top: 0, width: this.viewer.drawer.canvas.width-2, height: this.viewer.drawer.canvas.height-2, stroke: 'red', strokeWidth: 2, fill: null}))
       })
@@ -376,6 +375,10 @@ module.exports = {
       if (tiledImage) {
         const imageBounds = tiledImage.viewportToImageRectangle(viewportBounds)
         this.imageViewportCoords = `${Math.ceil(imageBounds.x)},${Math.ceil(imageBounds.y)},${Math.ceil(imageBounds.width)},${Math.ceil(imageBounds.height)}`
+      }
+      if (this.zoomtoRegion) {
+        this.gotoRegion(this.zoomtoRegion)
+        this.zoomtoRegion = null
       }
     }, 100),
     newPage(e) {
@@ -503,7 +506,9 @@ module.exports = {
     },
     gotoRegion(region) {
       this.viewer.viewport.zoomSpring.animationTime = 2
-      this.viewer.viewport.fitBounds(this.parseRegionString(region))
+      let bounds = this.parseRegionString(region)
+      console.log(`gotoRegion=${region} bounds=${bounds}`)
+      this.viewer.viewport.fitBounds(bounds)
       this.viewer.viewport.zoomSpring.animationTime = 1.2
     },
     copyTextToClipboard(e) {
@@ -546,24 +551,17 @@ module.exports = {
                   if (anno) {
                     this.gotoAnnotation(anno)
                   } else {
-                    if (region.includes(':')){
-                      console.log('region includes :');
-                      //split string and make current item
-                      let refImage = region.split(':')[0];
-                      let result = this.manifests.find(obj => {
-                        return obj.ref === refImage
-                      })
-                      if (result){
-                        this.page = refImage-1;
-                        this.currentItem = result;
-                        this.goToRegionCoords = region.split(':')[1]
-                        //console.log('goToRegionCoords', region.split(':')[1])
-                        
-                        this.viewer.goToPage(this.page)
+                    if (region.includes(':')) {
+                      let [ zoomtoRef, zoomtoRegion ] = region.split(':')
+                      let zoomtoPage = this.manifests.findIndex(obj => obj.ref === zoomtoRef)
+                      console.log(`zoomto ref=${zoomtoRef} page=${zoomtoPage} region=${zoomtoRegion}`);
+                      if (zoomtoPage >= 0) {
+                        this.zoomtoRegion = zoomtoRegion
+                        this.viewer.goToPage(zoomtoPage)
                       }
-                      console.log('this.currentItem', this.currentItem);
+                    } else {
+                      this.gotoRegion(region)
                     }
-                    this.gotoRegion(region)
                   }
                   break
               }                        
