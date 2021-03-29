@@ -94,7 +94,7 @@ def _put_annos(target, annos, sha, **kwargs):
     payload = {
         'message': 'Annotation file update',
         'content': str(base64.b64encode(bytes(json.dumps(annos_page, indent=2), 'utf-8')), 'utf-8'),
-        'branch': branch if branch in ('main', 'master', 'develop') else 'develop'
+        'branch': branch if branch in ('main', 'master', 'develop', 'annotations') else 'develop'
     }
     if sha:
         payload['sha'] = sha

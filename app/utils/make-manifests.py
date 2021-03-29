@@ -45,7 +45,9 @@ strip_html_regex = re.compile(r'<[^>]+>')
 
 def get_workbook(workbook=default_workbook, **kwargs):
     logger.info(f'get_workbook: {workbook}')
-    creds = ServiceAccountCredentials.from_json_keyfile_name(f'{BASEDIR}/creds/labs-gs-creds.json', scope)
+    creds_file = f'{BASEDIR}/creds/juncture-gs-creds.json'
+    logger.info(f'{creds_file} {os.path.exists(creds_file)}')
+    creds = ServiceAccountCredentials.from_json_keyfile_name(creds_file, scope)
     client = gspread.authorize(creds)
     return client.open(workbook)
 
@@ -174,14 +176,16 @@ if __name__ == '__main__':
     for i, rec in enumerate(recs):
         row = i + 2
         logger.debug(f'{is_ready(rec)} {not rec.get("manifest")} {force_refresh}')
-        if is_ready(rec) or force_refresh:
+        if is_ready(rec) or row_to_process or force_refresh:
             if row_to_process and row_to_process != row: continue
             logger.info(f'processing row={row}')
             try:
                 manifest = None
-                if rec.get('manifest'):
-                    if 'iiif-v2.visual-essays.app' not in rec['manifest']: # external manifest
-                        manifest = get_manifest(rec['manifest'])
+                if not force_refresh and rec.get('manifest'):
+                    manifest = get_manifest(rec['manifest'])
+                    # if 'iiif-v2.visual-essays.app' not in rec['manifest']: # external manifest
+                    #    manifest = get_manifest(rec['manifest'])
+                logger.info(manifest)
                 if manifest is None:
                     manifest = create_manifest(iiif_service, **rec, force=force_refresh)
                 if manifest:
