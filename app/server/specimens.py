@@ -310,7 +310,7 @@ def get_specimens(taxon_name=None, gpid=None, wdid=None, preload=False, **kwargs
             if '@graph' not in _jsonld:
                 _context = _jsonld.pop('@context')
                 _jsonld = {'@context': _context, '@graph': [_jsonld]}
-            logger.indebugfo(_jsonld)
+            logger.debug(_jsonld)
             _framed = jsonld.frame(
                 _jsonld,
                 frame = {
