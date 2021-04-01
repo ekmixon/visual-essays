@@ -145,8 +145,11 @@ module.exports = {
       if (this.currentItem.target) {
         return this.currentItem.target
       } else {
-        let path = this.path === '/' ? '' : this.path[this.path.length-1] === '/' ? this.path.slice(0,this.path.length-1): this.path
-        console.log(`path=${path}`)
+        let path = !this.path || this.path === '/' 
+          ? ''
+          : this.path[this.path.length-1] === '/' 
+            ? this.path.slice(0,this.path.length-1)
+            : this.path
         const imageSourceHash = this.currentItem ? this.sha256(this.currentItem['@id']).slice(0,8) : ''
         return `${this.siteInfo.acct}/${this.siteInfo.repo}/${this.siteInfo.editBranch}${path}/${imageSourceHash}`
       }
