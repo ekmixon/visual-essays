@@ -99,6 +99,7 @@ sparql_template = '''
     PREFIX jpq: <http://kg.jstor.org/prop/qualifier/>
     PREFIX wd: <http://www.wikidata.org/entity/>
     PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+    PREFIX schema: <http://schema.org/>
 
     CONSTRUCT {
     
@@ -289,10 +290,12 @@ def get_specimens(taxon_name=None, gpid=None, wdid=None, preload=False, **kwargs
     elif wdid:
         sparql = sparql_template.replace('<SELECTOR>', f'jwdt:P1660 {wdid} ;')
 
+    logger.info(sparql)
     data = {'specimens': []}
     for _ in range(2):
         resp = requests.post(
-            'https://kg-query.jstor.org/proxy/wdqs/bigdata/namespace/wdq/sparql',
+            # 'https://kg-query.jstor.org/proxy/wdqs/bigdata/namespace/wdq/sparql',
+            'https://cy9in0xsv5.execute-api.us-east-1.amazonaws.com/prod/sparql',
             headers={
                 'Accept': 'text/plain',
                 'Content-type': 'application/x-www-form-urlencoded',
@@ -307,7 +310,7 @@ def get_specimens(taxon_name=None, gpid=None, wdid=None, preload=False, **kwargs
             if '@graph' not in _jsonld:
                 _context = _jsonld.pop('@context')
                 _jsonld = {'@context': _context, '@graph': [_jsonld]}
-            logger.debug(_jsonld)
+            logger.indebugfo(_jsonld)
             _framed = jsonld.frame(
                 _jsonld,
                 frame = {
@@ -337,6 +340,8 @@ def get_specimens(taxon_name=None, gpid=None, wdid=None, preload=False, **kwargs
             data['specimens'] = sort_specimens(data['specimens'], **kwargs)
             data['specimens'] = data['specimens'][:int(kwargs.get('max', 5))]
             break
+        else:
+            logger.info(resp.content)
     _get_manifests(data, preload)
     return data
 

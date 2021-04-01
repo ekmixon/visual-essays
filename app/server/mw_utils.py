@@ -21,7 +21,8 @@ GRAPHS = [
     {
         'ns': 'jstor',
         'prefix': 'http://kg.jstor.org/entity/',
-        'sparql_endpoint': 'https://kg-query.jstor.org/proxy/wdqs/bigdata/namespace/wdq/sparql'
+        # 'sparql_endpoint': 'https://kg-query.jstor.org/proxy/wdqs/bigdata/namespace/wdq/sparql'
+        'sparql_endpoint': 'https://cy9in0xsv5.execute-api.us-east-1.amazonaws.com/prod/sparql',
     },
     {
         'ns': 'wd',
