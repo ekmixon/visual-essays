@@ -11,6 +11,12 @@
             letter-spacing: unset;
         }
 
+        .v-card__title {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
         .back-link {
             background-color: #444A1E;
             width: 50px;
@@ -268,7 +274,7 @@
                                         <v-card
                                                 :color="active ? '' : ''"
                                                 class="mx-auto"
-                                                max-height="200"
+                                                max-height="250"
                                                 @click="toggle"
                                         >
                                             <v-img :src="`${item.cropSrc}`" height="100px" contain></v-img>
