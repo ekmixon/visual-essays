@@ -30,7 +30,8 @@ GRAPHS = [
         'ns': 'jstor',
         'prefix': 'http://kg.jstor.org/entity/',
         'baseurl': 'https://kg.jstor.org/entity',
-        'sparql_endpoint': 'https://kg-query.jstor.org/proxy/wdqs/bigdata/namespace/wdq/sparql',
+        # 'sparql_endpoint': 'https://kg-query.jstor.org/proxy/wdqs/bigdata/namespace/wdq/sparql',
+        'sparql_endpoint': 'https://cy9in0xsv5.execute-api.us-east-1.amazonaws.com/prod/sparql',
         'api_endpoint': 'https://kg.jstor.org/w/api.php',
         'types': {
             'entity': 'Q13'

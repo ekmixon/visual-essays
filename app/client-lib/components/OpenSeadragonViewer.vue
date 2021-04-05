@@ -40,7 +40,7 @@
         <div class="annos" v-html="annoText" @click="copyAnnoIdToClipboard"></div>
       </div>
   
-      <input v-if="items.length > 1 && (mode === 'layers' || mode === 'curtain')"
+      <input v-if="items && items.length > 1 && (mode === 'layers' || mode === 'curtain')"
             class="slider" 
             v-model="sliderPct" type="range" min="0" max="100" value="0"
       >
@@ -146,7 +146,11 @@ module.exports = {
       if (this.currentItem.target) {
         return this.currentItem.target
       } else {
-        let path = this.path === '/' ? '' : this.path[this.path.length-1] === '/' ? this.path.slice(0,this.path.length-1): this.path
+        let path = !this.path || this.path === '/' 
+          ? ''
+          : this.path[this.path.length-1] === '/' 
+            ? this.path.slice(0,this.path.length-1)
+            : this.path
         console.log(`path=${path}`)
         const imageSourceHash = this.currentItem ? this.sha256(this.currentItem['@id']).slice(0,8) : ''
         return `${this.siteInfo.acct}/${this.siteInfo.repo}/${this.siteInfo.editBranch}${path}/${imageSourceHash}`
@@ -784,21 +788,21 @@ module.exports = {
       }
     },
     items (current, previous) {
-      current = current.sort((a, b) => {
+      let sorted = [...current].sort((a, b) => {
         let aIdx = parseInt(a.id.split('-').pop())
         let bIdx = parseInt(b.id.split('-').pop())
         // console.log(`sort: a=${aIdx} b=${bIdx}`)
         return aIdx > bIdx ? 1 : -1
       })
-      console.log('current', current)
-      const cur = current.map(item => this.stringifyKeysInOrder(item))
+      console.log('current', sorted)
+      const cur = sorted.map(item => this.stringifyKeysInOrder(item))
       const prev = previous ? previous.map(item => this.stringifyKeysInOrder(item)) : []
       if (this.viewer) {
         if (cur.join() !== prev.join()) {
           this.loadManifests(this.items)
         } else {
           this.page = 0
-          this.currentItem = { ...this.manifests[this.page], ...current[0] }
+          this.currentItem = { ...this.manifests[this.page], ...sorted[0] }
         }
       }
       console.log('currentitem', this.currentItem)

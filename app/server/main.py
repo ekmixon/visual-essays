@@ -490,7 +490,7 @@ def specimens(path):
         else:
             _specimens['from_cache'] = True
         if content_type == 'text/html':
-            return (open(os.path.join(BASEDIR, 'app', 'server', 'json-viewer.html'), 'r').read().replace("'{{DATA}}'", json.dumps(_specimens)), 200, cors_headers)
+            return (open(os.path.join(SCRIPT_DIR, 'json-viewer.html'), 'r').read().replace("'{{DATA}}'", json.dumps(_specimens)), 200, cors_headers)
         else:
             return (_specimens, 200, cors_headers)
 
