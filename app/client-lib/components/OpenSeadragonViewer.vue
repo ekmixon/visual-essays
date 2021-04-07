@@ -423,6 +423,11 @@ module.exports = {
     },
     createAnnotation(anno) {
       // console.log('createAnnotation', anno)
+      const tmp = document.createElement('div')
+      tmp.innerHTML = anno
+      let annoText = tmp.textContent;
+      console.log('annoText', annoText)
+
       anno.seq = this.currentItem.annotations ? this.currentItem.annotations.length : 0
       anno.target.id = this.target
       fetch(`${this.annosEndpoint}`, {
@@ -431,7 +436,7 @@ module.exports = {
           Authorization: `Bearer ${this.jwt}`,
           'Content-type': 'application/json'
         },
-        body: JSON.stringify(anno)
+        body: JSON.stringify(annoText)
       })
       .then(resp => resp.json())
       .then(createdAnno => {
@@ -442,6 +447,11 @@ module.exports = {
     },
     updateAnnotation(anno) {
       // console.log('updateAnnotation', anno)
+      const tmp = document.createElement('div')
+      tmp.innerHTML = anno
+      let annoText = tmp.textContent;
+      console.log('annoText', annoText)
+
       const _id = anno.id.split('/').pop()
       fetch(`${this.annosEndpoint}${this.target}/${_id}`, {
         method: 'PUT',
@@ -555,8 +565,17 @@ module.exports = {
                   if (anno) {
                     this.gotoAnnotation(anno)
                   } else {
-                    if (region.includes(':')) {
-                      let [ zoomtoRef, zoomtoRegion ] = region.split(':')
+                    if (region.includes('ref')){
+                      let zoomtoRef = region.split('-')[1];
+                      let zoomtoPage = this.manifests.findIndex(obj => obj.ref === zoomtoRef)
+                      console.log('zoom to page', zoomtoRef, zoomtoPage);
+                      if (zoomtoPage >= 0) {
+                        this.viewer.goToPage(zoomtoPage)
+                      }
+
+                    }
+                    else if (region.includes('|')) {
+                      let [ zoomtoRef, zoomtoRegion ] = region.split('|')
                       let zoomtoPage = this.manifests.findIndex(obj => obj.ref === zoomtoRef)
                       console.log(`zoomto ref=${zoomtoRef} page=${zoomtoPage} region=${zoomtoRegion}`);
                       if (zoomtoPage >= 0) {
@@ -568,6 +587,7 @@ module.exports = {
                     }
                   }
                   break
+                
               }                        
               break
           case 'mouseover':
