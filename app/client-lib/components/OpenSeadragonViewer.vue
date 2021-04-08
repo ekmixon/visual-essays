@@ -565,20 +565,35 @@ module.exports = {
                   if (anno) {
                     this.gotoAnnotation(anno)
                   } else {
-                    if (region.includes('ref')){
-                      let zoomtoRef = region.split('-')[1];
-                      let zoomtoPage = this.manifests.findIndex(obj => obj.ref === zoomtoRef)
-                      console.log('zoom to page', zoomtoRef, zoomtoPage);
-                      if (zoomtoPage >= 0) {
-                        this.viewer.goToPage(zoomtoPage)
+                    if (region == 'next'){
+                      //go to next page
+                      console.log('this page', this.page)
+                      if (this.page+1 <= this.manifests.length){
+                        this.viewer.goToPage(this.page+1)
                       }
 
+                    }
+                    else if (region == 'previous'){
+                      //go to previous page
+                      console.log('this page', this.page)
+                      if (this.page-1 > -1){
+                        this.viewer.goToPage(this.page-1)
+                      }
+                    }
+                    else if (!region.includes(',')){
+                      let zoomtoPage = this.manifests.findIndex(obj => obj.ref === region)
+                      console.log('zoom to page', zoomtoPage);
+                      if (zoomtoPage >= 0) {
+                        this.page = zoomtoPage;
+                        this.viewer.goToPage(zoomtoPage)
+                      }
                     }
                     else if (region.includes('|')) {
                       let [ zoomtoRef, zoomtoRegion ] = region.split('|')
                       let zoomtoPage = this.manifests.findIndex(obj => obj.ref === zoomtoRef)
                       console.log(`zoomto ref=${zoomtoRef} page=${zoomtoPage} region=${zoomtoRegion}`);
                       if (zoomtoPage >= 0) {
+                        this.page = zoomtoPage;
                         this.zoomtoRegion = zoomtoRegion
                         this.viewer.goToPage(zoomtoPage)
                       }
