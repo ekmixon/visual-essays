@@ -171,7 +171,8 @@ module.exports = {
     label() {
       return this.currentItem && this.metadata && this.metadata.title_formatted
         ? this.metadata.title_formatted
-        : this.currentItem && this.currentItem.label ? this.currentItem.label : null
+        : this.currentItem && this.currentItem.label
+        ? this.currentItem.label['@value'] || this.currentItem.label : null
     },
     title() {
       if (this.items.length > 0){
