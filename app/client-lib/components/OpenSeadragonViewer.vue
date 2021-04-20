@@ -11,7 +11,7 @@
         <span v-if="hasAnnotations" @click="showAnnotations = !showAnnotations" title="Show Annotations">
           <i class="far fa-comment-alt-dots"></i>
         </span>
-        <span v-if="hasAnnotations" @click="showAnnotationsNavigator = !showAnnotationsNavigator" title="Open Annotations Navigator">
+        <span v-if="hasAnnotations" @click="showAnnotationsNavigator = !showAnnotationsNavigator" title="Play Annotations">
           <svg width="19" height="20" viewBox="0 0 20 21" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M13.3333 8L7.77778 12.4444V3.55556L13.3333 8ZM2.22222 0H17.7778C19 0 20 1 20 2.22222V13.7778C20 15 19 16 17.7778 16H11.885L14.2682 18.8598C14.6218 19.2841 14.5645 19.9147 14.1402 20.2682C13.7159 20.6218 13.0853 20.5645 12.7318 20.1402L9.75 16.562L6.76822 20.1402C6.41466 20.5645 5.78409 20.6218 5.35982 20.2682C4.93554 19.9147 4.87821 19.2841 5.23178 18.8598L7.61496 16H2.22222C1 16 0 15 0 13.7778V2.22222C0 1 1 0 2.22222 0ZM2.22222 13.7778H17.7778V2.22222H2.22222V13.7778Z"/>
           </svg>
@@ -40,7 +40,7 @@
         <div class="annos" v-html="annoText" @click="copyAnnoIdToClipboard"></div>
       </div>
   
-      <input v-if="items.length > 1 && (mode === 'layers' || mode === 'curtain')"
+      <input v-if="items && items.length > 1 && (mode === 'layers' || mode === 'curtain')"
             class="slider" 
             v-model="sliderPct" type="range" min="0" max="100" value="0"
       >
@@ -103,6 +103,7 @@ module.exports = {
     prefixUrl,
     manifests: undefined,
     page: 0,
+    goToRegionCoords: null,
     currentItem: undefined,
     viewer: undefined,
     imageSize: {x:0,y:0},
@@ -169,7 +170,8 @@ module.exports = {
     label() {
       return this.currentItem && this.metadata && this.metadata.title_formatted
         ? this.metadata.title_formatted
-        : this.currentItem && this.currentItem.label ? this.currentItem.label : null
+        : this.currentItem && this.currentItem.label
+        ? this.currentItem.label['@value'] || this.currentItem.label : null
     },
     title() {
       if (this.items.length > 0){
@@ -298,7 +300,6 @@ module.exports = {
             this.viewer.world.getItemAt(numItems-1).setClip(new OpenSeadragon.Rect(0, 0, 0, 0))
           }
           this.imageSize = e.item.getContentSize() || {x:0 , y:0}
-
         })
         // console.log(this.drawRect({left: 0, top: 0, width: this.viewer.drawer.canvas.width-2, height: this.viewer.drawer.canvas.height-2, stroke: 'red', strokeWidth: 2, fill: null}))
       })
@@ -379,10 +380,14 @@ module.exports = {
         const imageBounds = tiledImage.viewportToImageRectangle(viewportBounds)
         this.imageViewportCoords = `${Math.ceil(imageBounds.x)},${Math.ceil(imageBounds.y)},${Math.ceil(imageBounds.width)},${Math.ceil(imageBounds.height)}`
       }
+      if (this.zoomtoRegion) {
+        this.gotoRegion(this.zoomtoRegion)
+        this.zoomtoRegion = null
+      }
     }, 100),
     newPage(e) {
       this.page = e.page
-      console.log(e)
+      console.log('new page event', e)
     },
     initAnnotator() {
       // console.log('initAnnotator', this.currentItem.annotations.length)
@@ -418,6 +423,11 @@ module.exports = {
     },
     createAnnotation(anno) {
       // console.log('createAnnotation', anno)
+      const tmp = document.createElement('div')
+      tmp.innerHTML = anno
+      let annoText = tmp.textContent;
+      console.log('annoText', annoText)
+
       anno.seq = this.currentItem.annotations ? this.currentItem.annotations.length : 0
       anno.target.id = this.target
       fetch(`${this.annosEndpoint}`, {
@@ -426,7 +436,7 @@ module.exports = {
           Authorization: `Bearer ${this.jwt}`,
           'Content-type': 'application/json'
         },
-        body: JSON.stringify(anno)
+        body: JSON.stringify(annoText)
       })
       .then(resp => resp.json())
       .then(createdAnno => {
@@ -437,6 +447,11 @@ module.exports = {
     },
     updateAnnotation(anno) {
       // console.log('updateAnnotation', anno)
+      const tmp = document.createElement('div')
+      tmp.innerHTML = anno
+      let annoText = tmp.textContent;
+      console.log('annoText', annoText)
+
       const _id = anno.id.split('/').pop()
       fetch(`${this.annosEndpoint}${this.target}/${_id}`, {
         method: 'PUT',
@@ -499,9 +514,15 @@ module.exports = {
       console.log(`gotoAnnotation "${anno.body[0].value}" ${anno.id.split('/').pop()}`)
       this.gotoRegion(anno.target.selector.value.split('=')[1])
     },
+    gotoPage(page, region) {
+      this.viewer.goToPage(page);
+      this.gotoRegion(region)
+    },
     gotoRegion(region) {
       this.viewer.viewport.zoomSpring.animationTime = 2
-      this.viewer.viewport.fitBounds(this.parseRegionString(region))
+      let bounds = this.parseRegionString(region)
+      console.log(`gotoRegion=${region} bounds=${bounds}`)
+      this.viewer.viewport.fitBounds(bounds)
       this.viewer.viewport.zoomSpring.animationTime = 1.2
     },
     copyTextToClipboard(e) {
@@ -544,9 +565,44 @@ module.exports = {
                   if (anno) {
                     this.gotoAnnotation(anno)
                   } else {
-                    this.gotoRegion(region)
+                    if (region == 'next'){
+                      //go to next page
+                      console.log('this page', this.page)
+                      if (this.page+1 <= this.manifests.length){
+                        this.viewer.goToPage(this.page+1)
+                      }
+
+                    }
+                    else if (region == 'previous'){
+                      //go to previous page
+                      console.log('this page', this.page)
+                      if (this.page-1 > -1){
+                        this.viewer.goToPage(this.page-1)
+                      }
+                    }
+                    else if (!region.includes(',')){
+                      let zoomtoPage = this.manifests.findIndex(obj => obj.ref === region)
+                      console.log('zoom to page', zoomtoPage);
+                      if (zoomtoPage >= 0) {
+                        this.page = zoomtoPage;
+                        this.viewer.goToPage(zoomtoPage)
+                      }
+                    }
+                    else if (region.includes('|')) {
+                      let [ zoomtoRef, zoomtoRegion ] = region.split('|')
+                      let zoomtoPage = this.manifests.findIndex(obj => obj.ref === zoomtoRef)
+                      console.log(`zoomto ref=${zoomtoRef} page=${zoomtoPage} region=${zoomtoRegion}`);
+                      if (zoomtoPage >= 0) {
+                        this.page = zoomtoPage;
+                        this.zoomtoRegion = zoomtoRegion
+                        this.viewer.goToPage(zoomtoPage)
+                      }
+                    } else {
+                      this.gotoRegion(region)
+                    }
                   }
                   break
+                
               }                        
               break
           case 'mouseover':
@@ -609,13 +665,19 @@ module.exports = {
       if (licenseCode) {
         console.log(`licenseCode=${licenseCode}`)    
         if (licenseCode.toUpperCase() === 'PD' || licenseCode.toUpperCase() === 'public domain') {
+          
           licenseUrl = licenseUrl || 'https://creativecommons.org/publicdomain/mark/1.0'
           licenseIcons = [ccLicenseIcons.PD]
+          console.log('if', licenseIcons)
         } else if (licenseCode.indexOf('CC0') === 0) {
           licenseUrl = licenseUrl || 'https://creativecommons.org/publicdomain/zero/1.0'
           licenseIcons = [ccLicenseIcons.CC, ccLicenseIcons.CC0]
+          console.log('else if', licenseIcons)
+        } else if (licenseCode == 'NO KNOWN COPYRIGHT RESTRICTIONS') {
+          //do nothing
+          licenseIcons = [];
         } else {
-          const icons = []
+          let icons = []
           const ccVersion = licenseCode.split(' ').pop()
           const ccTerms = licenseCode.split(' ').filter(t => t !== '').slice(1,2).pop().split('-')
           icons.push(ccLicenseIcons.CC)
@@ -624,6 +686,7 @@ module.exports = {
           })
           licenseUrl = licenseUrl || `https://creativecommons.org/licenses/${ccTerms.join('-').toLowerCase()}/${ccVersion}`
           licenseIcons = icons
+          console.log('else', licenseIcons)
         }
       }
       this.licenseUrl = licenseUrl
@@ -705,7 +768,7 @@ module.exports = {
             allowHTML: true,
             placement: 'bottom-start',
             zIndex: 11,
-            preventOverflow: { enabled: false },
+            preventOverflow: { enabled: true },
             hideOnClick: true,
             // theme: 'light-border',
             
@@ -737,6 +800,7 @@ module.exports = {
   watch: {
     license: {
       handler: function () {
+      
         this.evalLicense()
       },
       immediate: true
@@ -788,7 +852,17 @@ module.exports = {
     page() {
       console.log(`page=${this.page}`)
       this.currentItem = this.manifests[this.page]
+      if (this.goToRegionCoords != null){
+        //this.$nextTick(() => setTimeout(() => this.gotoRegion(this.goToRegionCoords), 100))
+
+        this.$nextTick(() => {
+          this.gotoRegion(this.goToRegionCoords)
+          this.goToRegionCoords = null;
+        })
+        
+      }
     },
+    
     actions: {
       handler: function () {
         this.actions.forEach(action => this.handleEssayAction(action))

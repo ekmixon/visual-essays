@@ -81,6 +81,8 @@ yarn serve-lib
 If the pip install command fails with a `ERROR: Failed building wheel for cryptography` message, try installing the cryptography package with this command before running the bulk install with the requirements.text file.
 
 ```bash
+export CPPFLAGS=-I/usr/local/opt/openssl/include
+export LDFLAGS=-L/usr/local/opt/openssl/lib
 pip install cryptography --global-option=build_ext --global-option="-L/usr/local/opt/openssl/lib" --global-option="-I/usr/local/opt/openssl/include"
 ```
 
