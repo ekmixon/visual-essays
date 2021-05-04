@@ -25,6 +25,7 @@ import EssayIndex from './components/EssayIndex.vue'
 import GraphicViewer from './components/GraphicViewer.vue'
 import IIIFSideBySide from './components/IIIFSideBySide.vue'
 import OpenSeadragonViewer from './components/OpenSeadragonViewer.vue'
+import ImageCompare from './components/ImageCompare.vue'
 // import PlantsIndexHeader from './components/PlantsIndexHeader.vue'
 import PlantsIndexHeaderWithSearch from './components/PlantsIndexHeaderWithSearch.vue'
 import KnightlabTimeline from './components/KnightlabTimeline.vue'
@@ -57,6 +58,7 @@ const baseComponentIndex = [
   { name: 'essayIndex', src: '/components/EssayIndex.vue', component: EssayIndex, type: 'content', layouts: ['index']},
   { name: 'iiifSideBySide', src: '/components/IIIFSideBySide.vue', component: IIIFSideBySide, selectors: ['tag:iiif-compare'], icon: 'fa-file-image', label: 'Image compare'},
   { name: 'imageViewer', src: '/components/OpenSeadragonViewer', component: OpenSeadragonViewer, selectors: ['tag:image'], icon: 'fa-file-image', label: 'Images'},
+  { name: 'imageCompare', src: '/components/ImageCompare', component: ImageCompare, selectors: ['tag:compare'], icon: 'fa-images', label: 'Image Compare'},
   { name: 'indexHeader', src: '/components/Header.vue', component: Header, type: 'header', layouts: ['index']},
   { name: 'knightlabTimeline', src: '/components/KnightlabTimeline.vue', component: KnightlabTimeline, selectors: ['tag:knightlab-timeline'], icon: 'fa-history', label: 'Knightlab Timeline'},
   { name: 'mapViewer', src: '/components/LeafletTimeDimension.vue', component: LeafletTimeDimension, selectors: ['tag:map'], icon: 'fa-map-marker-alt', label: 'Map'},
