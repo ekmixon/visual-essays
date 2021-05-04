@@ -5,6 +5,7 @@
 </template>
 
 <script>
+/* global CurtainSyncViewer */
 
 // https://cuberis.github.io/openseadragon-curtain-sync/
 
@@ -14,8 +15,9 @@ const prefixUrl = 'https://openseadragon.github.io/openseadragon/images/'
 module.exports = {
   name: 've-compare',
   props: {
+    height: Number,
     items: { type: Array, default: () => ([]) },
-    active: Boolean
+    active: { type: Boolean, default: () => true },
   },
   data: () => ({
     viewerLabel: 'Image Compare',
@@ -26,8 +28,8 @@ module.exports = {
     viewer: null
   }),
   computed: {
-    containerStyle() { return { height: this.active ? '100%' : '0' } },
-    compareItems() { return this.items.filter(item => item[this.$options.name]) },
+    containerStyle() { return { height: this.active ? `${this.height}px` : '0' } },
+    compareItems() { return this.items.filter(item => item.tag === 'compare') },
     mode() { let itemsWithMode = this.compareItems.filter(item => item.sync || item.curtain).map(item => item.sync ? 'sync' : 'curtain') 
              return itemsWithMode.length > 0 ? itemsWithMode[0] : 'curtain'
     },
@@ -40,7 +42,6 @@ module.exports = {
   methods: {
     init() { this.loadManifests() },
     initViewer() {
-      if (this.active) {
       let main = document.getElementById('main')
       let container = document.getElementById('osd')
       if (container) {
@@ -72,7 +73,6 @@ module.exports = {
           }
         })
       })
-      }
     },
     loadManifests() {
       let promises = this.compareItems.map(item => {
@@ -92,8 +92,7 @@ module.exports = {
       })
       Promise.all(promises).then(manifests => {
           this.manifests = manifests.map((manifest, idx) => {return {...manifest, ...this.compareItems[idx]}})
-          this.tileSources = this.manifests.map((manifest, idx) => {
-            const opacity = idx === 0 ? 1 : this.mode === 'layers' ? 0 : 1
+          this.tileSources = this.manifests.map(manifest => {
             const tileSource = manifest.sequences[0].canvases[manifest.seq || 0].images[0].resource.service
               ? `${manifest.sequences[0].canvases[manifest.seq || 0].images[0].resource.service['@id']}/info.json`
               : { url: manifest.sequences[0].canvases[manifest.seq || 0].images[0].resource['@id'] || manifest.metadata.find(md => md.label === 'source').value,
