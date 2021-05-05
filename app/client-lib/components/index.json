@@ -8,6 +8,7 @@
     { "name": "siteFooter", "src": "/components/Footer.vue"},
     { "name": "mapViewer", "src": "/components/LeafletTimeDimension.vue", "selectors": ["tag:map"], "icon": "fa-map-marker-alt", "label": "Map"},
     { "name": "imageViewer", "src": "/components/OpenSeadragonViewer.vue", "selectors": ["tag:image"], "icon": "fa-file-image", "label": "Images"},
+    { "name": "imageCompare", "src": "/components/ImageCompare.vue", "selectors": ["tag:compare"], "icon": "fa-images", "label": "Image Compare"},
     { "name": "videoPlayer", "src": "/components/VideoPlayer.vue", "selectors": ["tag:video"], "icon": "fa-video", "label": "Videos"},
     { "name": "storiiiesViewer", "src": "/components/StoriiiesViewer.vue", "selectors": ["tag:storiiies"], "icon": "fa-book", "label": "Storiiies Viewer"},
     { "name": "plantSpecimenViewer", "src": "/components/PlantSpecimenViewer.vue", "selectors": ["tag:plant-specimen"], "icon": "fa-seedling", "label": "Plant Specimens"},
