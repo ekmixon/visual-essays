@@ -332,7 +332,7 @@ def _find_ve_markup(soup):
                     attrs['title'] = attrs['title']
 
         elif tag == 'map-layer':
-            for layer_type in ('geojson', 'mapwarper'):
+            for layer_type in ('geojson', 'mapwarper', 'heatmap'):
                 if layer_type in attrs:
                     attrs['type'] = layer_type
                     del attrs[layer_type]

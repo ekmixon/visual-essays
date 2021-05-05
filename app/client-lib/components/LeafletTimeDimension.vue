@@ -8,7 +8,7 @@
 </template>
 
 <script>
-/* global L, _, moment */
+/* global L, _, moment, HeatmapOverlay */
 
 const dependencies = [
     'https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.css',
@@ -18,7 +18,9 @@ const dependencies = [
     'https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.1/dist/leaflet.timedimension.min.js',
     'https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js',
     'https://jstor-labs.github.io/visual-essays/js/L.Control.Opacity.js',
-    'https://jstor-labs.github.io/visual-essays/js/leaflet-fa-markers.js'
+    'https://jstor-labs.github.io/visual-essays/js/leaflet-fa-markers.js',
+    'https://gitcdn.link/repo/pa7/heatmap.js/develop/build/heatmap.min.js',
+    'https://gitcdn.link/repo/pa7/heatmap.js/develop/plugins/leaflet-heatmap/leaflet-heatmap.js'
 ]
 
 // Some leaflet baselayers
@@ -231,7 +233,9 @@ module.exports = {
         },
         syncTileLayers() {
             const mapDefs = {}
-            this.mapDef.layers.filter(layerDef => layerDef.type === 'mapwarper').forEach(layerDef => mapDefs[layerDef['mapwarper-id']] = layerDef)
+            this.mapDef.layers
+                .filter(layerDef => layerDef.type === 'mapwarper' || layerDef.type === 'heatmap')
+                .forEach(layerDef => mapDefs[layerDef['mapwarper-id'] || 'heatmap'] = layerDef)
             
             const next = []
             if (this.tileLayers.length > 0 && this.tileLayers[0].id === this.basemap) {
@@ -255,12 +259,16 @@ module.exports = {
             for (let [layerId, layerDef] of Object.entries(mapDefs)) {
                 const exists = next.find(layer => layer.id === layerId)
                 if (!exists) {
-                    const layer = L.tileLayer(`https://mapwarper.net/maps/tile/${layerDef['mapwarper-id']}/{z}/{x}/{y}.png`)
-                    next.push({id: layerId, label: layerDef.label || layerDef.title, layer})
-                    layer.options.id = layerDef.id
-                    layer.options.label = layerDef.label || layerDef.title
-                    layer.options.type = 'mapwarper'
-                    if (layerDef.active) layer.addTo(this.map)
+                    if (layerId === 'heatmap') {
+                        this.addHeatmap(layerDef)
+                    } else {
+                        const layer = L.tileLayer(`https://mapwarper.net/maps/tile/${layerDef['mapwarper-id']}/{z}/{x}/{y}.png`)
+                        next.push({id: layerId, label: layerDef.label || layerDef.title, layer})
+                        layer.options.id = layerDef.id
+                        layer.options.label = layerDef.label || layerDef.title
+                        layer.options.type = 'mapwarper'
+                        if (layerDef.active) layer.addTo(this.map)
+                    }
                 }
             }
 
@@ -278,6 +286,33 @@ module.exports = {
                 this.controls.opacity = L.control.opacity(layers, { collapsed: true }).addTo(this.map)
             } 
             this.tileLayers = next
+        },
+        addHeatmap(layer) {
+            console.log('TODO: add heatmap', layer)
+            let cfg = {
+                radius: parseInt(layer.radius || '15'),
+                maxOpacity: parseFloat(layer['max-opacity'] || '0.6'),
+                scaleRadius: layer['scale-radius'] === 'true',
+                useLocalExtrema: layer['use-local-extrema'] === 'true',
+                latField: 'lat',
+                lngField: 'lng',
+                valueField: 'count'
+            }
+            console.log(cfg)
+            let heatmapLayer = new HeatmapOverlay(cfg)
+            this.map.addLayer(heatmapLayer)
+
+            fetch(layer.url).then(resp => resp.text())
+            .then(delimitedDataString => {
+                let byPlace = {}
+                this.delimitedStringToObjArray(delimitedDataString)
+                    .forEach(item => {
+                    if (!byPlace[item.PlaceQID.id]) byPlace[item.PlaceQID.id] = {lat: parseFloat(item.Lat1.id), lng: parseFloat(item.Long1.id), count: 0}
+                    byPlace[item.PlaceQID.id].count += 1
+                    })
+                let heatmapData = {layer: parseInt(layer.max || '10'), data: Object.values(byPlace)}
+                heatmapLayer.setData(heatmapData)
+                })
         },
         syncGeoJSONLayers() {
             for (let [label, layer] of Object.entries(this.geoJSONLayers)) {  // eslint-disable-line no-unused-vars
