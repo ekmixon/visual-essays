@@ -296,9 +296,11 @@ def get_specimens(taxon_name=None, gpid=None, wdid=None, preload=False, **kwargs
             headers={
                 'Accept': 'text/plain',
                 'Content-type': 'application/x-www-form-urlencoded',
-                'User-agent': 'JSTOR Labs python client'},
-            data='query=%s' % quote(sparql)
+                'User-agent': 'JSTOR Labs python client',
+            },
+            data=f'query={quote(sparql)}',
         )
+
         if resp.status_code == 200:
             # Convert N-Triples to json-ld using json-ld context
             graph = Graph()
@@ -342,8 +344,8 @@ def get_specimens(taxon_name=None, gpid=None, wdid=None, preload=False, **kwargs
 
 def usage():
     print(f'{sys.argv[0]} [hl:] taxon name')
-    print(f'   -h --help          Print help message')
-    print(f'   -l --loglevel      Logging level (default=warning)')
+    print('   -h --help          Print help message')
+    print('   -l --loglevel      Logging level (default=warning)')
 
 if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
@@ -353,7 +355,7 @@ if __name__ == '__main__':
             sys.argv[1:], 'hl:', ['help', 'loglevel'])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print(str(err))  # will print something like "option -a not recognized"
+        print(err)
         usage()
         sys.exit(2)
 
@@ -361,8 +363,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-h', '--help'):
             usage()

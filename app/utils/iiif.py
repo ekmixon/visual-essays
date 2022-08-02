@@ -55,12 +55,12 @@ def create_manifest(**kwargs):
 
 def usage():
     print(f'{sys.argv[0]} [hl:t:d:a:r:] url')
-    print(f'   -h --help          Print help message')
-    print(f'   -l --loglevel      Logging level (default=warning)')
-    print(f'   -t --label         Image label')
-    print(f'   -d --description   Image description')
-    print(f'   -a --annotations   URL to image annotations')
-    print(f'   -r --attribution   Attribution')
+    print('   -h --help          Print help message')
+    print('   -l --loglevel      Logging level (default=warning)')
+    print('   -t --label         Image label')
+    print('   -d --description   Image description')
+    print('   -a --annotations   URL to image annotations')
+    print('   -r --attribution   Attribution')
 
 if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
@@ -70,7 +70,7 @@ if __name__ == '__main__':
             sys.argv[1:], 'hl:t:d:a:r:', ['help', 'loglevel', 'label', 'description', 'annotations', 'attribution'])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print(str(err))  # will print something like "option -a not recognized"
+        print(err)
         usage()
         sys.exit(2)
 
@@ -78,8 +78,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-t', '--label'):
             kwargs['label'] = a

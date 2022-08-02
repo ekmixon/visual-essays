@@ -68,19 +68,21 @@ def has_gh_repo_prefix(path):
 def get_gh_markdown(acct, repo, ref, path, token):
     logger.info(path)
     if has_gh_repo_prefix(path):
-        path = f'/{"/".join(path.split("/")[3:])}'    
+        path = f'/{"/".join(path.split("/")[3:])}'
     logger.info(f'get_gh_markdown: path={path}')
     markdown = md_path = url = sha = None
     if path.endswith('.md'):
         paths = [path]
+    elif path == '/':
+        paths = ['/README.md', '/index.md']
     else:
-        if path == '/':
-            paths = ['/README.md', '/index.md']
-        else:
-            if path[-1] == '/':
-                paths = [f'{path}{file}' for file in ('README.md', 'index.md')]
-            else:
-                paths = [f'{path}.md'] + [f'{path}/{file}' for file in ('README.md', 'index.md')]
+        paths = (
+            [f'{path}{file}' for file in ('README.md', 'index.md')]
+            if path[-1] == '/'
+            else [f'{path}.md']
+            + [f'{path}/{file}' for file in ('README.md', 'index.md')]
+        )
+
     for _path in paths:
         markdown, url, sha = query_gh_file(acct, repo, ref, _path, token)
         if markdown:
@@ -94,7 +96,7 @@ def get_default_branch(acct, repo):
 
 _configs = {}
 def get_site_config(acct, repo, refresh=False):
-    if refresh or not f'{acct}/{repo}' in _configs:
+    if refresh or f'{acct}/{repo}' not in _configs:
         content, _, _ = get_gh_file(f'https://api.github.com/repos/{acct}/{repo}/contents/config.json')
         config = json.loads(content) if content else {}
         config.update({ 'acct': acct, 'repo': repo, 'ref': config.get('ref') })

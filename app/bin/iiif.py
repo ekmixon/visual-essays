@@ -26,13 +26,13 @@ def get_manifest(url, **metadata):
 
 def usage():
     print(f'{sys.argv[0]} [hl:t:d:a:r:p:] url')
-    print(f'   -h --help       Print help message')
-    print(f'   -l --loglevel    Logging level (default=warning)')
-    print(f'   -t --label       Image label')
-    print(f'   -d --description Image description')
-    print(f'   -a --attribution Image attribution')
-    print(f'   -r --license     Image license')
-    print(f'   -n --navDate     Image navDate')
+    print('   -h --help       Print help message')
+    print('   -l --loglevel    Logging level (default=warning)')
+    print('   -t --label       Image label')
+    print('   -d --description Image description')
+    print('   -a --attribution Image attribution')
+    print('   -r --license     Image license')
+    print('   -n --navDate     Image navDate')
 
 if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
@@ -42,7 +42,7 @@ if __name__ == '__main__':
             sys.argv[1:], 'hl:t:d:a:r:', ['help', 'loglevel'])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print(str(err))  # will print something like "option -a not recognized"
+        print(err)
         usage()
         sys.exit(2)
 
@@ -50,8 +50,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-t', '--label'):
             metadata['label'] = a

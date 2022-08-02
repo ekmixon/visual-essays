@@ -70,7 +70,7 @@ def process_image(url, endpoint=default_iiif_service):
         logger.info(f'status={resp.status_code} msg={resp.content}')
 
 def usage():
-    print(('%s [hl:w:s:r:]' % sys.argv[0]))
+    print(f'{sys.argv[0]} [hl:w:s:r:]')
     print('   -h --help            Print help message')
     print('   -l --loglevel        Logging level (default=warning)')
     print('   -w --workbook        Workbook name (default="%s")' % default_workbook)
@@ -93,8 +93,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-w', '--workbook'):
             kwargs['workbook'] = a
@@ -132,17 +131,19 @@ if __name__ == '__main__':
 
     for i, rec in enumerate(recs):
         row = i + 2
-        if rec.get('manifest') and 'iiif-v2.visual-essays.app' in rec['manifest']:
-            if row_to_process is None or row_to_process == row:
-                # logger.info(f'{i} {rec["iiif-url"]} {rec["iiif-url"] in processed}')
-                if rec['iiif-url'] not in processed or force_refresh:
-                    try:
-                        processed[rec['iiif-url']] = process_image(rec['url'])
-                    except KeyboardInterrupt:
-                        break
-                    except:
-                        logger.info('error')
-    
+        if (
+            rec.get('manifest')
+            and 'iiif-v2.visual-essays.app' in rec['manifest']
+            and (row_to_process is None or row_to_process == row)
+            and (rec['iiif-url'] not in processed or force_refresh)
+        ):
+            try:
+                processed[rec['iiif-url']] = process_image(rec['url'])
+            except KeyboardInterrupt:
+                break
+            except:
+                logger.info('error')
+
     with open('iiif-urls.tsv', 'w') as fp:
         for orig, reprocessed in processed.items():
             fp.write('\t'.join([orig, reprocessed]) + '\n')

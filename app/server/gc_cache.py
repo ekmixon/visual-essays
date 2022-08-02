@@ -114,10 +114,10 @@ class Cache(object):
         pass # TODO
 
 def usage():
-    print('%s [hl:n:f:k:siexm:a:] [keys]' % sys.argv[0])
+    print(f'{sys.argv[0]} [hl:n:f:k:siexm:a:] [keys]')
     print('   -h --help            Print help message')
     print('   -l --loglevel        Logging level (default=warning)')
-    print('   -n --name            Database name (%s)' % DEFAULT_BUCKET_NAME)
+    print(f'   -n --name            Database name ({DEFAULT_BUCKET_NAME})')
     print('   -f --key             Field value to use for key when importing (default="%s")' % DEFAULT_KEYFIELD)
     print('   -k --list            Number of keys to list (-1 = all)')
     print('   -s --size            Database size')
@@ -133,7 +133,7 @@ if __name__ == '__main__':
         opts, args = getopt.getopt(sys.argv[1:], 'hl:n:f:k:siexm:a:', ['help', 'loglevel', 'name', 'key', 'list', 'size', 'import', 'export', 'delete', 'maxage', 'after'])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print(str(err)) # will print something like "option -a not recognized"
+        print(err)
         usage()
         sys.exit(2)
 
@@ -141,8 +141,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-n', '--name'):
             kwargs['name'] = a
@@ -169,7 +168,7 @@ if __name__ == '__main__':
             assert False, 'unhandled option'
 
     cache = Cache(**kwargs)
-        
+
     if kwargs.get('import', False):
         key = kwargs.get('key', DEFAULT_KEYFIELD)
         ctr = 0
@@ -185,7 +184,8 @@ if __name__ == '__main__':
                         logger.error(traceback.format_exc())
                         # db.logger.error(line)
                     ctr += 1
-                    if ctr % 10000 == 0: logger.info('%s %s'%(path,ctr))
+                    if ctr % 10000 == 0:
+                        logger.info(f'{path} {ctr}')
         logger.info(ctr)
     elif kwargs.get('export', False):
         ctr = 0
@@ -221,9 +221,7 @@ if __name__ == '__main__':
             else:
                 print(json.dumps(cache.get(key, maxage=kwargs.get('maxage'), after=kwargs.get('after'))))
     else:
-        ctr = 0
-        for line in sys.stdin:
+        for ctr, line in enumerate(sys.stdin, start=1):
             rec = json.loads(line)
             cache[rec['id']] = rec
-            ctr += 1
             logger.info('%s %s', ctr, rec['id'])

@@ -66,9 +66,11 @@ def _mw_url(eid):
         headers={
             'Accept': 'application/sparql-results+json;charset=UTF-8',
             'Content-type': 'application/x-www-form-urlencoded',
-            'User-agent': 'JSTOR Labs python client'},
-        data='query=%s' % quote(sparql)
+            'User-agent': 'JSTOR Labs python client',
+        },
+        data=f'query={quote(sparql)}',
     )
+
     logger.debug(f'{graph["sparql_endpoint"]} {sparql} {resp.status_code}')
     if resp.status_code == 200:
         resp = resp.json()
@@ -86,14 +88,13 @@ def mw_page(eid, format='mediawiki'):
         for pageid in resp['query']['pages']:
             wikitext = resp['query']['pages'][pageid]['revisions'][0]['slots']['main']['*']
             as_html = pypandoc.convert_text(wikitext, 'html', format='mediawiki')
-            output = pypandoc.convert_text(as_html, format, format='html')
             '''
             if format == 'mediawiki':
                 output = wikitext
             else:
                 output = pypandoc.convert_text(wikitext, format, format='mediawiki')
             '''
-            return output
+            return pypandoc.convert_text(as_html, format, format='html')
 
 def eids(titles):
     _eids = {}
@@ -104,9 +105,11 @@ def eids(titles):
         headers={
             'Accept': 'application/sparql-results+json;charset=UTF-8',
             'Content-type': 'application/x-www-form-urlencoded',
-            'User-agent': 'JSTOR Labs python client'},
-        data='query=%s' % quote(sparql)
+            'User-agent': 'JSTOR Labs python client',
+        },
+        data=f'query={quote(sparql)}',
     )
+
     if resp.status_code == 200:
         resp = resp.json()
         for item in resp['results']['bindings']:
@@ -114,7 +117,6 @@ def eids(titles):
     return _eids
 
 def mentioned_entities(eid):
-    mentions = {}
     html = mw_page(eid, 'html')
     titles = {}
     if not html: return
@@ -123,9 +125,10 @@ def mentioned_entities(eid):
         if 'href' in link.attrs and not link.attrs['href'].startswith('#') and not link.attrs['href'].startswith('http') and not link.attrs['href'].startswith('Category'):
             title = link.attrs['href']
             titles[title] = titles.get(title, 0) + 1
-    for title, eid in eids(titles.keys()).items():
-        mentions[title] = {'eid': eid, 'count': titles[title]}
-    return mentions
+    return {
+        title: {'eid': eid, 'count': titles[title]}
+        for title, eid in eids(titles.keys()).items()
+    }
 
 AVAILABLE_FORMATS = '''
     commonmark (CommonMark Markdown)
@@ -158,10 +161,10 @@ AVAILABLE_FORMATS = '''
 
 def usage():
     print(f'{sys.argv[0]} [hl:f:e eid')
-    print(f'   -h --help       Print help message')
-    print(f'   -l --loglevel   Logging level (default=warning)')
-    print(f'   -e --entities   Find mentioned entities')
-    print(f'   -f --format     Output format (default=mediawiki)')
+    print('   -h --help       Print help message')
+    print('   -l --loglevel   Logging level (default=warning)')
+    print('   -e --entities   Find mentioned entities')
+    print('   -f --format     Output format (default=mediawiki)')
     print(f'Available formats: {AVAILABLE_FORMATS}')
 
 if __name__ == '__main__':
@@ -172,7 +175,7 @@ if __name__ == '__main__':
             sys.argv[1:], 'hl:f:e', ['help', 'loglevel', 'format', 'entities'])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print(str(err))  # will print something like "option -a not recognized"
+        print(err)
         usage()
         sys.exit(2)
 
@@ -180,8 +183,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-e', '--entities'):
             kwargs['entities'] = True

@@ -92,9 +92,11 @@ def _ns_fingerprints(ns, qids, language):
         GRAPHS[ns]['sparql_endpoint'],
         headers={
             'Accept': 'text/plain',
-            'Content-type': 'application/x-www-form-urlencoded'},
-        data='query=%s' % quote(sparql)
+            'Content-type': 'application/x-www-form-urlencoded',
+        },
+        data=f'query={quote(sparql)}',
     )
+
     if resp.status_code == 200:
         # Convert N-Triples to json-ld using json-ld context
         graph = Graph()
@@ -116,8 +118,9 @@ def get_fingerprints(qids, language='en'):
     by_ns = {}
     for qid in qids:
         ns, qid = qid.split(':') if ':' in qid else (default_ns, qid)
-        fingerprint_from_cache = CACHE['fingerprints'].get(f'{language}:{ns}:{qid}')
-        if fingerprint_from_cache:
+        if fingerprint_from_cache := CACHE['fingerprints'].get(
+            f'{language}:{ns}:{qid}'
+        ):
             # fingerprint_from_cache['from_cache'] = True
             fingerprints[f'{ns}:{qid}'] = fingerprint_from_cache
         else:
@@ -126,14 +129,16 @@ def get_fingerprints(qids, language='en'):
             by_ns[ns].add(qid)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-        results = {}
-        futures = {}
-        for ns, qids in by_ns.items():
-            futures[executor.submit(_ns_fingerprints, ns, qids, language)] = ns
+        futures = {
+            executor.submit(_ns_fingerprints, ns, qids, language): ns
+            for ns, qids in by_ns.items()
+        }
 
-        for future in concurrent.futures.as_completed(futures):
-            if future.result():
-                results[futures[future]] = future.result()
+        results = {
+            futures[future]: future.result()
+            for future in concurrent.futures.as_completed(futures)
+            if future.result()
+        }
 
     for fp_vals in results.values():
         for fingerprint in fp_vals:
@@ -144,7 +149,7 @@ def get_fingerprints(qids, language='en'):
     return fingerprints
 
 def usage():
-    print('%s [hl:e:] qid qid ...' % sys.argv[0])
+    print(f'{sys.argv[0]} [hl:e:] qid qid ...')
     print('   -h --help          Print help message')
     print('   -l --loglevel      Logging level (default=warning)')
     print('   -e --language      Language (default="en")')
@@ -157,7 +162,7 @@ if __name__ == '__main__':
             sys.argv[1:], 'hl:e:', ['help', 'loglevel', 'language'])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print(str(err))  # will print something like "option -a not recognized"
+        print(err)
         usage()
         sys.exit(2)
 
@@ -165,8 +170,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-e', '--language'):
             kwargs['language'] = a

@@ -96,7 +96,7 @@ def get_thumbnail(manifest):
     return thumbnail
 
 def as_hyperlink(qid, label=None):
-    return '=HYPERLINK("{}", "{}")'.format('https://kg.jstor.org/entity/{}'.format(qid), label if label else qid)
+    return f'=HYPERLINK("https://kg.jstor.org/entity/{qid}", "{label or qid}")'
 
 def as_image(url):
     return f'=IMAGE("{url}")'
@@ -105,7 +105,7 @@ def is_ready(rec):
     return rec.get('ready').lower() in ('x', 't', 'true', 'y', 'yes')
 
 def usage():
-    print(('%s [hl:w:s:i:r:fn]' % sys.argv[0]))
+    print(f'{sys.argv[0]} [hl:w:s:i:r:fn]')
     print('   -h --help            Print help message')
     print('   -l --loglevel        Logging level (default=warning)')
     print('   -w --workbook        Workbook name (default="%s")' % default_workbook)
@@ -131,8 +131,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-w', '--workbook'):
             kwargs['workbook'] = a
@@ -179,14 +178,15 @@ if __name__ == '__main__':
             logger.info(f'processing row={row}')
             try:
                 manifest = None
-                if rec.get('manifest'):
-                    if 'iiif-v2.visual-essays.app' not in rec['manifest']: # external manifest
-                        manifest = get_manifest(rec['manifest'])
+                if (
+                    rec.get('manifest')
+                    and 'iiif-v2.visual-essays.app' not in rec['manifest']
+                ):
+                    manifest = get_manifest(rec['manifest'])
                 if manifest is None:
                     manifest = create_manifest(iiif_service, **rec, force=force_refresh)
                 if manifest:
-                    thumbnail_url = get_thumbnail(manifest)
-                    if thumbnail_url:
+                    if thumbnail_url := get_thumbnail(manifest):
                         logger.debug(json.dumps(manifest, indent=2))
                         img = manifest['sequences'][0]['canvases'][0]['images'][0]['resource']
                         row_updates = {
@@ -207,6 +207,5 @@ if __name__ == '__main__':
     updates.sort(key=lambda cell: cell.col, reverse=False)
     if dryrun:
         print(updates)
-    else:
-        if updates:
-            ws.update_cells(updates, value_input_option='USER_ENTERED')
+    elif updates:
+        ws.update_cells(updates, value_input_option='USER_ENTERED')

@@ -119,7 +119,8 @@ def markdown_to_html5(markdown, site, acct, repo, ref, path, root):
     soup = BeautifulSoup(f'<div id="md-content">{html}</div>', 'html5lib')
     convert_relative_links(soup, site, acct, repo, ref, path, root)
 
-    base_html = f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title></title></head><body></body></html>'
+    base_html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><title></title></head><body></body></html>'
+
     html5 = BeautifulSoup(base_html, 'html5lib')
 
     article = html5.new_tag('article', id='essay')
@@ -146,7 +147,7 @@ def markdown_to_html5(markdown, site, acct, repo, ref, path, root):
                 tag = html5.new_tag('section', id=section_id)
                 head = html5.new_tag(f'h{level}')
                 head.attrs = elem.attrs
-                head.string = title if title else ''
+                head.string = title or ''
                 tag.append(head)
                 section = {
                     'id': section_id,
@@ -178,15 +179,17 @@ def markdown_to_html5(markdown, site, acct, repo, ref, path, root):
     return str(html5)
 
 def _is_empty(elem):
-    child_images = [c for c in elem.children if c.name == 'img']
-    if child_images:
+    if child_images := [c for c in elem.children if c.name == 'img']:
         return False
-    anchors = [c for c in elem.children if c.name == 'a' and 'name' in c.attrs and 'href' not in c.attrs]
-    if anchors:
+    if anchors := [
+        c
+        for c in elem.children
+        if c.name == 'a' and 'name' in c.attrs and 'href' not in c.attrs
+    ]:
         if elem.previous_sibling.previous_sibling and elem.previous_sibling.previous_sibling.name[0].upper() == 'H':
             elem.previous_sibling.previous_sibling.attrs['id'] = anchors[0].attrs['name']
     elem_contents = [t for t in elem.contents if t and (isinstance(t, str) and t.strip()) or t.name not in ('br',) and t.string and t.string.strip()]
-    return len(elem_contents) == 0
+    return not elem_contents
 
 def _enclosing_section(elem):
     parent_section = None
@@ -211,9 +214,11 @@ def _get_entity_data(qids):
             headers={
                 'Accept': 'text/plain',
                 'Content-type': 'application/x-www-form-urlencoded',
-                'User-agent': 'JSTOR Labs python client'},
-            data='query=%s' % quote(sparql)
+                'User-agent': 'JSTOR Labs python client',
+            },
+            data=f'query={quote(sparql)}',
         )
+
         if resp.status_code == 200:
             # Convert N-Triples to json-ld using json-ld context
             graph = Graph()
@@ -226,41 +231,59 @@ def _get_entity_data(qids):
         logger.debug(f'_get_entity_data: resp_code={resp.status_code} msg=${resp.text}')
 
 def _update_entities_from_knowledgegraph(markup, refresh=False):
-    by_eid = dict([(item['eid'], item) for item in markup.values() if 'eid' in item and is_qid(item['eid'])])
-    if by_eid:
-        cache_key = hashlib.sha256(str(sorted(by_eid.keys())).encode('utf-8')).hexdigest()
-        kg_entities = cache.get(cache_key) if not refresh else None
-        from_cache = kg_entities is not None
-        if kg_entities is None:
-            kg_entities = _get_entity_data([eid for eid in by_eid.keys() if eid.split(':')[0] in ('wd', 'jstor')])['@graph']
-            cache[cache_key] = kg_entities
-        # logger.info(json.dumps(kg_entities, indent=2))
-        for entity in kg_entities:
-            if 'whos_on_first_id' in entity:
-                wof = entity.pop('whos_on_first_id')
-                wof_parts = [wof[i:i+3] for i in range(0, len(wof), 3)]
-                entity['geojson'] = f'https://data.whosonfirst.org/{"/".join(wof_parts)}/{wof}.geojson'
-        for kg_props in kg_entities:
-            if kg_props['id'] in by_eid:
-                me = by_eid[kg_props['id']]
-                me['fromCache'] = from_cache
-                for k, v in kg_props.items():
-                    if k in ('aliases',) and not isinstance(v, list):
-                        v = [v]
-                    elif k == 'qid' and ':' not in kg_props[k]:
-                        v = f'wd:{kg_props[k]}'
-                    elif k == 'coords':
-                        coords = []
-                        for coords_str in v:
-                            coords.append([float(c.strip()) for c in coords_str.replace('Point(','').replace(')','').split()[::-1]])
-                        v = coords
-                    elif k == 'category':
-                        if 'category' in me:
-                            v = me['category']
-                    if k in ('aliases',) and k in by_eid[kg_props['id']]:
-                        # merge values
-                        v = sorted(set(by_eid[kg_props['id']][k] + v))
-                    me[k] = v
+    if not (
+        by_eid := dict(
+            [
+                (item['eid'], item)
+                for item in markup.values()
+                if 'eid' in item and is_qid(item['eid'])
+            ]
+        )
+    ):
+        return
+    cache_key = hashlib.sha256(str(sorted(by_eid.keys())).encode('utf-8')).hexdigest()
+    kg_entities = None if refresh else cache.get(cache_key)
+    from_cache = kg_entities is not None
+    if kg_entities is None:
+        kg_entities = _get_entity_data(
+            [eid for eid in by_eid if eid.split(':')[0] in ('wd', 'jstor')]
+        )['@graph']
+
+        cache[cache_key] = kg_entities
+    # logger.info(json.dumps(kg_entities, indent=2))
+    for entity in kg_entities:
+        if 'whos_on_first_id' in entity:
+            wof = entity.pop('whos_on_first_id')
+            wof_parts = [wof[i:i+3] for i in range(0, len(wof), 3)]
+            entity['geojson'] = f'https://data.whosonfirst.org/{"/".join(wof_parts)}/{wof}.geojson'
+    for kg_props in kg_entities:
+        if kg_props['id'] in by_eid:
+            me = by_eid[kg_props['id']]
+            me['fromCache'] = from_cache
+            for k, v in kg_props.items():
+                if k in ('aliases',) and not isinstance(v, list):
+                    v = [v]
+                elif k == 'qid' and ':' not in kg_props[k]:
+                    v = f'wd:{kg_props[k]}'
+                elif k == 'coords':
+                    coords = [
+                        [
+                            float(c.strip())
+                            for c in coords_str.replace('Point(', '')
+                            .replace(')', '')
+                            .split()[::-1]
+                        ]
+                        for coords_str in v
+                    ]
+
+                    v = coords
+                elif k == 'category':
+                    if 'category' in me:
+                        v = me['category']
+                if k in ('aliases',) and k in by_eid[kg_props['id']]:
+                    # merge values
+                    v = sorted(set(by_eid[kg_props['id']][k] + v))
+                me[k] = v
                     
 def _find_ve_markup(soup):
     ve_markup = {}

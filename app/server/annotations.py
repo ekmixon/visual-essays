@@ -105,10 +105,9 @@ def _put_annos(target, annos, sha, **kwargs):
     )
     if resp.status_code >= 200 and resp.status_code < 300:
         return 'success'
-    else:
-        logger.warning(f'_put_annos: {resp.status_code} {resp.content} {gh_content_url} {branch} {kwargs.get("auth_token")}')
-        logger.info(json.dumps(annos_page, indent=2))
-        return 'failed'
+    logger.warning(f'_put_annos: {resp.status_code} {resp.content} {gh_content_url} {branch} {kwargs.get("auth_token")}')
+    logger.info(json.dumps(annos_page, indent=2))
+    return 'failed'
 
 def get_annotation(annoid, **kwargs):
     # get github account and repo and path to annotation file (annotations_root)
@@ -157,16 +156,16 @@ def delete_annotation(annoid, **kwargs):
 
 def usage():
     print(f'{sys.argv[0]} [hl:a:r:b:e:t:dqu] arg')
-    print(f'   -h --help       Print help message')
-    print(f'   -l --loglevel   Logging level (default=warning)')
-    print(f'   -a --acct       GitHub account')
-    print(f'   -r --repo       GitHub repository')
-    print(f'   -b --branch     GitHub branch, default="develop"')
-    print(f'   -e --essay      Essay path')
-    print(f'   -t --token      Auth token')
-    print(f'   -d --delete     Delete annotation')
-    print(f'   -q --query      Query annotations')
-    print(f'   -u --update     Update annotation')
+    print('   -h --help       Print help message')
+    print('   -l --loglevel   Logging level (default=warning)')
+    print('   -a --acct       GitHub account')
+    print('   -r --repo       GitHub repository')
+    print('   -b --branch     GitHub branch, default="develop"')
+    print('   -e --essay      Essay path')
+    print('   -t --token      Auth token')
+    print('   -d --delete     Delete annotation')
+    print('   -q --query      Query annotations')
+    print('   -u --update     Update annotation')
 
 if __name__ == '__main__':
     logger.setLevel(logging.WARNING)
@@ -176,7 +175,7 @@ if __name__ == '__main__':
             sys.argv[1:], 'hl:a:r:b:e:t:dqu', ['help', 'loglevel', 'acct', 'repo', 'branch', 'essay', 'token', 'delete', 'query', 'update'])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print(str(err))  # will print something like "option -a not recognized"
+        print(err)
         usage()
         sys.exit(2)
 
@@ -184,8 +183,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-a', '--acct'):
             kwargs['acct'] = a

@@ -48,7 +48,7 @@ GRAPHS = [
     }
 ]
 PREFIXES = dict([(g['ns'],g['prefix']) for g in GRAPHS])
-NAMESPACES = set([g['ns'] for g in GRAPHS])
+NAMESPACES = {g['ns'] for g in GRAPHS}
 default_ns = 'wd'
 default_entity_type = 'entity'
 
@@ -86,7 +86,7 @@ class KnowledgeGraph(object):
 
     def entity(self, uri, project=None, raw=False, article=None, **kwargs):
         logger.info(f'entity={uri} project={project} raw={raw} article={article}')
-        refresh = str(kwargs.pop('refresh', 'false')).lower() in ('', 'true')
+        refresh = str(kwargs.pop('refresh', 'false')).lower() in {'', 'true'}
 
         cache_key = f'{uri}-{project}'
         logger.info(f'entity: cache_key={cache_key} refresh={refresh} raw={raw}')
@@ -94,7 +94,7 @@ class KnowledgeGraph(object):
         if entity:
             entity['fromCache'] = True
             return entity
- 
+
         secondary = None
         if uri.startswith('http://kg.jstor.org/'):
             primary = self._entity_from_wikibase(uri)
@@ -129,9 +129,9 @@ class KnowledgeGraph(object):
 
         if not raw:
             self._add_summary_text(entity, project, article, **kwargs)
-        
+
             entity = self._add_id_labels(entity, get_fingerprints(self._find_ids(entity)))
-        
+
             self.cache[cache_key] = entity
 
         entity['fromCache'] = False
@@ -319,9 +319,11 @@ class KnowledgeGraph(object):
                 headers={
                     'Accept': 'application/sparql-results+json',
                     'Content-type': 'application/x-www-form-urlencoded',
-                    'User-agent': 'JSTOR Labs python client'},
-                data='query=%s' % quote(sparql)
+                    'User-agent': 'JSTOR Labs python client',
+                },
+                data=f'query={quote(sparql)}',
             )
+
             if resp.status_code == 200:
                 sparql_results = resp.json()['results']['bindings']
                 props = [
@@ -359,9 +361,11 @@ class KnowledgeGraph(object):
                 headers={
                     'Accept': 'application/sparql-results+json',
                     'Content-type': 'application/x-www-form-urlencoded',
-                    'User-agent': 'JSTOR Labs python client'},
-                data='query=%s' % quote(sparql)
+                    'User-agent': 'JSTOR Labs python client',
+                },
+                data=f'query={quote(sparql)}',
             ).json()['results']['bindings']
+
             formatter_urls = [
                 {
                     'id': p['entity']['value'].split('/')[-1],
@@ -380,7 +384,8 @@ class KnowledgeGraph(object):
         logger.info(f'_add_summary_text: id={entity.get("id")} project={project} article={article}')
         summary_url = None
         if article:
-            summary_url = f'https://raw.githubusercontent.com/{self.acct}/{self.repo}/{self.ref if self.ref else "main"}/articles/{article}.md'
+            summary_url = f'https://raw.githubusercontent.com/{self.acct}/{self.repo}/{self.ref or "main"}/articles/{article}.md'
+
         elif entity.get('id'):
             if 'described at URL' in entity['claims']:
                 for stmt in entity['claims']['described at URL']:
@@ -390,9 +395,8 @@ class KnowledgeGraph(object):
                         if project:
                             if project in stmt.get('qualifiers',{}).get('project code',[]):
                                 summary_url = stmt['value']
-                        else:
-                            if 'project code' not in stmt.get('qualifiers', {}):
-                                summary_url = stmt['value']
+                        elif 'project code' not in stmt.get('qualifiers', {}):
+                            summary_url = stmt['value']
             elif entity['id'].startswith('wd:'):
                 g = [g for g in GRAPHS if g['ns'] == 'wd'][0]
                 sparql = '''
@@ -405,9 +409,11 @@ class KnowledgeGraph(object):
                     headers={
                         'Accept': 'application/sparql-results+json;charset=UTF-8',
                         'Content-type': 'application/x-www-form-urlencoded',
-                        'User-agent': 'JSTOR Labs python client'},
-                    data='query=%s' % quote(sparql)
+                        'User-agent': 'JSTOR Labs python client',
+                    },
+                    data=f'query={quote(sparql)}',
                 )
+
                 if resp.status_code == 200:
                     resp = resp.json()
                     if resp['results']['bindings']:
@@ -430,8 +436,7 @@ class KnowledgeGraph(object):
                 #  this just includes the extract text in raw and HTML
                 resp = requests.get(f'https://kg.jstor.org/w/api.php?action=parse&format=json&page={page}').json()
                 html = BeautifulSoup(resp['parse']['text']['*'], 'html5lib')
-                extract = html.find('p')
-                if extract:
+                if extract := html.find('p'):
                     entity['summary info'] = {
                         'extract_html': str(extract).replace('\n',''),
                         'extract': extract.text.strip()
@@ -471,13 +476,12 @@ class KnowledgeGraph(object):
         if not isinstance(d, (dict, list, str)):
             return d
         if isinstance(d, str):
-            if _is_entity_id(d):
-                if d in fingerprints:
-                    ns, qid = d.split(':')
-                    label = fingerprints[d]['label']
-                    g = [g for g in GRAPHS if g['ns'] == ns][0]
-                    url = f'{g["baseurl"]}/{qid}'
-                    d = {'id': d, 'value': label, 'url': url}
+            if _is_entity_id(d) and d in fingerprints:
+                ns, qid = d.split(':')
+                label = fingerprints[d]['label']
+                g = [g for g in GRAPHS if g['ns'] == ns][0]
+                url = f'{g["baseurl"]}/{qid}'
+                d = {'id': d, 'value': label, 'url': url}
             return d
         elif isinstance(d, list):
             return [v for v in (self._add_id_labels(v, fingerprints) for v in d) if v]
@@ -496,7 +500,7 @@ def _is_entity_id(s, ns_required=True):
     return len(eid[-1]) > 1 and eid[-1][0] in ('Q', 'P') and eid[-1][1:].isdecimal()
 
 def usage():
-    print('%s [hl:jrp:] qid' % sys.argv[0])
+    print(f'{sys.argv[0]} [hl:jrp:] qid')
     print('   -h --help       Print help message')
     print('   -l --loglevel   Logging level (default=warning)')
     print('   -j --raw        Return raw jsonld')
@@ -511,7 +515,7 @@ if __name__ == '__main__':
             sys.argv[1:], 'hl:jrp:', ['help', 'loglevel', 'raw', 'refresh', 'project'])
     except getopt.GetoptError as err:
         # print help information and exit:
-        print(str(err))  # will print something like "option -a not recognized"
+        print(err)
         usage()
         sys.exit(2)
 
@@ -519,8 +523,7 @@ if __name__ == '__main__':
         if o in ('-l', '--loglevel'):
             loglevel = a.lower()
             if loglevel in ('error',): logger.setLevel(logging.ERROR)
-            elif loglevel in ('warn','warning'): logger.setLevel(logging.INFO)
-            elif loglevel in ('info',): logger.setLevel(logging.INFO)
+            elif loglevel in ('warn', 'warning', 'info'): logger.setLevel(logging.INFO)
             elif loglevel in ('debug',): logger.setLevel(logging.DEBUG)
         elif o in ('-j', '--raw'):
             kwargs['raw'] = True
